@@ -7,9 +7,10 @@
 			// Disable 'Field ... is never assigned to'
 			// warnings as this structure is just for interop
 			#pragma warning disable 0649
-			public float x;
-			public float y;
-			public float z;
+			public byte x;
+			public byte y;
+			public byte z;
+			public byte normal;
 			public QuantizedColor color;
 			#pragma warning restore 0649
 		}

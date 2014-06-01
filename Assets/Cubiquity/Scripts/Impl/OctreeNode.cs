@@ -306,6 +306,8 @@ namespace Cubiquity
 			public Mesh BuildMeshFromNodeHandleForColoredCubesVolume(uint nodeHandle)
 			{
 				// At some point I should read this: http://forum.unity3d.com/threads/5687-C-plugin-pass-arrays-from-C
+				
+				Vector3 offset = new Vector3(0.5f, 0.5f, 0.5f); // Required for the CubicVertex decoding process.
 					
 				// Create rendering and possible collision meshes.
 				Mesh renderingMesh = new Mesh();		
@@ -323,6 +325,7 @@ namespace Cubiquity
 				{
 					// Get the vertex data from Cubiquity.
 					Vector3 position = new Vector3(cubiquityVertices[ct].x, cubiquityVertices[ct].y, cubiquityVertices[ct].z);
+					position -= offset; // Part of the CubicVertex decoding process.
 					QuantizedColor color = cubiquityVertices[ct].color;
 						
 					// Copy it to the arrays.
