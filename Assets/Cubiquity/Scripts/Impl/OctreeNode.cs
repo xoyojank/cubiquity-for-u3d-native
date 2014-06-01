@@ -268,16 +268,28 @@ namespace Cubiquity
 				Vector2[] renderingUV = new Vector2[cubiquityVertices.Length];
 				Vector2[] renderingUV2 = new Vector2[cubiquityVertices.Length];
 				
+				Vector3 normalOffset = new Vector3(1.0f, 1.0f, 1.0f);
 				
 				for(int ct = 0; ct < cubiquityVertices.Length; ct++)
 				{
-					// Get the vertex data from Cubiquity.
+					// Get and decode the position
 					Vector3 position = new Vector3(cubiquityVertices[ct].x, cubiquityVertices[ct].y, cubiquityVertices[ct].z);
-					Vector3 normal = new Vector3(cubiquityVertices[ct].nx, cubiquityVertices[ct].ny, cubiquityVertices[ct].nz);
+					position *= (1.0f / 256.0f);
+					
+					// Get and decode the normal
+					
+					// Get the materials
 					Color32 color = new Color32(cubiquityVertices[ct].m0, cubiquityVertices[ct].m1, cubiquityVertices[ct].m2, cubiquityVertices[ct].m3);
 					//Vector4 tangents = new Vector4(cubiquityVertices[ct].m4 / 255.0f, cubiquityVertices[ct].m5 / 255.0f, cubiquityVertices[ct].m6 / 255.0f, cubiquityVertices[ct].m7 / 255.0f);
 					Vector2 uv = new Vector2(cubiquityVertices[ct].m4 / 255.0f, cubiquityVertices[ct].m5 / 255.0f);
 					Vector2 uv2 = new Vector2(cubiquityVertices[ct].m6 / 255.0f, cubiquityVertices[ct].m7 / 255.0f);
+					
+					ushort decodedX = (ushort)((cubiquityVertices[ct].normal >> (ushort)10) & (ushort)0x1F);
+					ushort decodedY = (ushort)((cubiquityVertices[ct].normal >> (ushort)5) & (ushort)0x1F);
+					ushort decodedZ = (ushort)((cubiquityVertices[ct].normal) & (ushort)0x1F);					
+					Vector3 normal = new Vector3(decodedX, decodedY, decodedZ);
+					normal *= (1.0f / 15.5f);
+					normal -= normalOffset;
 						
 					// Copy it to the arrays.
 					renderingVertices[ct] = position;	

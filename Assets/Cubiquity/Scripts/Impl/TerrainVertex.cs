@@ -7,12 +7,10 @@
 			// Disable 'Field ... is never assigned to'
 			// warnings as this structure is just for interop
 			#pragma warning disable 0649
-			public float x;
-			public float y;
-			public float z;
-			public float nx;
-			public float ny;
-			public float nz;
+			public ushort x;
+			public ushort y;
+			public ushort z;
+			public ushort normal;
 			public byte m0;
 			public byte m1;
 			public byte m2;
