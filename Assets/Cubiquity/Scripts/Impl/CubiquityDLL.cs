@@ -16,7 +16,7 @@ namespace Cubiquity
 			const int CU_OK = 0;
 			
 			const uint requiredMajorVersion = 1;
-			const uint requiredMinorVersion = 0;
+			const uint requiredMinorVersion = 1;
 			const uint requiredPatchVersion = 0;
 				
 			// This static constructor is supposed to make sure that the Cubiquity.dll is in the right place before the DllImport is done.
