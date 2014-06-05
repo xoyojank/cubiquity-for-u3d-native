@@ -2,6 +2,7 @@ Shader "ColoredCubes"
 {	
 	Properties
     {
+    	_NormalMap ("Normal Map", 2D) = "white" {}
     	_NoiseStrength ("Noise Strength", Range (0.0,0.5)) = 0.1
     }
     SubShader
@@ -25,6 +26,7 @@ Shader "ColoredCubes"
       };
       
       float _NoiseStrength;
+      sampler2D _NormalMap;
       
       #include "ColoredCubesUtilities.cginc"
 
@@ -53,21 +55,35 @@ Shader "ColoredCubes"
       	// other handiness differences internally). With these render system tests the normals are correct on Windows
       	// regardless of which render system is in use.
 #if SHADER_API_D3D9 || SHADER_API_D3D11 || SHADER_API_D3D11_9X || SHADER_API_XBOX360
-      	float3 surfaceNormal = normalize(cross(ddx(IN.modelPos.xyz), ddy(IN.modelPos.xyz)));
+      	float3 modelNormal = normalize(cross(ddx(IN.modelPos.xyz), ddy(IN.modelPos.xyz)));
 #else
-		float3 surfaceNormal = -normalize(cross(ddx(IN.modelPos.xyz), ddy(IN.modelPos.xyz)));
+		float3 modelNormal = -normalize(cross(ddx(IN.modelPos.xyz), ddy(IN.modelPos.xyz)));
 #endif
 
 		// Despite our render system checks above, we have seen that the normals are still backwards in Linux
       	// standalone builds. The reason is not currently clear, but the 'normalMultiplier' allow scripts to
       	// flip the normal if required by setting the multiplier to '-1.0f'.
-		surfaceNormal *= normalMultiplier;
+		modelNormal *= normalMultiplier;
+		
+		modelNormal = floor(modelNormal + float3(0.5, 0.5, 0.5));	
+		
+		
+		float3 modelTangent = modelNormal.yzx;
+    	float3 modelBinormal = modelNormal.zxy;
+    	
+    	float2 texCoords = float2(dot(IN.modelPos.xyz, modelTangent), dot(IN.modelPos.xyz, modelBinormal));
+		
+		float3 diffuseTexture = UnpackNormal(tex2D(_NormalMap, texCoords));
+			  
+		//diffuseTexture = diffuseTexture * 0.33333;
       	
 	    //Add noise - we use volume space to prevent noise scrolling if the volume moves.
 	    float noise = positionBasedNoise(float4(IN.volumePos.xyz, _NoiseStrength));
         
-        o.Albedo = IN.color.xyz + float3(noise, noise, noise);
-        o.Normal = surfaceNormal;
+        o.Albedo = IN.color.xyz + float3(noise, noise, noise) + diffuseTexture;
+        
+        o.Albedo = diffuseTexture;
+        o.Normal = modelNormal;
       }
       ENDCG
     }
