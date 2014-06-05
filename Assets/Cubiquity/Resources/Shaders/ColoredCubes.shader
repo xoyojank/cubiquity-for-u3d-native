@@ -1,5 +1,9 @@
 Shader "ColoredCubes"
 {	
+	Properties
+    {
+    	_NoiseStrength ("Noise Strength", Range (0.0,0.5)) = 0.1
+    }
     SubShader
     {
       Tags { "RenderType" = "Opaque" }
@@ -19,6 +23,8 @@ Shader "ColoredCubes"
           float4 modelPos;
           float4 volumePos;
       };
+      
+      float _NoiseStrength;
       
       #include "ColoredCubesUtilities.cginc"
 
@@ -58,7 +64,7 @@ Shader "ColoredCubes"
 		surfaceNormal *= normalMultiplier;
       	
 	    //Add noise - we use volume space to prevent noise scrolling if the volume moves.
-	    float noise = positionBasedNoise(float4(IN.volumePos.xyz, 0.1));
+	    float noise = positionBasedNoise(float4(IN.volumePos.xyz, _NoiseStrength));
         
         o.Albedo = IN.color.xyz + float3(noise, noise, noise);
         o.Normal = surfaceNormal;
