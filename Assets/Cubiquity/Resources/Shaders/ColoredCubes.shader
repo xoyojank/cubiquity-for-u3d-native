@@ -71,19 +71,24 @@ Shader "ColoredCubes"
 		float3 modelTangent = modelNormal.yzx;
     	float3 modelBinormal = modelNormal.zxy;
     	
+    	float3x3 worldToTangentMatrix = float3x3(modelTangent.x, modelBinormal.x, modelNormal.x, modelTangent.y, modelBinormal.y, modelNormal.y, modelTangent.z, modelBinormal.z, modelNormal.z);
+    	
     	float2 texCoords = float2(dot(IN.modelPos.xyz, modelTangent), dot(IN.modelPos.xyz, modelBinormal));
+    	texCoords = texCoords - float2(0.5, 0.5);
 		
-		float3 diffuseTexture = UnpackNormal(tex2D(_NormalMap, texCoords));
+		float3 unpackedNormal = UnpackNormal(tex2D(_NormalMap, texCoords));
+		
+		unpackedNormal = mul(worldToTangentMatrix, unpackedNormal);
 			  
 		//diffuseTexture = diffuseTexture * 0.33333;
       	
 	    //Add noise - we use volume space to prevent noise scrolling if the volume moves.
 	    float noise = positionBasedNoise(float4(IN.volumePos.xyz, _NoiseStrength));
         
-        o.Albedo = IN.color.xyz + float3(noise, noise, noise) + diffuseTexture;
+        o.Albedo = IN.color.xyz + float3(noise, noise, noise);
         
-        o.Albedo = diffuseTexture;
-        o.Normal = modelNormal;
+        //o.Albedo = diffuseTexture;
+        o.Normal = unpackedNormal;
       }
       ENDCG
     }
