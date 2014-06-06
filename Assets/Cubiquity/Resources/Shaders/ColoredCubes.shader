@@ -22,7 +22,6 @@ Shader "ColoredCubes"
       struct Input
       {
           float4 color : COLOR;
-          float4 modelPos;
           float4 volumePos;
       };
       
@@ -44,8 +43,7 @@ Shader "ColoredCubes"
       	v.normal = float3 (0.0f, 0.0f, 1.0f);
       	v.tangent = float4 (1.0f, 0.0f, 0.0f, 1.0f);     
         
-        // Model-space position is use for adding noise.
-        o.modelPos = v.vertex;
+        // Volume-space position is use for adding noise.
         float4 worldPos = mul(_Object2World, v.vertex);
         o.volumePos =  mul(_World2Volume, worldPos);
       }
@@ -57,25 +55,25 @@ Shader "ColoredCubes"
       	// other handiness differences internally). With these render system tests the normals are correct on Windows
       	// regardless of which render system is in use.
 #if SHADER_API_D3D9 || SHADER_API_D3D11 || SHADER_API_D3D11_9X || SHADER_API_XBOX360
-      	float3 modelNormal = normalize(cross(ddx(IN.modelPos.xyz), ddy(IN.modelPos.xyz)));
+      	float3 volumeNormal = normalize(cross(ddx(IN.volumePos.xyz), ddy(IN.volumePos.xyz)));
 #else
-		float3 modelNormal = -normalize(cross(ddx(IN.modelPos.xyz), ddy(IN.modelPos.xyz)));
+		float3 volumeNormal = -normalize(cross(ddx(IN.volumePos.xyz), ddy(IN.volumePos.xyz)));
 #endif
 
 		// Despite our render system checks above, we have seen that the normals are still backwards in Linux
       	// standalone builds. The reason is not currently clear, but the 'normalMultiplier' allow scripts to
       	// flip the normal if required by setting the multiplier to '-1.0f'.
-		modelNormal *= normalMultiplier;
+		volumeNormal *= normalMultiplier;
 		
 		// This fixes inaccuracies/rounding errors which can otherwise occur
-		modelNormal = floor(modelNormal + float3(0.5, 0.5, 0.5));	
+		volumeNormal = floor(volumeNormal + float3(0.5, 0.5, 0.5));	
 		
 		// Because we know our normal is pointing along one of the three main axes we can trivially compute a tangent space.
-		float3 modelTangent = modelNormal.yzx;
-    	float3 modelBinormal = modelNormal.zxy;
+		float3 volumeTangent = volumeNormal.yzx;
+    	float3 volumeBinormal = volumeNormal.zxy;
     	
     	// And from our tangent space we can now compute texture coordinates.
-    	float2 texCoords = float2(dot(IN.modelPos.xyz, modelTangent), dot(IN.modelPos.xyz, modelBinormal));
+    	float2 texCoords = float2(dot(IN.volumePos.xyz, volumeTangent), dot(IN.volumePos.xyz, volumeBinormal));
     	texCoords = texCoords - float2(0.5, 0.5);  // Required because integer positions are at the center of the voxel.
     	texCoords = texCoords / _NormalMapScaleFactor;
     	
@@ -83,11 +81,11 @@ Shader "ColoredCubes"
     	float3 normalFromNormalMap = UnpackNormal(tex2D(_NormalMap, texCoords));
     	
     	// Move the normal into the correct space. I do wonder whether some of this is unnecessary, and actually reduces to something trivial...
-    	float3x3 modelToTangentMatrix = float3x3(
-    		modelTangent.x, modelBinormal.x, modelNormal.x, 
-    		modelTangent.y, modelBinormal.y, modelNormal.y, 
-    		modelTangent.z, modelBinormal.z, modelNormal.z);
-		normalFromNormalMap = mul(modelToTangentMatrix, normalFromNormalMap);
+    	float3x3 volumeToTangentMatrix = float3x3(
+    		volumeTangent.x, volumeBinormal.x, volumeNormal.x, 
+    		volumeTangent.y, volumeBinormal.y, volumeNormal.y, 
+    		volumeTangent.z, volumeBinormal.z, volumeNormal.z);
+		normalFromNormalMap = mul(volumeToTangentMatrix, normalFromNormalMap);
       	
 	    // Add noise - we use volume space to prevent noise scrolling if the volume moves.
 	    float noise = positionBasedNoise(float4(IN.volumePos.xyz, _NoiseStrength));
