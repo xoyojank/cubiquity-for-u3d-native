@@ -65,30 +65,33 @@ Shader "ColoredCubes"
       	// flip the normal if required by setting the multiplier to '-1.0f'.
 		modelNormal *= normalMultiplier;
 		
+		// This fixes inaccuracies/rounding errors which can otherwise occur
 		modelNormal = floor(modelNormal + float3(0.5, 0.5, 0.5));	
 		
-		
+		// Because we know our normal is pointing along one of the three main axes we can trivially compute a tangent space.
 		float3 modelTangent = modelNormal.yzx;
     	float3 modelBinormal = modelNormal.zxy;
     	
-    	float3x3 worldToTangentMatrix = float3x3(modelTangent.x, modelBinormal.x, modelNormal.x, modelTangent.y, modelBinormal.y, modelNormal.y, modelTangent.z, modelBinormal.z, modelNormal.z);
-    	
+    	// And from our tangent space we can now compute texture coordinates.
     	float2 texCoords = float2(dot(IN.modelPos.xyz, modelTangent), dot(IN.modelPos.xyz, modelBinormal));
-    	texCoords = texCoords - float2(0.5, 0.5);
-		
-		float3 unpackedNormal = UnpackNormal(tex2D(_NormalMap, texCoords));
-		
-		unpackedNormal = mul(worldToTangentMatrix, unpackedNormal);
-			  
-		//diffuseTexture = diffuseTexture * 0.33333;
+    	texCoords = texCoords - float2(0.5, 0.5);  // Required because integer positions are at the center of the voxel.
+    	
+    	// Get the normal from the normal map (we no longer need the normal we calculated earlier).
+    	float3 normalFromNormalMap = UnpackNormal(tex2D(_NormalMap, texCoords));
+    	
+    	// Move the normal into the correct space. I do wonder whether some of this is unnecessary, and actually reduces to something trivial...
+    	float3x3 modelToTangentMatrix = float3x3(
+    		modelTangent.x, modelBinormal.x, modelNormal.x, 
+    		modelTangent.y, modelBinormal.y, modelNormal.y, 
+    		modelTangent.z, modelBinormal.z, modelNormal.z);
+		normalFromNormalMap = mul(modelToTangentMatrix, normalFromNormalMap);
       	
-	    //Add noise - we use volume space to prevent noise scrolling if the volume moves.
+	    // Add noise - we use volume space to prevent noise scrolling if the volume moves.
 	    float noise = positionBasedNoise(float4(IN.volumePos.xyz, _NoiseStrength));
         
-        o.Albedo = IN.color.xyz + float3(noise, noise, noise);
-        
-        //o.Albedo = diffuseTexture;
-        o.Normal = unpackedNormal;
+        // Pass the various values to Unity.
+        o.Albedo = IN.color.xyz + float3(noise, noise, noise);        
+        o.Normal = normalFromNormalMap;
       }
       ENDCG
     }
