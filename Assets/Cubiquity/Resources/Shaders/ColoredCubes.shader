@@ -2,7 +2,7 @@ Shader "ColoredCubes"
 {	
 	Properties
     {
-    	_NormalMap ("Normal map", 2D) = "white" {}
+    	_NormalMap ("Normal map", 2D) = "bump" {}
     	_NormalMapScaleFactor ("Normal map scale factor", Float) = 1.0
     	_NoiseStrength ("Noise strength", Range (0.0,0.5)) = 0.1
     }
