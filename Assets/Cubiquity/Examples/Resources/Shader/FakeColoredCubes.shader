@@ -52,7 +52,7 @@
 			float3 volumeNormal = -normalize(cross(ddx(IN.volumePos.xyz), ddy(IN.volumePos.xyz)));
 #endif
 
-			normalMultiplier = -normalMultiplier; //HACK!!
+			normalMultiplier = 1.0; //-normalMultiplier; //HACK!!
 	
 			// Despite our render system checks above, we have seen that the normals are still backwards in Linux
 	      	// standalone builds. The reason is not currently clear, but the 'normalMultiplier' allow scripts to
@@ -79,12 +79,11 @@
 	    		volumeTangent.x, volumeBinormal.x, volumeNormal.x, 
 	    		volumeTangent.y, volumeBinormal.y, volumeNormal.y, 
 	    		volumeTangent.z, volumeBinormal.z, volumeNormal.z);
-			//normalFromNormalMap = mul(volumeToTangentMatrix, normalFromNormalMap); HACK - this shouldn't be commented?!!
+			normalFromNormalMap = mul(volumeToTangentMatrix, normalFromNormalMap); //HACK - this shouldn't be commented?!!
 			
 			o.Albedo = _CubeColor.rgb;
-			//o.Albedo = normalFromNormalMap;
 			o.Alpha = 1.0;
-			o.Normal = normalFromNormalMap;
+        	o.Normal = normalFromNormalMap;
 		}
 		ENDCG
 	} 

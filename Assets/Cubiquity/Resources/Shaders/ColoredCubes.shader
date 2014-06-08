@@ -91,7 +91,8 @@ Shader "ColoredCubes"
 	    float noise = positionBasedNoise(float4(IN.volumePos.xyz, _NoiseStrength));
         
         // Pass the various values to Unity.
-        o.Albedo = IN.color.xyz + float3(noise, noise, noise);        
+        o.Albedo = IN.color.xyz + float3(noise, noise, noise);   
+        o.Alpha = 1.0;     
         o.Normal = normalFromNormalMap;
       }
       ENDCG
