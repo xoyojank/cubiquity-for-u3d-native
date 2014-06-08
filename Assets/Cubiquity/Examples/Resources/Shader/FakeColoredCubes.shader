@@ -14,6 +14,9 @@
 		#pragma surface surf Lambert
 		#pragma target 3.0
 		#pragma glsl
+		
+		// Scripts can flip the computed normal by setting this to '-1.0f'.
+		float normalMultiplier;
 
 		float4 _CubeColor;
 		sampler2D _NormalMap;
@@ -26,7 +29,7 @@
 
 		void surf (Input IN, inout SurfaceOutput o)
 		{
-			o.Normal = UnpackNormal (tex2D (_NormalMap, IN.uv_NormalMap / _NormalMapScaleFactor));
+			o.Normal = UnpackNormal (tex2D (_NormalMap, IN.uv_NormalMap));
 			
 			o.Albedo = _CubeColor.rgb;
 			o.Alpha = 1.0;
