@@ -3,7 +3,6 @@ Shader "ColoredCubes"
 	Properties
 	{
 		_NormalMap ("Normal map", 2D) = "bump" {}
-		_NormalMapScaleFactor ("Normal map scale factor", Float) = 1.0
 		_NoiseStrength ("Noise strength", Range (0.0,0.5)) = 0.1
 	}
 	SubShader
@@ -73,7 +72,6 @@ Shader "ColoredCubes"
 			// And from our tangent space we can now compute texture coordinates.
 			float2 texCoords = float2(dot(IN.volumePos.xyz, volumeTangent), dot(IN.volumePos.xyz, volumeBinormal));
 			texCoords = texCoords - float2(0.5, 0.5);  // Required because integer positions are at the center of the voxel.
-			texCoords = texCoords / _NormalMapScaleFactor;
 			
 			// Get the normal from the normal map (we no longer need the normal we calculated earlier).
 			float3 normalFromNormalMap = UnpackNormal(tex2D(_NormalMap, texCoords));
