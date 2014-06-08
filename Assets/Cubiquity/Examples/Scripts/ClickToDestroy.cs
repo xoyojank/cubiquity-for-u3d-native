@@ -13,6 +13,8 @@ public class ClickToDestroy : MonoBehaviour
 	// individual pieces do, but not the parent). So we define a click as the mouse being down
 	// but not being down on the previous frame. We'll fix this better in the future...
 	private bool isMouseAlreadyDown = false;
+	
+	private Material fakeVoxelMaterial;
 
 	// Use this for initialization
 	void Start()
@@ -22,6 +24,10 @@ public class ClickToDestroy : MonoBehaviour
 		if(coloredCubesVolume == null)
 		{
 			Debug.LogError("This 'ClickToDestroy' script should be attached to a game object with a ColoredCubesVolume component");
+		}
+		else
+		{
+			fakeVoxelMaterial = Resources.Load("Materials/SimpleFakeColoredCubes", typeof(Material)) as Material;
 		}
 	}
 	
@@ -145,13 +151,13 @@ public class ClickToDestroy : MonoBehaviour
 								cube.transform.localPosition = new Vector3(x, y, z);
 								cube.transform.localRotation = Quaternion.identity;
 								//cube.transform.localScale = new Vector3(0.9f, 0.9f, 0.9f);
-								cube.renderer.material = Resources.Load("Materials/SimpleFakeColoredCubes", typeof(Material)) as Material; //Should load outide of loop!
+								cube.renderer.material = fakeVoxelMaterial;
 								cube.renderer.material.SetColor("_CubeColor", (Color32)color);
 								//cube.renderer.material.SetTexture("_NormalMap", coloredCubesVolume.GetComponent<ColoredCubesVolumeRenderer>().material.GetTexture("_NormalMap"));
 								//Texture2D normalMap = Resources.Load("Textures/MultipleTilesFake", typeof(Texture2D)) as Texture2D;
 								//cube.renderer.material.SetTexture("_NormalMap", normalMap);
-								cube.renderer.material.SetFloat("normalMultiplier", coloredCubesVolume.GetComponent<ColoredCubesVolumeRenderer>().material.GetFloat("normalMultiplier"));
-								cube.renderer.material.SetMatrix("_World2Volume", coloredCubesVolume.GetComponent<ColoredCubesVolumeRenderer>().material.GetMatrix("_World2Volume"));
+								//cube.renderer.material.SetFloat("normalMultiplier", coloredCubesVolume.GetComponent<ColoredCubesVolumeRenderer>().material.GetFloat("normalMultiplier"));
+								//cube.renderer.material.SetMatrix("_World2Volume", coloredCubesVolume.GetComponent<ColoredCubesVolumeRenderer>().material.GetMatrix("_World2Volume"));
 								
 								Vector3 explosionForce = cube.transform.position - pos;
 								
