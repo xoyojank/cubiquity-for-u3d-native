@@ -1,4 +1,4 @@
-﻿Shader "FakeColoredCubes"
+﻿Shader "DerivativeFakeColoredCubes"
 {
 	Properties
 	{
