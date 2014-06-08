@@ -153,6 +153,7 @@ public class ClickToDestroy : MonoBehaviour
 								//cube.transform.localScale = new Vector3(0.9f, 0.9f, 0.9f);
 								cube.renderer.material = fakeVoxelMaterial;
 								cube.renderer.material.SetColor("_CubeColor", (Color32)color);
+								cube.renderer.material.SetVector("_CubePosition", new Vector4(x, y, z, 0.0f));
 								//cube.renderer.material.SetTexture("_NormalMap", coloredCubesVolume.GetComponent<ColoredCubesVolumeRenderer>().material.GetTexture("_NormalMap"));
 								//Texture2D normalMap = Resources.Load("Textures/MultipleTilesFake", typeof(Texture2D)) as Texture2D;
 								//cube.renderer.material.SetTexture("_NormalMap", normalMap);

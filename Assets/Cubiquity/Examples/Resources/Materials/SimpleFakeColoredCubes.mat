@@ -34,13 +34,13 @@ Material:
       data:
         first:
           name: _NoiseStrength
-        second: .100000001
+        second: .5
     m_Colors:
       data:
         first:
-          name: _Color
+          name: _CubeColor
         second: {r: 1, g: 1, b: 1, a: 1}
       data:
         first:
-          name: _CubeColor
+          name: _Color
         second: {r: 1, g: 1, b: 1, a: 1}
