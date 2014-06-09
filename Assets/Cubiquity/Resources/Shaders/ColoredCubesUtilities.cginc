@@ -26,32 +26,9 @@ float positionBasedNoise(float4 positionAndStrength)
 	float3 f;
 	float3 i;
 	f = modf(roundedPos / 5.0, i);
-	//if(f > 0.7)
-	//{
-	//	noise = 0.75;
-	//}
-	//else
-	//{
-	//	noise = 0.25;
-	//}
 	noise = dot(f, float3(0.333, 0.333, 0.333));
 	
 	return noise;
-}
-
-float3 positionBasedNoise3(float4 positionAndStrength)
-{
-	//'floor' is more widely supported than 'round'. Offset consists of:
-	//  - 0.5 to perform the rounding
-	//  - A tiny offset to prevent sparkes as faces are exactly on rounding boundary.
-	float3 roundedPos = floor(positionAndStrength.xyz + float3(0.501, 0.501, 0.501));
-	
-	roundedPos = roundedPos / 10.0;
-	float3 f;
-	float3 i;
-	f = modf(roundedPos, i);
-	
-	return f;
 }
 		
 #endif //COLORED_CUBES_VOLUME_UTILITIES
