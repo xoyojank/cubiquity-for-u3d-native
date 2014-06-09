@@ -84,10 +84,11 @@ Shader "ColoredCubes"
 			normalFromNormalMap = mul(volumeToTangentMatrix, normalFromNormalMap);
 			
 			// Add noise - we use volume space to prevent noise scrolling if the volume moves.
-			float noise = positionBasedNoise(float4(IN.volumePos.xyz, _NoiseStrength));
+			float noise = positionBasedNoise(float4(IN.volumePos.xyz - (volumeNormal * 0.5), _NoiseStrength));
 			
 			// Pass the various values to Unity.
 			o.Albedo = IN.color.xyz + float3(noise, noise, noise);   
+			//o.Albedo = noise;   
 			o.Alpha = 1.0;     
 			o.Normal = normalFromNormalMap;
 		}				
