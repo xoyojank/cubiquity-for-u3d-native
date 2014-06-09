@@ -6,7 +6,7 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: SimpleFakeColoredCubes
+  m_Name: FakeColoredCubes
   m_Shader: {fileID: 4800000, guid: d5ffa1f7b55623849bfbf9b90b7fa200, type: 3}
   m_ShaderKeywords: []
   m_SavedProperties:
