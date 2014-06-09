@@ -10,7 +10,11 @@
 	}
 	SubShader
 	{
-		Tags { "RenderType"="Opaque" }
+		// Set up for transparent rendering.
+		Tags { "Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent" }		
+		ZWrite Off
+		Blend SrcAlpha OneMinusSrcAlpha
+         
 		CGPROGRAM
 		
 		// We include this file so we can access functionality such as noise from the colored cubes shader.
@@ -18,7 +22,7 @@
 		// the absolute path: http://forum.unity3d.com/threads/custom-cginc-relative-to-assets-folder-in-dx11.163271/
 		#include "../../../Resources/Shaders/ColoredCubesUtilities.cginc"
 		
-		#pragma surface surf Lambert vertex:vert addshadow
+		#pragma surface surf Lambert alpha vertex:vert addshadow
 		#pragma target 3.0
 		#pragma glsl		
 
@@ -27,6 +31,7 @@
 		
 		float4 _CubeColor;
 		float4 _CubePosition;
+		float _CubeOpacity;
 
 		struct Input
 		{
@@ -50,7 +55,7 @@
 			
 			o.Albedo = _CubeColor.rgb + float3(noise, noise, noise);
 			//o.Albedo = _CubePosition.xyz;
-			o.Alpha = 1.0;
+			o.Alpha = _CubeOpacity;
         	//o.Normal = normalFromNormalMap;
 		}
 		ENDCG

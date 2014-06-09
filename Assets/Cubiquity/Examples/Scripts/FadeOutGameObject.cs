@@ -31,7 +31,7 @@ public class FadeOutGameObject : MonoBehaviour
 				
 				// Bit of a hack - we also have a dummy material in 'Resources' to make
 				// sure the shader exists in standalone builds. Need to do this properly.
-				renderer.material.shader = Shader.Find ("Transparent/Diffuse");
+				//renderer.material.shader = Shader.Find ("Transparent/Diffuse");
 			}
 		}
 		
@@ -39,11 +39,15 @@ public class FadeOutGameObject : MonoBehaviour
 		{
 			float timeSpentFading = Time.time - fadeStart;
 			
-			Color color = renderer.material.color;
-			color.a = 1.0f - timeSpentFading / fadeTime;
-			renderer.material.color = color;
+			//Color color = renderer.material.color;
+			//color.a = 1.0f - timeSpentFading / fadeTime;
+			//renderer.material.color = color;
 			
-			if(color.a < 0.01)
+			float opacity = 1.0f - timeSpentFading / fadeTime;
+			
+			renderer.material.SetFloat("_CubeOpacity", opacity);
+			
+			if(opacity < 0.01)
 			{
 				Destroy (gameObject);
 			}
