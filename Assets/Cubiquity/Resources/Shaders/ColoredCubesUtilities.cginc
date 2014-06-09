@@ -22,11 +22,6 @@ float positionBasedNoise(float4 positionAndStrength)
 	float halfNoiseStrength = positionAndStrength.w * 0.5;
 	noise = -halfNoiseStrength + positionAndStrength.w * noise; //http://www.opengl.org/wiki/GLSL_Optimizations#Get_MAD
 	
-	float3 f;
-	float3 i;
-	f = modf(roundedPos / 5.0, i);
-	noise = dot(f, float3(0.333, 0.333, 0.333));
-	
 	return noise;
 }
 		
