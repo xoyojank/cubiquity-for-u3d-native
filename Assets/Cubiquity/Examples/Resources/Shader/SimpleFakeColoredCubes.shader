@@ -5,7 +5,7 @@
 		_NormalMap ("Normal map", 2D) = "bump" {}
 		_NoiseStrength ("Noise strength", Range (0.0,0.5)) = 0.1
 		
-		//_CubePosition ("Cube Position", Color) = (1.0, 1.0, 1.0, 1.0)
+		//_CubePosition ("Cube Position", Vector) = (0.0, 1.0, 0.0, 1.0)
 		//_CubeColor ("Cube Color", Color) = (1.0, 1.0, 1.0, 1.0)
 	}
 	SubShader
@@ -26,7 +26,7 @@
 		float _NoiseStrength;
 		
 		float4 _CubeColor;
-		float4 _CubePostion;
+		float4 _CubePosition;
 
 		struct Input
 		{
@@ -46,13 +46,13 @@
 			o.Normal = UnpackNormal (tex2D (_NormalMap, IN.uv_NormalMap));
 			
 			// Add noise - we use volume space to prevent noise scrolling if the volume moves.
-			float noise = positionBasedNoise(float4(IN.localPosition.xyz, 0.5));
+			float noise = positionBasedNoise(float4(_CubePosition.xyz, 0.5));
 			
 			o.Albedo = _CubeColor.rgb + float3(noise, noise, noise);
+			//o.Albedo = _CubePosition.xyz;
 			o.Alpha = 1.0;
         	//o.Normal = normalFromNormalMap;
 		}
 		ENDCG
 	} 
-	FallBack "Diffuse"
 }
