@@ -145,12 +145,12 @@ public class ClickToDestroy : MonoBehaviour
 							if(IsSurfaceVoxel(x, y, z))
 							{
 								GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-								//cube.AddComponent<Rigidbody>();
+								cube.AddComponent<Rigidbody>();
 								cube.AddComponent<FadeOutGameObject>();
 								cube.transform.parent = coloredCubesVolume.transform;
 								cube.transform.localPosition = new Vector3(x, y, z);
 								cube.transform.localRotation = Quaternion.identity;
-								//cube.transform.localScale = new Vector3(0.9f, 0.9f, 0.9f);
+								cube.transform.localScale = new Vector3(0.9f, 0.9f, 0.9f);
 								cube.renderer.material = fakeVoxelMaterial;
 								cube.renderer.material.SetColor("_CubeColor", (Color32)color);
 								cube.renderer.material.SetVector("_CubePosition", new Vector4(x, y, z, 0.0f));
@@ -170,8 +170,8 @@ public class ClickToDestroy : MonoBehaviour
 								
 								Vector3 up = new Vector3(0.0f, 2.0f, 0.0f);
 								
-								//cube.rigidbody.AddTorque(xTorque, yTorque, zTorque);
-								//cube.rigidbody.AddForce((explosionForce.normalized + up) * 100.0f);
+								cube.rigidbody.AddTorque(xTorque, yTorque, zTorque);
+								cube.rigidbody.AddForce((explosionForce.normalized + up) * 100.0f);
 							}
 						}
 					}
