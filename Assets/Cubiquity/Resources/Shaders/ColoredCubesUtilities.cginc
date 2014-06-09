@@ -5,8 +5,7 @@ float positionBasedNoise(float4 positionAndStrength)
 {
 	//'floor' is more widely supported than 'round'. Offset consists of:
 	//  - 0.5 to perform the rounding
-	//  - A tiny offset to prevent sparkes as faces are exactly on rounding boundary.
-	float3 roundedPos = floor(positionAndStrength.xyz + float3(0.501, 0.501, 0.501));
+	float3 roundedPos = floor(positionAndStrength.xyz + float3(0.5, 0.5, 0.5));
 	
 	// The noise function below seems to do remarkably well even for large inputs. None-the-less, it is
 	// better for small inputs so we limit the input range to within a few hundred voxels of the origin.

@@ -46,7 +46,7 @@
 			o.Normal = UnpackNormal (tex2D (_NormalMap, IN.uv_NormalMap));
 			
 			// Add noise - we use volume space to prevent noise scrolling if the volume moves.
-			float noise = positionBasedNoise(float4(_CubePosition.xyz, 0.5));
+			float noise = positionBasedNoise(float4(_CubePosition.xyz, _NoiseStrength));
 			
 			o.Albedo = _CubeColor.rgb + float3(noise, noise, noise);
 			//o.Albedo = _CubePosition.xyz;
