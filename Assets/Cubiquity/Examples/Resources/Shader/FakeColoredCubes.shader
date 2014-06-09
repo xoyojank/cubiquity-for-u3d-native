@@ -1,13 +1,5 @@
 ﻿Shader "SimpleFakeColoredCubes"
 {
-	Properties
-	{
-		_NormalMap ("Normal map", 2D) = "bump" {}
-		_NoiseStrength ("Noise strength", Range (0.0,0.5)) = 0.1
-		
-		//_CubePosition ("Cube Position", Vector) = (0.0, 1.0, 0.0, 1.0)
-		//_CubeColor ("Cube Color", Color) = (1.0, 1.0, 1.0, 1.0)
-	}
 	SubShader
 	{
 		// Set up for transparent rendering.
