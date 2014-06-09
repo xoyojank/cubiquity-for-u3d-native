@@ -27,7 +27,7 @@ public class ClickToDestroy : MonoBehaviour
 		}
 		else
 		{
-			fakeVoxelMaterial = Resources.Load("Materials/SimpleFakeColoredCubes", typeof(Material)) as Material;
+			fakeVoxelMaterial = Resources.Load("Materials/FakeColoredCubes", typeof(Material)) as Material;
 		}
 	}
 	
