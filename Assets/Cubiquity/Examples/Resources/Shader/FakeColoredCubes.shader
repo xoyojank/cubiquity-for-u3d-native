@@ -20,6 +20,7 @@ Shader "FakeColoredCubes"
 		#pragma glsl		
 
 		// These are the same parameters that the real colored cube has.
+		sampler2D _DiffuseMap;
 		sampler2D _NormalMap;
 		float _NoiseStrength;
 		
@@ -42,8 +43,11 @@ Shader "FakeColoredCubes"
 			// Sample the same surface maps that are used by the real colored cubes voxel shader.
 			float3 unpackedNormal = UnpackNormal (tex2D (_NormalMap, IN.uv_NormalMap));
 			
+			// Sample the other texture maps
+			float3 diffuseVal = tex2D(_DiffuseMap, IN.uv_NormalMap);
+			
 			// Set the appropriate attributes of the output struct.
-			o.Albedo = _CubeColor.rgb + float3(noise, noise, noise);
+			o.Albedo = (_CubeColor.rgb + float3(noise, noise, noise)) * diffuseVal;
 			o.Alpha = _CubeOpacity;
 			o.Normal = unpackedNormal;
 		}

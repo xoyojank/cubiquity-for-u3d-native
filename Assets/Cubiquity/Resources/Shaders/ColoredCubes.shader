@@ -2,6 +2,7 @@ Shader "ColoredCubes"
 {	
 	Properties
 	{
+		_DiffuseMap ("Diffuse map", 2D) = "white" {}
 		_NormalMap ("Normal map", 2D) = "bump" {}
 		_NoiseStrength ("Noise strength", Range (0.0,0.5)) = 0.1
 	}
@@ -24,8 +25,8 @@ Shader "ColoredCubes"
 			float4 volumePos;
 		};
 	
+		sampler2D _DiffuseMap;
 		sampler2D _NormalMap;
-		float _NormalMapScaleFactor;
 		float _NoiseStrength;
 		
 		#include "ColoredCubesUtilities.cginc"
@@ -86,9 +87,11 @@ Shader "ColoredCubes"
 			// Add noise - we use volume space to prevent noise scrolling if the volume moves.
 			float noise = positionBasedNoise(float4(IN.volumePos.xyz - (volumeNormal * 0.1), _NoiseStrength));
 			
+			// Sample the other texture maps
+			float3 diffuseVal = tex2D(_DiffuseMap, texCoords);
+			
 			// Pass the various values to Unity.
-			o.Albedo = IN.color.xyz + float3(noise, noise, noise);   
-			//o.Albedo = noise;   
+			o.Albedo = (IN.color.xyz + float3(noise, noise, noise)) * diffuseVal;   
 			o.Alpha = 1.0;     
 			o.Normal = normalFromNormalMap;
 		}				
