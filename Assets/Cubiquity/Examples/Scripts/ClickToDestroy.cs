@@ -97,6 +97,12 @@ public class ClickToDestroy : MonoBehaviour
 	
 	void DestroyVoxels(int xPos, int yPos, int zPos, int range)
 	{
+		Material fakeVoxelMaterial = Resources.Load("Materials/FakeColoredCubes", typeof(Material)) as Material;
+		fakeVoxelMaterial.SetFloat("_CubeOpacity", 1.0f);
+		fakeVoxelMaterial.SetTexture("_DiffuseMap", coloredCubesVolume.GetComponent<ColoredCubesVolumeRenderer>().material.GetTexture("_DiffuseMap"));
+		fakeVoxelMaterial.SetTexture("_NormalMap", coloredCubesVolume.GetComponent<ColoredCubesVolumeRenderer>().material.GetTexture("_NormalMap"));
+		fakeVoxelMaterial.SetFloat("_NoiseStrength", coloredCubesVolume.GetComponent<ColoredCubesVolumeRenderer>().material.GetFloat("_NoiseStrength"));
+
 		// Initialise outside the loop, but we'll use it later.
 		Vector3 pos = new Vector3(xPos, yPos, zPos);
 		int rangeSquared = range * range;
@@ -145,7 +151,9 @@ public class ClickToDestroy : MonoBehaviour
 								cube.transform.localPosition = new Vector3(x, y, z);
 								cube.transform.localRotation = Quaternion.identity;
 								cube.transform.localScale = new Vector3(0.9f, 0.9f, 0.9f);
-								cube.renderer.material.color = (Color32)color;
+								cube.renderer.material = fakeVoxelMaterial;
+								cube.renderer.material.SetColor("_CubeColor", (Color32)color);
+								cube.renderer.material.SetVector("_CubePosition", new Vector4(x, y, z, 0.0f));
 								
 								Vector3 explosionForce = cube.transform.position - pos;
 								

@@ -136,18 +136,17 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
---- !u!1 &1302112035
+--- !u!1 &690550937
 GameObject:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   serializedVersion: 4
   m_Component:
-  - 4: {fileID: 1302112039}
-  - 114: {fileID: 1302112038}
-  - 114: {fileID: 1302112037}
-  - 114: {fileID: 1302112036}
-  - 114: {fileID: 1302112040}
+  - 4: {fileID: 690550941}
+  - 114: {fileID: 690550940}
+  - 114: {fileID: 690550939}
+  - 114: {fileID: 690550938}
   m_Layer: 0
   m_Name: Terrain Volume
   m_TagString: Untagged
@@ -155,65 +154,136 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1302112036
+--- !u!114 &690550938
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1302112035}
+  m_GameObject: {fileID: 690550937}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 747f253283d29264ba6624bdf2e9ad88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1302112037
+--- !u!114 &690550939
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1302112035}
+  m_GameObject: {fileID: 690550937}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ba582b797ce3ad14e9569c9dade105c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  material: {fileID: 2100000, guid: 51d9f6a74d90a2649a080b18a25914c8, type: 2}
+  material: {fileID: 1315562466}
   mCastShadows: 1
   mReceiveShadows: 1
---- !u!114 &1302112038
+--- !u!114 &690550940
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1302112035}
+  m_GameObject: {fileID: 690550937}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 045d67dae0d4c514a8e6add34c63a804, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   mData: {fileID: 11400000, guid: a6593d18217408f4496c91d047d88bfb, type: 2}
---- !u!4 &1302112039
+--- !u!4 &690550941
 Transform:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1302112035}
+  m_GameObject: {fileID: 690550937}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
---- !u!114 &1302112040
-MonoBehaviour:
+--- !u!21 &1315562466
+Material:
+  serializedVersion: 3
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1302112035}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bfc1839ae5e58e743a487271c6168708, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name: Triplanar(Clone)
+  m_Shader: {fileID: 4800000, guid: 1caca2db8f6a85441b19b319a7fae750, type: 3}
+  m_ShaderKeywords:
+  - BRUSH_MARKER_OFF
+  m_SavedProperties:
+    serializedVersion: 2
+    m_TexEnvs:
+      data:
+        first:
+          name: _MainTex
+        second:
+          m_Texture: {fileID: 0}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
+      data:
+        first:
+          name: _Tex0
+        second:
+          m_Texture: {fileID: 2800000, guid: 80ba9c91035caa14f8722f8bc573b136, type: 3}
+          m_Scale: {x: .125, y: .125}
+          m_Offset: {x: 0, y: 0}
+      data:
+        first:
+          name: _Tex1
+        second:
+          m_Texture: {fileID: 2800000, guid: bb38bb14b5e175f4ca16975ae08541d0, type: 3}
+          m_Scale: {x: .125, y: .125}
+          m_Offset: {x: 0, y: 0}
+      data:
+        first:
+          name: _Tex2
+        second:
+          m_Texture: {fileID: 2800000, guid: c6c07e201ceca3443af08cff1b1fadb5, type: 3}
+          m_Scale: {x: .125, y: .125}
+          m_Offset: {x: 0, y: 0}
+      data:
+        first:
+          name: _Tex3
+        second:
+          m_Texture: {fileID: 0}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
+      data:
+        first:
+          name: _Tex4
+        second:
+          m_Texture: {fileID: 0}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
+      data:
+        first:
+          name: _Tex5
+        second:
+          m_Texture: {fileID: 0}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
+      data:
+        first:
+          name: _Tex6
+        second:
+          m_Texture: {fileID: 0}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
+      data:
+        first:
+          name: _Tex7
+        second:
+          m_Texture: {fileID: 0}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
+    m_Floats: {}
+    m_Colors:
+      data:
+        first:
+          name: _Color
+        second: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1690653741
 GameObject:
   m_ObjectHideFlags: 0

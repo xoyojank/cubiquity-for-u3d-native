@@ -1,0 +1,56 @@
+﻿// This shader can be applied to a cube to make it look like a 'colored cube' voxel.
+Shader "FakeColoredCubes"
+{
+	SubShader
+	{
+		// Set up for transparent rendering.
+		Tags { "Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent" }		
+		ZWrite Off
+		Blend SrcAlpha OneMinusSrcAlpha
+         
+		CGPROGRAM
+		
+		// We include this file so we can access functionality such as noise from the colored cubes shader.
+		// Using the relative path here is slightly error-prone, but it seems a Unity bug prevents us from using 
+		// the absolute path: http://forum.unity3d.com/threads/custom-cginc-relative-to-assets-folder-in-dx11.163271/
+		#include "../../../Resources/Shaders/ColoredCubesUtilities.cginc"
+		
+		#pragma surface surf Lambert alpha
+		#pragma target 3.0
+		#pragma glsl		
+
+		// These are the same parameters that the real colored cube has.
+		sampler2D _DiffuseMap;
+		sampler2D _NormalMap;
+		float _NoiseStrength;
+		
+		// These properties are specific to the fake colored cube.
+		float4 _CubeColor;
+		float4 _CubePosition; // In volume space
+		float _CubeOpacity;
+
+		struct Input
+		{
+	        float2 uv_NormalMap;
+	        float4 localPosition;
+      	};
+
+		void surf (Input IN, inout SurfaceOutput o)
+		{
+			// Add noise using the same input as is used by the real colored cubes voxel shader.
+			float noise = positionBasedNoise(float4(_CubePosition.xyz, _NoiseStrength));
+			
+			// Sample the same surface maps that are used by the real colored cubes voxel shader.
+			float3 unpackedNormal = UnpackNormal (tex2D (_NormalMap, IN.uv_NormalMap));
+			
+			// Sample the other texture maps
+			float3 diffuseVal = tex2D(_DiffuseMap, IN.uv_NormalMap);
+			
+			// Set the appropriate attributes of the output struct.
+			o.Albedo = (_CubeColor.rgb + float3(noise, noise, noise)) * diffuseVal;
+			o.Alpha = _CubeOpacity;
+			o.Normal = unpackedNormal;
+		}
+		ENDCG
+	} 
+}
