@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 8f4952f5e434d8548971daa76db005a8
+guid: 2b79fe609c5da87449892ba3c41f1a47
 TextureImporter:
   serializedVersion: 2
   mipmaps:
@@ -12,7 +12,7 @@ TextureImporter:
     mipMapFadeDistanceStart: 8
     mipMapFadeDistanceEnd: 10
   bumpmap:
-    convertToNormalMap: 1
+    convertToNormalMap: 0
     externalNormalMap: 1
     heightScale: .25
     normalMapFilter: 0
