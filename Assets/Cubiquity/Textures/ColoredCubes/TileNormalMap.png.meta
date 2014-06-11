@@ -7,10 +7,10 @@ TextureImporter:
     enableMipMap: 1
     linearTexture: 1
     correctGamma: 0
-    fadeOut: 0
+    fadeOut: 1
     borderMipMap: 0
-    mipMapFadeDistanceStart: 1
-    mipMapFadeDistanceEnd: 3
+    mipMapFadeDistanceStart: 8
+    mipMapFadeDistanceEnd: 10
   bumpmap:
     convertToNormalMap: 0
     externalNormalMap: 1
@@ -24,13 +24,13 @@ TextureImporter:
   maxTextureSize: 1024
   textureSettings:
     filterMode: -1
-    aniso: -1
+    aniso: 1
     mipBias: -1
     wrapMode: -1
   nPOTScale: 1
   lightmap: 0
   compressionQuality: 50
   alphaIsTransparency: 0
-  textureType: 1
+  textureType: 5
   buildTargetSettings: []
   userData: 
