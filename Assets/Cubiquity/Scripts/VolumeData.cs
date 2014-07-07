@@ -191,6 +191,14 @@ using Cubiquity.Impl;
 		
 		private void OnEnable()
 		{	
+			// It would seem intuitive to open and initialise the voxel database from this function. However, there seem to be 
+			// some problems with this approach.
+			//		1. OnEnable() is (sometimes?) called when simply clicking on the asset in the project window. In this scenario
+			// 		we don't really want/need to connect to the database.
+			//		2. OnEnable() does not seem to be called when a volume asset is dragged onto an existing volume, and this is
+			// 		the main way of setting which data a volume should use.
+			// More investigation is needed but perhaps we should simply initialize the volume on demand?
+
 			// Note: For some reason this function is not called when transitioning between edit/play mode if this scriptable 
 			// object has been turned into an asset. Therefore we also call Initialize...()/Shutdown...() from the Volume class.
 			
