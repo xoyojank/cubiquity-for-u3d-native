@@ -42,11 +42,15 @@ using Cubiquity.Impl;
 	    {
 	        get
 			{
+				DebugUtils.Assert(volumeHandle != null, "Volume handle should never be null when getting enclosing region.");
+			
 				Region result = new Region(0, 0, 0, 0, 0, 0);
-				CubiquityDLL.GetEnclosingRegion(volumeHandle.Value,
-					out result.lowerCorner.x, out result.lowerCorner.y, out result.lowerCorner.z,
-					out result.upperCorner.x, out result.upperCorner.y, out result.upperCorner.z);
-				
+				if(volumeHandle != null)
+				{
+					CubiquityDLL.GetEnclosingRegion(volumeHandle.Value,
+						out result.lowerCorner.x, out result.lowerCorner.y, out result.lowerCorner.z,
+						out result.upperCorner.x, out result.upperCorner.y, out result.upperCorner.z);
+				}				
 				return result;
 			}
 	    }

@@ -35,6 +35,8 @@ using Cubiquity.Impl;
 		 */
 		public QuantizedColor GetVoxel(int x, int y, int z)
 		{
+			DebugUtils.Assert(volumeHandle != null, "Volume handle should never be null when getting a voxel.");
+		
 			QuantizedColor result;
 			if(volumeHandle.HasValue)
 			{
@@ -57,6 +59,8 @@ using Cubiquity.Impl;
 		 */
 		public void SetVoxel(int x, int y, int z, QuantizedColor quantizedColor)
 		{
+			DebugUtils.Assert(volumeHandle != null, "Volume handle should never be null when setting a voxel.");
+		
 			if(volumeHandle.HasValue)
 			{
 				if(x >= enclosingRegion.lowerCorner.x && y >= enclosingRegion.lowerCorner.y && z >= enclosingRegion.lowerCorner.z
