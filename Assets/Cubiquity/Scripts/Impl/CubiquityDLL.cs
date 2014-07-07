@@ -18,7 +18,7 @@ namespace Cubiquity
 			const uint requiredMajorVersion = 1;
 			const uint requiredMinorVersion = 1;
 			const uint requiredPatchVersion = 0;
-				
+			
 			// This static constructor is supposed to make sure that the Cubiquity.dll is in the right place before the DllImport is done.
 			// It doesn't seem to work, because in Standalone builds the message below is printed after the exception about the .dll not
 			// being found. We need to look into this further.
@@ -110,11 +110,11 @@ namespace Cubiquity
 			}
 			
 			[DllImport (dllToImport)]
-			private static extern int cuNewColoredCubesVolumeFromVDB(StringBuilder datasetName, uint baseNodeSize, out uint result);
-			public static uint NewColoredCubesVolumeFromVDB(string datasetName, uint baseNodeSize)
+			private static extern int cuNewColoredCubesVolumeFromVDB(StringBuilder datasetName, uint writePermissions, uint baseNodeSize, out uint result);
+			public static uint NewColoredCubesVolumeFromVDB(string datasetName, WritePermissions writePermissions, uint baseNodeSize)
 			{
 				uint result;
-				Validate(cuNewColoredCubesVolumeFromVDB(new StringBuilder(datasetName), baseNodeSize, out result));
+				Validate(cuNewColoredCubesVolumeFromVDB(new StringBuilder(datasetName), (uint)writePermissions, baseNodeSize, out result));
 				return result;
 			}
 			
@@ -197,11 +197,11 @@ namespace Cubiquity
 			}
 			
 			[DllImport (dllToImport)]
-			private static extern int cuNewTerrainVolumeFromVDB(StringBuilder datasetName, uint baseNodeSize, out uint result);
-			public static uint NewTerrainVolumeFromVDB(string datasetName, uint baseNodeSize)
+			private static extern int cuNewTerrainVolumeFromVDB(StringBuilder datasetName, uint writePermissions, uint baseNodeSize, out uint result);
+			public static uint NewTerrainVolumeFromVDB(string datasetName, WritePermissions writePermissions, uint baseNodeSize)
 			{
 				uint result;
-				Validate(cuNewTerrainVolumeFromVDB(new StringBuilder(datasetName), baseNodeSize, out result));
+				Validate(cuNewTerrainVolumeFromVDB(new StringBuilder(datasetName), (uint)writePermissions, baseNodeSize, out result));
 				return result;
 			}
 			

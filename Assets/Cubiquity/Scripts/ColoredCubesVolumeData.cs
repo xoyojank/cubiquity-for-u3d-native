@@ -89,7 +89,7 @@ using Cubiquity.Impl;
 			if(volumeHandle == null)
 			{
 				// Create an empty region of the desired size.
-				volumeHandle = CubiquityDLL.NewColoredCubesVolumeFromVDB(fullPathToVoxelDatabase, DefaultBaseNodeSize);
+				volumeHandle = CubiquityDLL.NewColoredCubesVolumeFromVDB(fullPathToVoxelDatabase, WritePermissions.ReadWrite, DefaultBaseNodeSize);
 			}
 		}
 		/// \endcond
