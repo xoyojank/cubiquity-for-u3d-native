@@ -4,14 +4,10 @@ using System;
 using System.IO;
 using System.Collections;
 
-using Cubiquity;
 using Cubiquity.Impl;
 
-// VolumeData and it's subclasses are not in the Cubiquity namespace because it seems to cause problems with 'EditorGUILayout.ObjectField(...)'.
-// Specifically the pop-up window (which appears when click the small circle with the dot in it) does not display the other volume data assets 
-// in the project if the Cubiquity namespace is used. This appears to simply be a namespace-related bug in Unity.
-//namespace Cubiquity
-//{
+namespace Cubiquity
+{
 	/// Base class representing the actual 3D grid of voxel values
 	/**
 	 * This class primarily serves as a light-weight wrapper around the \ref secVoxelDatabase "voxel databases" which are used by the %Cubiquity engine,
@@ -238,4 +234,4 @@ using Cubiquity.Impl;
 		public abstract void ShutdownCubiquityVolume();
 		/// \endcond
 	}
-//}
+}
