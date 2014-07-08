@@ -38,7 +38,12 @@ namespace Cubiquity
 	    {
 	        get
 			{
-				DebugUtils.Assert(volumeHandle != null, "Volume handle should never be null when getting enclosing region.");
+				//DebugUtils.Assert(volumeHandle != null, "Volume handle should never be null when getting enclosing region.");
+
+				if(volumeHandle == null)
+				{
+					InitializeExistingCubiquityVolume();
+				}
 			
 				Region result = new Region(0, 0, 0, 0, 0, 0);
 				if(volumeHandle != null)
@@ -200,10 +205,10 @@ namespace Cubiquity
 			
 			// This OnEnable() function is called as soon as the VolumeData is instantiated, but at this point it has not yet
 			// been initilized with the path and so in this case we cannot yet initialize the underlying Cubiquity volume.
-			if(relativePathToVoxelDatabase != null)
+			/*if(relativePathToVoxelDatabase != null)
 			{
 				InitializeExistingCubiquityVolume();
-			}
+			}*/
 		}
 		
 		private void OnDisable()

@@ -31,7 +31,12 @@ namespace Cubiquity
 		 */
 		public QuantizedColor GetVoxel(int x, int y, int z)
 		{
-			DebugUtils.Assert(volumeHandle != null, "Volume handle should never be null when getting a voxel.");
+			//DebugUtils.Assert(volumeHandle != null, "Volume handle should never be null when getting a voxel.");
+
+			if(volumeHandle == null)
+			{
+				InitializeExistingCubiquityVolume();
+			}
 		
 			QuantizedColor result;
 			if(volumeHandle.HasValue)
@@ -55,7 +60,12 @@ namespace Cubiquity
 		 */
 		public void SetVoxel(int x, int y, int z, QuantizedColor quantizedColor)
 		{
-			DebugUtils.Assert(volumeHandle != null, "Volume handle should never be null when setting a voxel.");
+			//DebugUtils.Assert(volumeHandle != null, "Volume handle should never be null when setting a voxel.");
+
+			if(volumeHandle == null)
+			{
+				InitializeExistingCubiquityVolume();
+			}
 		
 			if(volumeHandle.HasValue)
 			{
