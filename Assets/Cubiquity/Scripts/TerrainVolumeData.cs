@@ -31,13 +31,6 @@ namespace Cubiquity
 		 */
 		public MaterialSet GetVoxel(int x, int y, int z)
 		{
-			// We open the database connection the first time that any attempt is made to access the data. See the
-			// comments in the 'VolumeData.OnEnable()' function for more information about why we don't do it there.
-			if(volumeHandle == null)
-			{
-				InitializeExistingCubiquityVolume();
-			}
-
 			// The initialization can fail (bad filename, database locked, etc), so the volume handle could still be null.
 			MaterialSet materialSet;
 			if(volumeHandle.HasValue)
@@ -61,13 +54,6 @@ namespace Cubiquity
 		 */
 		public void SetVoxel(int x, int y, int z, MaterialSet materialSet)
 		{
-			// We open the database connection the first time that any attempt is made to access the data. See the
-			// comments in the 'VolumeData.OnEnable()' function for more information about why we don't do it there.
-			if(volumeHandle == null)
-			{
-				InitializeExistingCubiquityVolume();
-			}
-		
 			// The initialization can fail (bad filename, database locked, etc), so the volume handle could still be null.
 			if(volumeHandle.HasValue)
 			{
@@ -82,8 +68,8 @@ namespace Cubiquity
 		/// \cond
 		protected override void InitializeEmptyCubiquityVolume(Region region)
 		{			
-			DebugUtils.Assert(volumeHandle == null, "Volume handle should be null prior to initializing volume");
-			if(volumeHandle == null)
+			DebugUtils.Assert(mVolumeHandle == null, "Volume handle should be null prior to initializing volume");
+			if(mVolumeHandle == null)
 			{
 				// Create an empty region of the desired size.
 				volumeHandle = CubiquityDLL.NewEmptyTerrainVolume(region.lowerCorner.x, region.lowerCorner.y, region.lowerCorner.z,
@@ -95,8 +81,8 @@ namespace Cubiquity
 		/// \cond
 		protected override void InitializeExistingCubiquityVolume()
 		{			
-			DebugUtils.Assert(volumeHandle == null, "Volume handle should be null prior to initializing volume");
-			if(volumeHandle == null)
+			DebugUtils.Assert(mVolumeHandle == null, "Volume handle should be null prior to initializing volume");
+			if(mVolumeHandle == null)
 			{
 				// Create an empty region of the desired size.
 				volumeHandle = CubiquityDLL.NewTerrainVolumeFromVDB(fullPathToVoxelDatabase, WritePermissions.ReadWrite, DefaultBaseNodeSize);

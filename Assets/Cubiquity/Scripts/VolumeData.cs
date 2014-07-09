@@ -37,14 +37,7 @@ namespace Cubiquity
 	    public Region enclosingRegion
 	    {
 	        get
-			{
-				// We open the database connection the first time that any attempt is made to access the data. See the
-				// comments in the 'VolumeData.OnEnable()' function for more information about why we don't do it there.
-				if(volumeHandle == null)
-				{
-					InitializeExistingCubiquityVolume();
-				}
-			
+			{			
 				// The initialization can fail (bad filename, database locked, etc), so the volume handle could still be null.
 				Region result = new Region(0, 0, 0, 0, 0, 0);
 				if(volumeHandle != null)
@@ -102,10 +95,20 @@ namespace Cubiquity
 		// be tested against null to find if the volume is currently valid.
 		/// \cond
 		protected uint? mVolumeHandle = null;
-		public uint? volumeHandle
+		internal uint? volumeHandle
 		{
-			get { return mVolumeHandle; }
-			protected set { mVolumeHandle = value; }
+			get
+			{
+				// We open the database connection the first time that any attempt is made to access the data. See the
+				// comments in the 'VolumeData.OnEnable()' function for more information about why we don't do it there.
+				if(mVolumeHandle == null)
+				{
+					InitializeExistingCubiquityVolume();
+				}
+
+				return mVolumeHandle;
+			}
+			set { mVolumeHandle = value; }
 		}
 		/// \endcond
 		

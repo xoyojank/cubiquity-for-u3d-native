@@ -31,13 +31,6 @@ namespace Cubiquity
 		 */
 		public QuantizedColor GetVoxel(int x, int y, int z)
 		{
-			// We open the database connection the first time that any attempt is made to access the data. See the
-			// comments in the 'VolumeData.OnEnable()' function for more information about why we don't do it there.
-			if(volumeHandle == null)
-			{
-				InitializeExistingCubiquityVolume();
-			}
-
 			// The initialization can fail (bad filename, database locked, etc), so the volume handle could still be null.
 			QuantizedColor result;
 			if(volumeHandle.HasValue)
@@ -60,13 +53,6 @@ namespace Cubiquity
 		 */
 		public void SetVoxel(int x, int y, int z, QuantizedColor quantizedColor)
 		{
-			// We open the database connection the first time that any attempt is made to access the data. See the
-			// comments in the 'VolumeData.OnEnable()' function for more information about why we don't do it there.
-			if(volumeHandle == null)
-			{
-				InitializeExistingCubiquityVolume();
-			}
-
 			// The initialization can fail (bad filename, database locked, etc), so the volume handle could still be null.
 			if(volumeHandle.HasValue)
 			{
@@ -81,8 +67,8 @@ namespace Cubiquity
 		/// \cond
 		protected override void InitializeEmptyCubiquityVolume(Region region)
 		{				
-			DebugUtils.Assert(volumeHandle == null, "Volume handle should be null prior to initializing volume");
-			if(volumeHandle == null)
+			DebugUtils.Assert(mVolumeHandle == null, "Volume handle should be null prior to initializing volume");
+			if(mVolumeHandle == null)
 			{
 				// Create an empty region of the desired size.
 				volumeHandle = CubiquityDLL.NewEmptyColoredCubesVolume(region.lowerCorner.x, region.lowerCorner.y, region.lowerCorner.z,
@@ -94,8 +80,8 @@ namespace Cubiquity
 		/// \cond
 		protected override void InitializeExistingCubiquityVolume()
 		{				
-			DebugUtils.Assert(volumeHandle == null, "Volume handle should be null prior to initializing volume");
-			if(volumeHandle == null)
+			DebugUtils.Assert(mVolumeHandle == null, "Volume handle should be null prior to initializing volume");
+			if(mVolumeHandle == null)
 			{
 				// Create an empty region of the desired size.
 				volumeHandle = CubiquityDLL.NewColoredCubesVolumeFromVDB(fullPathToVoxelDatabase, WritePermissions.ReadWrite, DefaultBaseNodeSize);
