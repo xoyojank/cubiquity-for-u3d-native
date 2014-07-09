@@ -201,6 +201,8 @@ namespace Cubiquity
 		
 		private void OnEnable()
 		{	
+			// We should reset this flag from time-to-time incase the user has fixed the issue. This 
+			// seems like an appropriate place as the user may fix the issue aand then reload the scene.
 			initializeAlreadyFailed = false;
 
 			// It would seem intuitive to open and initialise the voxel database from this function. However, there seem to be 
