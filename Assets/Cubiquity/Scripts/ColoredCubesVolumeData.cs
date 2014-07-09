@@ -66,13 +66,21 @@ namespace Cubiquity
 		
 		/// \cond
 		protected override void InitializeEmptyCubiquityVolume(Region region)
-		{				
+		{		
+			// We check 'mVolumeHandle' instead of 'volumeHandle' as the getter for the latter will in turn call this method.
 			DebugUtils.Assert(mVolumeHandle == null, "Volume handle should be null prior to initializing volume");
-			if(mVolumeHandle == null)
+
+			try
 			{
 				// Create an empty region of the desired size.
 				volumeHandle = CubiquityDLL.NewEmptyColoredCubesVolume(region.lowerCorner.x, region.lowerCorner.y, region.lowerCorner.z,
 					region.upperCorner.x, region.upperCorner.y, region.upperCorner.z, fullPathToVoxelDatabase, DefaultBaseNodeSize);
+			}
+			catch(CubiquityException exception)
+			{
+				volumeHandle = null;
+				Debug.LogException(exception);
+				Debug.LogError("Failed to open voxel database '" + fullPathToVoxelDatabase + "'");
 			}
 		}
 		/// \endcond
@@ -80,11 +88,19 @@ namespace Cubiquity
 		/// \cond
 		protected override void InitializeExistingCubiquityVolume()
 		{				
+			// We check 'mVolumeHandle' instead of 'volumeHandle' as the getter for the latter will in turn call this method.
 			DebugUtils.Assert(mVolumeHandle == null, "Volume handle should be null prior to initializing volume");
-			if(mVolumeHandle == null)
+
+			try
 			{
 				// Create an empty region of the desired size.
 				volumeHandle = CubiquityDLL.NewColoredCubesVolumeFromVDB(fullPathToVoxelDatabase, WritePermissions.ReadWrite, DefaultBaseNodeSize);
+			}
+			catch(CubiquityException exception)
+			{
+				volumeHandle = null;
+				Debug.LogException(exception);
+				Debug.LogError("Failed to open voxel database '" + fullPathToVoxelDatabase + "'");
 			}
 		}
 		/// \endcond
