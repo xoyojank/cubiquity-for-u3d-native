@@ -45,6 +45,7 @@ namespace Cubiquity
 					InitializeExistingCubiquityVolume();
 				}
 			
+				// The initialization can fail (bad filename, database locked, etc), so the volume handle could still be null.
 				Region result = new Region(0, 0, 0, 0, 0, 0);
 				if(volumeHandle != null)
 				{

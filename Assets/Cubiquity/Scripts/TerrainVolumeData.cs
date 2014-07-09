@@ -37,7 +37,8 @@ namespace Cubiquity
 			{
 				InitializeExistingCubiquityVolume();
 			}
-		
+
+			// The initialization can fail (bad filename, database locked, etc), so the volume handle could still be null.
 			MaterialSet materialSet;
 			if(volumeHandle.HasValue)
 			{
@@ -45,9 +46,9 @@ namespace Cubiquity
 			}
 			else
 			{
-				// Should maybe throw instead?
-				materialSet = new MaterialSet();
+				materialSet  = new MaterialSet();
 			}
+
 			return materialSet;
 		}
 		
@@ -67,6 +68,7 @@ namespace Cubiquity
 				InitializeExistingCubiquityVolume();
 			}
 		
+			// The initialization can fail (bad filename, database locked, etc), so the volume handle could still be null.
 			if(volumeHandle.HasValue)
 			{
 				if(x >= enclosingRegion.lowerCorner.x && y >= enclosingRegion.lowerCorner.y && z >= enclosingRegion.lowerCorner.z
@@ -80,8 +82,7 @@ namespace Cubiquity
 		/// \cond
 		protected override void InitializeEmptyCubiquityVolume(Region region)
 		{			
-			// This function might get called multiple times. E.g the user might call it striaght after crating the volume (so
-			// they can add some initial data to the volume) and it might then get called again by OnEnable(). Handle this safely.
+			DebugUtils.Assert(volumeHandle == null, "Volume handle should be null prior to initializing volume");
 			if(volumeHandle == null)
 			{
 				// Create an empty region of the desired size.
@@ -94,8 +95,7 @@ namespace Cubiquity
 		/// \cond
 		protected override void InitializeExistingCubiquityVolume()
 		{			
-			// This function might get called multiple times. E.g the user might call it striaght after crating the volume (so
-			// they can add some initial data to the volume) and it might then get called again by OnEnable(). Handle this safely.
+			DebugUtils.Assert(volumeHandle == null, "Volume handle should be null prior to initializing volume");
 			if(volumeHandle == null)
 			{
 				// Create an empty region of the desired size.
