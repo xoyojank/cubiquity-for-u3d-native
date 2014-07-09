@@ -38,8 +38,8 @@ namespace Cubiquity
 	    {
 	        get
 			{
-				//DebugUtils.Assert(volumeHandle != null, "Volume handle should never be null when getting enclosing region.");
-
+				// We open the database connection the first time that any attempt is made to access the data. See the
+				// comments in the 'VolumeData.OnEnable()' function for more information about why we don't do it there.
 				if(volumeHandle == null)
 				{
 					InitializeExistingCubiquityVolume();
@@ -199,16 +199,6 @@ namespace Cubiquity
 			//		2. OnEnable() does not seem to be called when a volume asset is dragged onto an existing volume, and this is
 			// 		the main way of setting which data a volume should use.
 			// More investigation is needed but perhaps we should simply initialize the volume on demand?
-
-			// Note: For some reason this function is not called when transitioning between edit/play mode if this scriptable 
-			// object has been turned into an asset. Therefore we also call Initialize...()/Shutdown...() from the Volume class.
-			
-			// This OnEnable() function is called as soon as the VolumeData is instantiated, but at this point it has not yet
-			// been initilized with the path and so in this case we cannot yet initialize the underlying Cubiquity volume.
-			/*if(relativePathToVoxelDatabase != null)
-			{
-				InitializeExistingCubiquityVolume();
-			}*/
 		}
 		
 		private void OnDisable()
@@ -235,7 +225,7 @@ namespace Cubiquity
 		
 		/// \cond
 		protected abstract void InitializeEmptyCubiquityVolume(Region region);
-		public abstract void InitializeExistingCubiquityVolume();
+		protected abstract void InitializeExistingCubiquityVolume();
 		public abstract void ShutdownCubiquityVolume();
 		/// \endcond
 	}

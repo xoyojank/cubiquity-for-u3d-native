@@ -31,8 +31,8 @@ namespace Cubiquity
 		 */
 		public MaterialSet GetVoxel(int x, int y, int z)
 		{
-			//DebugUtils.Assert(volumeHandle != null, "Volume handle should never be null when getting a voxel.");
-
+			// We open the database connection the first time that any attempt is made to access the data. See the
+			// comments in the 'VolumeData.OnEnable()' function for more information about why we don't do it there.
 			if(volumeHandle == null)
 			{
 				InitializeExistingCubiquityVolume();
@@ -60,8 +60,8 @@ namespace Cubiquity
 		 */
 		public void SetVoxel(int x, int y, int z, MaterialSet materialSet)
 		{
-			//DebugUtils.Assert(volumeHandle != null, "Volume handle should never be null when setting a voxel.");
-
+			// We open the database connection the first time that any attempt is made to access the data. See the
+			// comments in the 'VolumeData.OnEnable()' function for more information about why we don't do it there.
 			if(volumeHandle == null)
 			{
 				InitializeExistingCubiquityVolume();
@@ -92,7 +92,7 @@ namespace Cubiquity
 		/// \endcond
 		
 		/// \cond
-		public override void InitializeExistingCubiquityVolume()
+		protected override void InitializeExistingCubiquityVolume()
 		{			
 			// This function might get called multiple times. E.g the user might call it striaght after crating the volume (so
 			// they can add some initial data to the volume) and it might then get called again by OnEnable(). Handle this safely.
