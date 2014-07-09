@@ -87,7 +87,7 @@ namespace Cubiquity
 					basePathString = Application.temporaryCachePath;
 					break;
 				}
-				return basePathString + Path.DirectorySeparatorChar + relativePathToVoxelDatabase;
+				return basePathString + '/' + relativePathToVoxelDatabase;
 			}
 		}
 		

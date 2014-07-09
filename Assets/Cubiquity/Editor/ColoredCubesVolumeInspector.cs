@@ -108,17 +108,6 @@ namespace Cubiquity
 				coloredCubesVolume.data = EditorGUILayout.ObjectField("Volume Data: ", coloredCubesVolume.data, typeof(ColoredCubesVolumeData), true) as ColoredCubesVolumeData;
 			}
 			
-			/*if(GUILayout.Button("Load Voxel Database..."))
-			{			
-				string pathToVoxelDatabase = EditorUtility.OpenFilePanel("Choose a Voxel Database (.vdb) file to load", Paths.voxelDatabases, "vdb");
-				
-				string relativePathToVoxelDatabase = Paths.MakeRelativePath(Paths.voxelDatabases + Path.DirectorySeparatorChar, pathToVoxelDatabase);
-				
-				ColoredCubesVolumeData data = VolumeData.CreateFromVoxelDatabase<ColoredCubesVolumeData>(relativePathToVoxelDatabase);
-				
-				coloredCubesVolume.data = data;
-			}*/
-			
 			if(!Licensing.isCommercial)
 			{
 				// Warn about unlicensed version.

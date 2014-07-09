@@ -37,11 +37,12 @@ namespace Cubiquity
 		[MenuItem ("Assets/Create/Terrain Volume Data/From Voxel Database...")]
 		static void CreateTerrainVolumeDataAssetFromVoxelDatabase()
 		{	
+			// Resulting path already contains UNIX-style seperators (even on Wondows).
 			string pathToVoxelDatabase = EditorUtility.OpenFilePanel("Choose a Voxel Database (.vdb) file to load", Paths.voxelDatabases, "vdb");
 			
 			if(pathToVoxelDatabase.Length != 0)
 			{
-				string relativePathToVoxelDatabase = Paths.MakeRelativePath(Paths.voxelDatabases + Path.DirectorySeparatorChar, pathToVoxelDatabase);
+				string relativePathToVoxelDatabase = PathUtils.MakeRelativePath(Paths.voxelDatabases + '/', pathToVoxelDatabase);
 			
 				// Pass through to the other version of the method.
 				VolumeDataAsset.CreateFromVoxelDatabase<TerrainVolumeData>(relativePathToVoxelDatabase);
@@ -86,11 +87,12 @@ namespace Cubiquity
 		[MenuItem ("Assets/Create/Colored Cubes Volume Data/From Voxel Database...")]
 		static void CreateColoredCubesVolumeDataAssetFromVoxelDatabase()
 		{	
+			// Resulting path already contains UNIX-style seperators (even on Wondows).
 			string pathToVoxelDatabase = EditorUtility.OpenFilePanel("Choose a Voxel Database (.vdb) file to load", Paths.voxelDatabases, "vdb");
 			
 			if(pathToVoxelDatabase.Length != 0)
 			{
-				string relativePathToVoxelDatabase = Paths.MakeRelativePath(Paths.voxelDatabases + Path.DirectorySeparatorChar, pathToVoxelDatabase);
+				string relativePathToVoxelDatabase = PathUtils.MakeRelativePath(Paths.voxelDatabases + '/', pathToVoxelDatabase);
 			
 				// Pass through to the other version of the method.
 				VolumeDataAsset.CreateFromVoxelDatabase<ColoredCubesVolumeData>(relativePathToVoxelDatabase);
