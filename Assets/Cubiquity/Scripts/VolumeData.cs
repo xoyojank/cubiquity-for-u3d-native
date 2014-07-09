@@ -117,7 +117,12 @@ namespace Cubiquity
 		/// \cond
 		protected static uint DefaultBaseNodeSize = 32;
 		/// \endcond
-		
+
+		// Used to stop too much spamming of error messages
+		/// \cond
+		protected bool initializeAlreadyFailed = false;
+		/// \endcond
+
 		/**
 		 * It is possible for %Cubiquity voxel databse files to be created outside of the %Cubiquity for Unity3D ecosystem (see the \ref secCubiquity
 		 * "user manual" if you are not clear on the difference between 'Cubiquity and 'Cubiquity for Unity3D'). For example, the %Cubiquity SDK contains
@@ -196,13 +201,14 @@ namespace Cubiquity
 		
 		private void OnEnable()
 		{	
+			initializeAlreadyFailed = false;
+
 			// It would seem intuitive to open and initialise the voxel database from this function. However, there seem to be 
 			// some problems with this approach.
 			//		1. OnEnable() is (sometimes?) called when simply clicking on the asset in the project window. In this scenario
 			// 		we don't really want/need to connect to the database.
 			//		2. OnEnable() does not seem to be called when a volume asset is dragged onto an existing volume, and this is
 			// 		the main way of setting which data a volume should use.
-			// More investigation is needed but perhaps we should simply initialize the volume on demand?
 		}
 		
 		private void OnDisable()
