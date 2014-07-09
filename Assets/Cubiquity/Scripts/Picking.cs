@@ -131,7 +131,7 @@ namespace Cubiquity
 			pickResult = new PickVoxelResult();
 			
 			// Can't hit it the volume if there's no data.
-			if(volume.data == null)
+			if((volume.data == null) || (volume.data.volumeHandle == null))
 			{
 				return false;
 			}
@@ -183,7 +183,7 @@ namespace Cubiquity
 			pickResult = new PickVoxelResult();
 			
 			// Can't hit it the volume if there's no data.
-			if(volume.data == null)
+			if((volume.data == null) || (volume.data.volumeHandle == null))
 			{
 				return false;
 			}
