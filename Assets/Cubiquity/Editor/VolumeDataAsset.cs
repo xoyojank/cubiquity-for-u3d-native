@@ -39,7 +39,7 @@ namespace Cubiquity
 			
 			if(assetName == "")
 			{
-				assetName = "New " + typeof(T).ToString();
+				assetName = "New " + typeof(T).Name;
 			}
 	 
 			string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath (path + "/" + assetName + ".asset");
