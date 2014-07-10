@@ -24,7 +24,7 @@ namespace Cubiquity
 	[System.Serializable]
 	public abstract class VolumeData : ScriptableObject
 	{
-		private enum VoxelDatabasePaths { Streaming, Temporary };
+		private enum VoxelDatabasePaths { Streaming, Temporary, Root };
 		
 		/// Gets the dimensions of the VolumeData.
 		/**
@@ -81,13 +81,16 @@ namespace Cubiquity
 				switch(basePath)
 				{
 				case VoxelDatabasePaths.Streaming:
-					basePathString = Paths.voxelDatabases;
+					basePathString = Paths.voxelDatabases + '/';
 					break;
 				case VoxelDatabasePaths.Temporary:
-					basePathString = Application.temporaryCachePath;
+					basePathString = Application.temporaryCachePath + '/';
+					break;
+				case VoxelDatabasePaths.Root:
+					basePathString = "";
 					break;
 				}
-				return basePathString + '/' + relativePathToVoxelDatabase;
+				return basePathString + relativePathToVoxelDatabase;
 			}
 		}
 		
@@ -129,13 +132,20 @@ namespace Cubiquity
 		 * importers for converting a variety of external file formats into voxel databases. This function provides a way for you to create volume data
 		 * which is linked to such a user provided voxel database.
 		 * 
-		 * \param relativePathToVoxelDatabase The path to the .vdb files which should be relative to the location given by Paths.voxelDatabases.
+		 * \param pathToVoxelDatabase The path to the .vdb files which should be relative to the location given by Paths.voxelDatabases.
 		 */
-		public static VolumeDataType CreateFromVoxelDatabase<VolumeDataType>(string relativePathToVoxelDatabase) where VolumeDataType : VolumeData
+		public static VolumeDataType CreateFromVoxelDatabase<VolumeDataType>(string pathToVoxelDatabase) where VolumeDataType : VolumeData
 		{			
 			VolumeDataType volumeData = ScriptableObject.CreateInstance<VolumeDataType>();
-			volumeData.basePath = VoxelDatabasePaths.Streaming;
-			volumeData.relativePathToVoxelDatabase = relativePathToVoxelDatabase;
+			if(Path.IsPathRooted(pathToVoxelDatabase))
+			{
+				volumeData.basePath = VoxelDatabasePaths.Root;
+			}
+			else
+			{
+				volumeData.basePath = VoxelDatabasePaths.Streaming;
+			}
+			volumeData.relativePathToVoxelDatabase = pathToVoxelDatabase;
 			
 			volumeData.InitializeExistingCubiquityVolume();
 			
@@ -151,7 +161,7 @@ namespace Cubiquity
 		 * 
 		 * \param region A Region instance specifying the dimensions of the volume data. You should not later try to access voxels outside of this range.
 		 */
-		public static VolumeDataType CreateEmptyVolumeData<VolumeDataType>(Region region) where VolumeDataType : VolumeData
+		/*public static VolumeDataType CreateEmptyVolumeData<VolumeDataType>(Region region) where VolumeDataType : VolumeData
 		{
 			string pathToCreateVoxelDatabase = Cubiquity.Impl.Utility.GenerateRandomVoxelDatabaseName();
 			
@@ -164,7 +174,7 @@ namespace Cubiquity
 			volumeData.InitializeEmptyCubiquityVolume(region);
 			
 			return volumeData;
-		}
+		}*/
 		
 		/**
 		 * This version of the function accepts a filename which will be given to the voxel database which is created. The path is relative to
@@ -173,20 +183,41 @@ namespace Cubiquity
 		 * standalone builds).
 		 * 
 		 * \param region A Region instance specifying the dimensions of the volume data. You should not later try to access voxels outside of this range.
-		 * \param relativePathToVoxelDatabase The path where the voxel database should be created, repative to the location given by Paths.voxelDatabases.
+		 * \param pathToVoxelDatabase The path where the voxel database should be created, relative to the location given by Paths.voxelDatabases.
 		 */
-		public static VolumeDataType CreateEmptyVolumeData<VolumeDataType>(Region region, string relativePathToVoxelDatabase) where VolumeDataType : VolumeData
-		{
-			// If the user is providing a name for the voxel database then it follows that they want to make use of it later.
-			// In this case it should not be in the temp folder so we put it in streaming assets.
-			if(Application.isPlaying)
-			{
-				Debug.LogWarning("You should not provide a path when creating empty volume data in play mode.");
-			}
-			
+		public static VolumeDataType CreateEmptyVolumeData<VolumeDataType>(Region region, string pathToVoxelDatabase = null) where VolumeDataType : VolumeData
+		{			
 			VolumeDataType volumeData = ScriptableObject.CreateInstance<VolumeDataType>();
-			volumeData.basePath = VoxelDatabasePaths.Streaming;
-			volumeData.relativePathToVoxelDatabase = relativePathToVoxelDatabase;
+
+			if(String.IsNullOrEmpty(pathToVoxelDatabase))
+			{
+				// No path was provided, so create a temporary path and the created .vdb file cannot be used after the current session.
+				string pathToCreateVoxelDatabase = Cubiquity.Impl.Utility.GenerateRandomVoxelDatabaseName();
+				volumeData.basePath = VoxelDatabasePaths.Temporary;
+				volumeData.relativePathToVoxelDatabase = pathToCreateVoxelDatabase;				
+				volumeData.hideFlags = HideFlags.DontSave; //Don't serialize this instance as it uses a temporary file for the voxel database.
+			}
+			else if(Path.IsPathRooted(pathToVoxelDatabase))
+			{
+				// The user provided a rooted (non-relative) path and so we use the details directly.
+				volumeData.basePath = VoxelDatabasePaths.Root;
+				volumeData.relativePathToVoxelDatabase = pathToVoxelDatabase;
+			}
+			else
+			{
+				// The user provided a relative path, which we then assume to be relative to the streaming assets folder.
+				// This should only be done in edit more (not in play mode) as stated belwo.
+				if(Application.isPlaying)
+				{
+					Debug.LogWarning("You should not provide a relative path when creating empty volume " +
+						"data in play mode, because the streaming assets folder might not have write access..");
+				}
+
+				// As the user is providing a name for the voxel database then it follows that they want to make use of it later.
+				// In this case it should not be in the temp folder so we put it in streaming assets.
+				volumeData.basePath = VoxelDatabasePaths.Streaming;
+				volumeData.relativePathToVoxelDatabase = pathToVoxelDatabase;
+			}
 			
 			volumeData.InitializeEmptyCubiquityVolume(region);
 			
