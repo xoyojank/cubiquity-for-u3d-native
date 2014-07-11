@@ -286,12 +286,14 @@ namespace Cubiquity
 
 				if(assetList.Count > 1)
 				{
-					string warningMessage = "Duplicate volume assets detected! The following assets are all referencing the same voxel database ('" + fullPathToVoxelDatabase + "'):\n";
+					string warningMessage = "Duplicate volume assets detected! The following assets " +
+						"are all referencing the same voxel database ('" + fullPathToVoxelDatabase + "'):\n";
 					foreach(string assetName in assetList)
 					{
 						warningMessage += "\t" + assetName +"\n";
 					}
-					warningMessage += "You should not allow this to happen, and should delete one of the assets. Please see the Cubiquity for Unity3D user manual for more information.";
+					warningMessage += "You should not allow this to happen, and should delete one of the assets. " +
+						"Please see the Cubiquity for Unity3D user manual for more information about duplicating and instancing volumes.";
 					Debug.LogWarning(warningMessage);
 				}
 			}
@@ -299,7 +301,15 @@ namespace Cubiquity
 
 		private void UnregisterPath()
 		{
-			//pathsAndAssets.Remove(fullPathToVoxelDatabase);
+			bool success = false;
+
+			List<string> assetList;
+			if(pathsAndAssets.TryGetValue(fullPathToVoxelDatabase, out assetList))
+			{
+				success = assetList.Remove(fullPathToVoxelDatabase);
+			}
+
+			DebugUtils.Assert(success, "Failed to remove entry from paths list");
 		}
 		
 		/// \cond
