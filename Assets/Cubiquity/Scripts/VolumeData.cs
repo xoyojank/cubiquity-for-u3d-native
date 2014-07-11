@@ -1,8 +1,12 @@
 ﻿using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 using System;
 using System.IO;
 using System.Collections;
+using System.Collections.Generic;
 
 using Cubiquity.Impl;
 
@@ -70,9 +74,9 @@ namespace Cubiquity
 		{
 			get
 			{
-				if(relativePathToVoxelDatabase.Length == 0)
+				if(String.IsNullOrEmpty(relativePathToVoxelDatabase))
 				{
-					throw new System.ArgumentException(@"The relative path to the voxel database should never be empty.
+					throw new System.ArgumentException(@"The relative path to the voxel database should always exist.
 						Perhaps you created the VolumeData with ScriptableObject.CreateInstance(), rather than with
 						CreateEmptyVolumeData() or CreateFromVoxelDatabase()?");
 				}
@@ -126,6 +130,8 @@ namespace Cubiquity
 		protected bool initializeAlreadyFailed = false;
 		/// \endcond
 
+		private static Dictionary<string, List<string> > pathsAndAssets = new Dictionary<string, List<string> >();
+
 		/**
 		 * It is possible for %Cubiquity voxel databse files to be created outside of the %Cubiquity for Unity3D ecosystem (see the \ref secCubiquity
 		 * "user manual" if you are not clear on the difference between 'Cubiquity and 'Cubiquity for Unity3D'). For example, the %Cubiquity SDK contains
@@ -152,6 +158,8 @@ namespace Cubiquity
 			volumeData.relativePathToVoxelDatabase = pathToVoxelDatabase;
 			
 			volumeData.InitializeExistingCubiquityVolume();
+
+			volumeData.RegisterPath();
 			
 			return volumeData;
 		}
@@ -208,6 +216,8 @@ namespace Cubiquity
 			}
 			
 			volumeData.InitializeEmptyCubiquityVolume(region);
+
+			volumeData.RegisterPath();
 			
 			return volumeData;
 		}
@@ -216,6 +226,8 @@ namespace Cubiquity
 		{
 			// Make sure the Cubiquity library is installed.
 			Installation.ValidateAndFix();
+
+			RegisterPath();
 		}
 		
 		private void OnEnable()
@@ -252,6 +264,42 @@ namespace Cubiquity
 					Debug.LogWarning("Failed to delete voxel database from temporary cache");
 				}
 			}
+
+			UnregisterPath();
+		}
+
+		private void RegisterPath()
+		{
+			string thisAssetName = "Asset Name Not Known";
+			#if UNITY_EDITOR
+			thisAssetName = AssetDatabase.GetAssetPath(this);
+			#endif
+			if(!String.IsNullOrEmpty(relativePathToVoxelDatabase))
+			{
+				List<string> assetList;
+				if(!pathsAndAssets.TryGetValue(fullPathToVoxelDatabase, out assetList))
+				{
+					assetList = new List<string>();
+					pathsAndAssets.Add(fullPathToVoxelDatabase, assetList);
+				}
+				assetList.Add(thisAssetName);
+
+				if(assetList.Count > 1)
+				{
+					string warningMessage = "Duplicate volume assets detected! The following assets are all referencing the same voxel database ('" + fullPathToVoxelDatabase + "'):\n";
+					foreach(string assetName in assetList)
+					{
+						warningMessage += "\t" + assetName +"\n";
+					}
+					warningMessage += "You should not allow this to happen, and should delete one of the assets. Please see the Cubiquity for Unity3D user manual for more information.";
+					Debug.LogWarning(warningMessage);
+				}
+			}
+		}
+
+		private void UnregisterPath()
+		{
+			//pathsAndAssets.Remove(fullPathToVoxelDatabase);
 		}
 		
 		/// \cond
