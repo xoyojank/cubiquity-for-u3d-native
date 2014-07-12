@@ -130,7 +130,7 @@ namespace Cubiquity
 		protected bool initializeAlreadyFailed = false;
 		/// \endcond
 
-		private static Dictionary<string, Dictionary<int, int> > pathsAndAssets = new Dictionary<string, Dictionary<int, int> >();
+		private static Dictionary<string, int > pathsAndAssets = new Dictionary<string, int >();
 
 		/**
 		 * It is possible for %Cubiquity voxel databse files to be created outside of the %Cubiquity for Unity3D ecosystem (see the \ref secCubiquity
@@ -272,44 +272,41 @@ namespace Cubiquity
 		{
 			if(!String.IsNullOrEmpty(relativePathToVoxelDatabase))
 			{
-				Dictionary<int, int> assetList;
-				if(!pathsAndAssets.TryGetValue(fullPathToVoxelDatabase, out assetList))
+				int instanceID = GetInstanceID();
+				try
 				{
-					assetList = new Dictionary<int, int>();
-					pathsAndAssets.Add(fullPathToVoxelDatabase, assetList);
+					pathsAndAssets.Add(fullPathToVoxelDatabase, instanceID);
 				}
-				assetList[GetInstanceID()] = 0;
-
-				if(assetList.Count > 1)
+				catch(ArgumentException)
 				{
-					string warningMessage = "Duplicate volume assets detected! The following assets " +
-						"are all referencing the same voxel database ('" + fullPathToVoxelDatabase + "'):\n";
-					foreach(KeyValuePair<int, int> assetInstanceID in assetList)
+					int existingInstanceID = pathsAndAssets[fullPathToVoxelDatabase];
+
+					if(existingInstanceID != instanceID)
 					{
-						string assetName = "Asset Name Not Known";
+						string assetName = "Instance ID = " + instanceID;
+						string existingAssetName = "Instance ID = " + existingInstanceID;
 						#if UNITY_EDITOR
-						assetName = AssetDatabase.GetAssetPath(assetInstanceID.Key);
+						assetName = AssetDatabase.GetAssetPath(instanceID);
+						existingAssetName = AssetDatabase.GetAssetPath(existingInstanceID);
 						#endif
-						warningMessage += "\t" + assetName +"\n";
+
+						string warningMessage = "Duplicate volume data detected! Did you attempt to duplicate or clone an existing asset? " +
+							"You should not do this - please see the Cubiquity for Unity3D user manual and API documentation for more information. " +
+							"\n Both '" + existingAssetName + "' and '" + assetName + "' reference the voxel database called '" + fullPathToVoxelDatabase + "'." +
+							"\n It is recommended that you delete/destroy '" + assetName + "'." +
+							"Note: If you see this message regarding an asset which you have already deleted then you may need to restart Unity.";
+						Debug.LogWarning(warningMessage);
 					}
-					warningMessage += "You should not allow this to happen, and should delete one of the assets. " +
-						"Please see the Cubiquity for Unity3D user manual for more information about duplicating and instancing volumes.";
-					Debug.LogWarning(warningMessage);
 				}
 			}
 		}
 
 		private void UnregisterPath()
 		{
-			bool success = false;
-
-			Dictionary<int, int> assetList;
-			if(pathsAndAssets.TryGetValue(fullPathToVoxelDatabase, out assetList))
+			if(!pathsAndAssets.Remove(fullPathToVoxelDatabase))
 			{
-				success = assetList.Remove(GetInstanceID());
+				DebugUtils.Assert(false, "Failed to remove entry from paths list");
 			}
-
-			DebugUtils.Assert(success, "Failed to remove entry from paths list");
 		}
 		
 		/// \cond
