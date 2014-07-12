@@ -130,7 +130,7 @@ namespace Cubiquity
 		protected bool initializeAlreadyFailed = false;
 		/// \endcond
 
-		private static Dictionary<string, List<string> > pathsAndAssets = new Dictionary<string, List<string> >();
+		private static Dictionary<string, Dictionary<int, int> > pathsAndAssets = new Dictionary<string, Dictionary<int, int> >();
 
 		/**
 		 * It is possible for %Cubiquity voxel databse files to be created outside of the %Cubiquity for Unity3D ecosystem (see the \ref secCubiquity
@@ -270,26 +270,26 @@ namespace Cubiquity
 
 		private void RegisterPath()
 		{
-			string thisAssetName = "Asset Name Not Known";
-			#if UNITY_EDITOR
-			thisAssetName = AssetDatabase.GetAssetPath(this);
-			#endif
 			if(!String.IsNullOrEmpty(relativePathToVoxelDatabase))
 			{
-				List<string> assetList;
+				Dictionary<int, int> assetList;
 				if(!pathsAndAssets.TryGetValue(fullPathToVoxelDatabase, out assetList))
 				{
-					assetList = new List<string>();
+					assetList = new Dictionary<int, int>();
 					pathsAndAssets.Add(fullPathToVoxelDatabase, assetList);
 				}
-				assetList.Add(thisAssetName);
+				assetList[GetInstanceID()] = 0;
 
 				if(assetList.Count > 1)
 				{
 					string warningMessage = "Duplicate volume assets detected! The following assets " +
 						"are all referencing the same voxel database ('" + fullPathToVoxelDatabase + "'):\n";
-					foreach(string assetName in assetList)
+					foreach(KeyValuePair<int, int> assetInstanceID in assetList)
 					{
+						string assetName = "Asset Name Not Known";
+						#if UNITY_EDITOR
+						assetName = AssetDatabase.GetAssetPath(assetInstanceID.Key);
+						#endif
 						warningMessage += "\t" + assetName +"\n";
 					}
 					warningMessage += "You should not allow this to happen, and should delete one of the assets. " +
@@ -303,10 +303,10 @@ namespace Cubiquity
 		{
 			bool success = false;
 
-			List<string> assetList;
+			Dictionary<int, int> assetList;
 			if(pathsAndAssets.TryGetValue(fullPathToVoxelDatabase, out assetList))
 			{
-				success = assetList.Remove(fullPathToVoxelDatabase);
+				success = assetList.Remove(GetInstanceID());
 			}
 
 			DebugUtils.Assert(success, "Failed to remove entry from paths list");
