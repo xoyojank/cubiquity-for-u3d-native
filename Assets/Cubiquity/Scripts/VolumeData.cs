@@ -19,6 +19,10 @@ namespace Cubiquity
 	 * folder (depending on the usage scenario), with the actual path being specified by the 'fullPathToVoxelDatabase' property. The VolumeData and it's
 	 * subclasses then forward requests such as finding the dimensions of the voxel data or getting/setting the values of the individual voxels.
 	 * 
+	 * Important: You should not allow multiple VolumeData instances to reference the same underlying voxel database (.vdb). That is, no two VolumeData
+	 * instances should have the same value of 'fullPathToVoxelDatabase'. This means you should not attempt to duplicate of clone VolumeData instances.
+	 * Please see the user manual for more information on duplicating, instancing, and sharing of volume data.
+	 * 
 	 * An instance of VolumeData can be created from an existing voxel database, or it can create an empty voxel database on demand. The class also
 	 * abstracts the properties and functionality which are common to all types of volume data regardless of the type of the underlying voxel. Note that
 	 * users should not interact with the VolumeData directly but should instead work with one of the derived classes.
@@ -130,6 +134,11 @@ namespace Cubiquity
 		protected bool initializeAlreadyFailed = false;
 		/// \endcond
 
+		// We wish to enforce the idea that each voxel database (.vdb) should only be referenced by a single instance of VolumeData.
+		// This avoids potential problems with multiple writes to the same database. However, Unity makes it difficult to enforce this
+		// because it allows users to copy VolumeData with Object.Instantiate(), and more problematically it allows users to duplicate
+		// VolumeData assets through the Unity editor. Therefore we use this dictionary to track whether a given filename is already 
+		// in use and warn the user if this is the case.
 		private static Dictionary<string, int > pathsAndAssets = new Dictionary<string, int >();
 
 		/**
@@ -270,39 +279,50 @@ namespace Cubiquity
 
 		private void RegisterPath()
 		{
+			// This function may be called before the object is poroperly initialised, in which case
+			// the path may be empty. There's no point in checking for duplicate entries of an empty path.
 			if(!String.IsNullOrEmpty(relativePathToVoxelDatabase))
 			{
 				int instanceID = GetInstanceID();
-				try
-				{
-					pathsAndAssets.Add(fullPathToVoxelDatabase, instanceID);
-				}
-				catch(ArgumentException)
-				{
-					int existingInstanceID = pathsAndAssets[fullPathToVoxelDatabase];
 
+				// Find out wherther the path is aready being used by an instance of VolumeData.
+				int existingInstanceID;
+				if(pathsAndAssets.TryGetValue(fullPathToVoxelDatabase, out existingInstanceID))
+				{
+					// It is being used, but this function could be called multiple tiomes so maybe it's being used by us?
 					if(existingInstanceID != instanceID)
 					{
+						// It's being used by a differnt instance, so warn the user.
+						// In play mode the best we can do is giv the user the instance IDs.
 						string assetName = "Instance ID = " + instanceID;
 						string existingAssetName = "Instance ID = " + existingInstanceID;
+
+						// But in the editor we can try and find assets for them.
 						#if UNITY_EDITOR
 						assetName = AssetDatabase.GetAssetPath(instanceID);
 						existingAssetName = AssetDatabase.GetAssetPath(existingInstanceID);
 						#endif
 
+						 // Let the user know what has gone wrong.
 						string warningMessage = "Duplicate volume data detected! Did you attempt to duplicate or clone an existing asset? " +
 							"You should not do this - please see the Cubiquity for Unity3D user manual and API documentation for more information. " +
-							"\n Both '" + existingAssetName + "' and '" + assetName + "' reference the voxel database called '" + fullPathToVoxelDatabase + "'." +
-							"\n It is recommended that you delete/destroy '" + assetName + "'." +
-							"Note: If you see this message regarding an asset which you have already deleted then you may need to restart Unity.";
+							"\nBoth '" + existingAssetName + "' and '" + assetName + "' reference the voxel database called '" + fullPathToVoxelDatabase + "'." +
+							"\nIt is recommended that you delete/destroy '" + assetName + "'." +
+							"\nNote: If you see this message regarding an asset which you have already deleted then you may need to restart Unity.";
 						Debug.LogWarning(warningMessage);
 					}
+				}
+				else
+				{
+					// No VolumeData instance is using this path yet, so register it for ourselves.
+					pathsAndAssets.Add(fullPathToVoxelDatabase, instanceID);
 				}
 			}
 		}
 
 		private void UnregisterPath()
 		{
+			// Remove the path entry from our duplicate-checking dictionary.
 			if(!pathsAndAssets.Remove(fullPathToVoxelDatabase))
 			{
 				DebugUtils.Assert(false, "Failed to remove entry from paths list");
