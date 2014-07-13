@@ -27,7 +27,6 @@ namespace Cubiquity
 	[ExecuteInEditMode]
 	public abstract class Volume : MonoBehaviour
 	{		
-		
 		[SerializeField]
 		private VolumeData mData = null;
 		/// Represents the actual 3D grid of voxels describing your object or environment.
@@ -43,7 +42,9 @@ namespace Cubiquity
 			{
 				if(this.mData != value)
 				{
+					UnregisterVolumeData();
 					this.mData = value;
+					RegisterVolumeData();
 					RequestFlushInternalData();
 				}
 			}
@@ -138,9 +139,13 @@ namespace Cubiquity
 		private bool flushRequested;
 		
 		private int previousLayer = -1;
+
+		private static Dictionary<int, int> volumeDataAndVolumes = new Dictionary<int, int>();
 		
 		void Awake()
 		{
+			RegisterVolumeData();
+
 			if(rootOctreeNodeGameObject != null)
 			{
 				// This should not happen because the rootOctreeNodeGameObject should have been set to null before being serialized.
@@ -193,6 +198,11 @@ namespace Cubiquity
 			{
 				data.ShutdownCubiquityVolume();
 			}
+		}
+
+		void OnDestroy()
+		{
+			UnregisterVolumeData();
 		}
 		
 		#if UNITY_EDITOR
@@ -277,7 +287,41 @@ namespace Cubiquity
 			}
 		}
 		/// \endcond
-		
+
+		private void RegisterVolumeData()
+		{
+			if(mData != null)
+			{
+				int volumeID = GetInstanceID();
+				int volumeDataID = mData.GetInstanceID();
+
+				int existingVolumeID;
+				if(volumeDataAndVolumes.TryGetValue(volumeDataID, out existingVolumeID))
+				{
+					if(existingVolumeID != volumeID)
+					{
+						Debug.LogWarning("Two volumes are using the same volume data!");
+					}
+				}
+				else
+				{
+					volumeDataAndVolumes.Add(volumeDataID, volumeID);
+				}
+			}
+		}
+
+		private void UnregisterVolumeData()
+		{
+			if(mData != null)
+			{
+				// Remove the volume data entry from our duplicate-checking dictionary.
+				if(!volumeDataAndVolumes.Remove(mData.GetInstanceID()))
+				{
+					DebugUtils.Assert(false, "Failed to remove entry from paths list");
+				}
+			}
+		}
+
 		#if UNITY_EDITOR
 			private class OnSaveHandler : UnityEditor.AssetModificationProcessor
 			{
