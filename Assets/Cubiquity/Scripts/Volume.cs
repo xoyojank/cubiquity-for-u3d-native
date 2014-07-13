@@ -140,6 +140,8 @@ namespace Cubiquity
 		
 		private int previousLayer = -1;
 
+		// Used to catch the user using the same volume data for multiple volumes (which they should not do).
+		// It's not a really robust approach but it works well enough and only serves to issue a warning anyway.
 		private static Dictionary<int, int> volumeDataAndVolumes = new Dictionary<int, int>();
 		
 		void Awake()
@@ -300,7 +302,29 @@ namespace Cubiquity
 				{
 					if(existingVolumeID != volumeID)
 					{
-						Debug.LogWarning("Two volumes are using the same volume data!");
+						// It's being used by a different instance, so warn the user.
+						// In play mode the best we can do is give the user the instance IDs.
+						string volumeName = "Instance ID = " + volumeID;
+						string existingVolumeName = "Instance ID = " + existingVolumeID;
+						string volumeDataName = "Instance ID = " + volumeDataID;
+						
+						// But in the editor we can try and find names for them.
+						#if UNITY_EDITOR
+						Object volume = EditorUtility.InstanceIDToObject(volumeID);
+						if(volume) volumeName = volume.name;
+
+						Object existingVolume = EditorUtility.InstanceIDToObject(existingVolumeID);
+						if(existingVolume) existingVolumeName = existingVolume.name;
+
+						volumeDataName = AssetDatabase.GetAssetPath(volumeDataID);
+						#endif
+
+						// Let the user know what has gone wrong.
+						string warningMessage = "Multiple use of volume data detected! Did you attempt to duplicate or clone an existing volume? " +
+							"Each volume data should only be used by a single volume - please see the Cubiquity for Unity3D user manual and API documentation for more information. " +
+							"\nBoth '" + existingVolumeName + "' and '" + volumeName + "' reference the volume data called '" + volumeDataName + "'." +
+							"\nNote: If you see this message regarding an asset which you have already deleted then you may need to close the scene and/or restart Unity.";
+						Debug.LogWarning(warningMessage);
 					}
 				}
 				else
@@ -312,14 +336,10 @@ namespace Cubiquity
 
 		private void UnregisterVolumeData()
 		{
-			if(mData != null)
-			{
-				// Remove the volume data entry from our duplicate-checking dictionary.
-				if(!volumeDataAndVolumes.Remove(mData.GetInstanceID()))
-				{
-					DebugUtils.Assert(false, "Failed to remove entry from paths list");
-				}
-			}
+			// Remove the volume data entry from our duplicate-checking dictionary.
+			// This could fail, e.g. if the user does indeed create two volumes with the same volume data
+			// then deleting the first will remove the entry which then won't exist when deleting the second.
+			volumeDataAndVolumes.Remove(mData.GetInstanceID());
 		}
 
 		#if UNITY_EDITOR

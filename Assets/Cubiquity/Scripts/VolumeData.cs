@@ -292,8 +292,8 @@ namespace Cubiquity
 					// It is being used, but this function could be called multiple tiomes so maybe it's being used by us?
 					if(existingInstanceID != instanceID)
 					{
-						// It's being used by a differnt instance, so warn the user.
-						// In play mode the best we can do is giv the user the instance IDs.
+						// It's being used by a different instance, so warn the user.
+						// In play mode the best we can do is give the user the instance IDs.
 						string assetName = "Instance ID = " + instanceID;
 						string existingAssetName = "Instance ID = " + existingInstanceID;
 
@@ -303,12 +303,12 @@ namespace Cubiquity
 						existingAssetName = AssetDatabase.GetAssetPath(existingInstanceID);
 						#endif
 
-						 // Let the user know what has gone wrong.
+						// Let the user know what has gone wrong.
 						string warningMessage = "Duplicate volume data detected! Did you attempt to duplicate or clone an existing asset? " +
 							"You should not do this - please see the Cubiquity for Unity3D user manual and API documentation for more information. " +
 							"\nBoth '" + existingAssetName + "' and '" + assetName + "' reference the voxel database called '" + fullPathToVoxelDatabase + "'." +
 							"\nIt is recommended that you delete/destroy '" + assetName + "'." +
-							"\nNote: If you see this message regarding an asset which you have already deleted then you may need to restart Unity.";
+							"\nNote: If you see this message regarding an asset which you have already deleted then you may need to close the scene and/or restart Unity.";
 						Debug.LogWarning(warningMessage);
 					}
 				}
@@ -323,10 +323,9 @@ namespace Cubiquity
 		private void UnregisterPath()
 		{
 			// Remove the path entry from our duplicate-checking dictionary.
-			if(!pathsAndAssets.Remove(fullPathToVoxelDatabase))
-			{
-				DebugUtils.Assert(false, "Failed to remove entry from paths list");
-			}
+			// This could fail, e.g. if the user does indeed create two instance with the same filename
+			// then deleting the first will remove the entry which then won't exist when deleting the second.
+			pathsAndAssets.Remove(fullPathToVoxelDatabase);
 		}
 		
 		/// \cond
