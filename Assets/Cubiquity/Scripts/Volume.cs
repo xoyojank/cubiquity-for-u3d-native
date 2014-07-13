@@ -336,10 +336,13 @@ namespace Cubiquity
 
 		private void UnregisterVolumeData()
 		{
-			// Remove the volume data entry from our duplicate-checking dictionary.
-			// This could fail, e.g. if the user does indeed create two volumes with the same volume data
-			// then deleting the first will remove the entry which then won't exist when deleting the second.
-			volumeDataAndVolumes.Remove(mData.GetInstanceID());
+			if(mData != null)
+			{
+				// Remove the volume data entry from our duplicate-checking dictionary.
+				// This could fail, e.g. if the user does indeed create two volumes with the same volume data
+				// then deleting the first will remove the entry which then won't exist when deleting the second.
+				volumeDataAndVolumes.Remove(mData.GetInstanceID());
+			}
 		}
 
 		#if UNITY_EDITOR
