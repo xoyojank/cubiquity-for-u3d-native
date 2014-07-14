@@ -101,6 +101,30 @@ namespace Cubiquity
 				return basePathString + relativePathToVoxelDatabase;
 			}
 		}
+
+		[SerializeField]
+		private WritePermissions mWritePermissions = WritePermissions.ReadOnly;
+		public WritePermissions writePermissions
+		{
+			get
+			{
+				return mWritePermissions;
+			}
+			set
+			{
+				if(writePermissions != value)
+				{
+					if(mVolumeHandle == null)
+					{
+						mWritePermissions = value;
+					}
+					else
+					{
+						Debug.LogError("Cannot change write permissions on open volume data");
+					}
+				}
+			}
+		}
 		
 		// If set, this identifies the volume to the Cubiquity DLL. It can
 		// be tested against null to find if the volume is currently valid.
@@ -153,7 +177,7 @@ namespace Cubiquity
 		 *   because the contents of this folder are included in the build and can therefore be accessed in the editor, during play 
 		 *   mode, and also in standalone builds.
 		 */
-		public static VolumeDataType CreateFromVoxelDatabase<VolumeDataType>(string pathToVoxelDatabase) where VolumeDataType : VolumeData
+		public static VolumeDataType CreateFromVoxelDatabase<VolumeDataType>(string pathToVoxelDatabase, WritePermissions writePermissions = WritePermissions.ReadOnly) where VolumeDataType : VolumeData
 		{			
 			VolumeDataType volumeData = ScriptableObject.CreateInstance<VolumeDataType>();
 			if(Path.IsPathRooted(pathToVoxelDatabase))
@@ -165,6 +189,7 @@ namespace Cubiquity
 				volumeData.basePath = VoxelDatabasePaths.Streaming;
 			}
 			volumeData.relativePathToVoxelDatabase = pathToVoxelDatabase;
+			volumeData.writePermissions = writePermissions;
 			
 			volumeData.InitializeExistingCubiquityVolume();
 
@@ -199,7 +224,8 @@ namespace Cubiquity
 				// No path was provided, so create a temporary path and the created .vdb file cannot be used after the current session.
 				string pathToCreateVoxelDatabase = Cubiquity.Impl.Utility.GenerateRandomVoxelDatabaseName();
 				volumeData.basePath = VoxelDatabasePaths.Temporary;
-				volumeData.relativePathToVoxelDatabase = pathToCreateVoxelDatabase;				
+				volumeData.relativePathToVoxelDatabase = pathToCreateVoxelDatabase;	
+				volumeData.writePermissions = WritePermissions.ReadWrite;
 				volumeData.hideFlags = HideFlags.DontSave; //Don't serialize this instance as it uses a temporary file for the voxel database.
 			}
 			else if(Path.IsPathRooted(pathToVoxelDatabase))
@@ -207,11 +233,12 @@ namespace Cubiquity
 				// The user provided a rooted (non-relative) path and so we use the details directly.
 				volumeData.basePath = VoxelDatabasePaths.Root;
 				volumeData.relativePathToVoxelDatabase = pathToVoxelDatabase;
+				volumeData.writePermissions = WritePermissions.ReadWrite;
 			}
 			else
 			{
 				// The user provided a relative path, which we then assume to be relative to the streaming assets folder.
-				// This should only be done in edit more (not in play mode) as stated belwo.
+				// This should only be done in edit more (not in play mode) as stated below.
 				if(Application.isPlaying)
 				{
 					Debug.LogWarning("You should not provide a relative path when creating empty volume " +
@@ -222,6 +249,7 @@ namespace Cubiquity
 				// In this case it should not be in the temp folder so we put it in streaming assets.
 				volumeData.basePath = VoxelDatabasePaths.Streaming;
 				volumeData.relativePathToVoxelDatabase = pathToVoxelDatabase;
+				volumeData.writePermissions = WritePermissions.ReadWrite;
 			}
 			
 			volumeData.InitializeEmptyCubiquityVolume(region);
@@ -305,7 +333,8 @@ namespace Cubiquity
 
 						// Let the user know what has gone wrong.
 						string warningMessage = "Duplicate volume data detected! Did you attempt to duplicate or clone an existing asset? " +
-							"You should not do this - please see the Cubiquity for Unity3D user manual and API documentation for more information. " +
+							"If you want multiple volume data instances to share a voxel database then they must all be set to read-only. " +
+							"Please see the Cubiquity for Unity3D user manual and API documentation for more information. " +
 							"\nBoth '" + existingAssetName + "' and '" + assetName + "' reference the voxel database called '" + fullPathToVoxelDatabase + "'." +
 							"\nIt is recommended that you delete/destroy '" + assetName + "'." +
 							"\nNote: If you see this message regarding an asset which you have already deleted then you may need to close the scene and/or restart Unity.";
@@ -314,8 +343,15 @@ namespace Cubiquity
 				}
 				else
 				{
-					// No VolumeData instance is using this path yet, so register it for ourselves.
-					pathsAndAssets.Add(fullPathToVoxelDatabase, instanceID);
+					// No VolumeData instance is using this path yet, so register it for ourselves. However, we only need to register if the volume data
+					// has write permissions, because multiple volume datas can safely share a single voxel database in read-only mode. Note that this 
+					// logic is not bulletproof because, for example, a volume data could open a .vdb in read-only mode (hence not registering it) and
+					// another could then open it in read-write mode. But it would be caught if the volume datas were created in the other order. In
+					// general we are mostly concerned with the user duplicating in the Unity editor, for which this logic should be sufficient.
+					if(writePermissions == WritePermissions.ReadWrite)
+					{
+						pathsAndAssets.Add(fullPathToVoxelDatabase, instanceID);
+					}
 				}
 			}
 		}
