@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -114,6 +114,8 @@ namespace Cubiquity
 			{
 				if(writePermissions != value)
 				{
+					// Don't try and change permissions if the voxel database is already open. Although we could close and reopen it, 
+					// we would probably lose the non-commited data. Or perhaps it can survive in the temporary tables? Should test this.
 					if(mVolumeHandle == null)
 					{
 						// Although the voxel database is not currently open, the path could still be registered because this is
@@ -149,6 +151,13 @@ namespace Cubiquity
 				return mVolumeHandle;
 			}
 			set { mVolumeHandle = value; }
+		}
+
+		// Accessing the volumeHandle property will cause it to try to be initialized,
+		// therfore it should not be tested against null. This method can be used instead.
+		public bool IsVolumeHandleNull()
+		{
+			return mVolumeHandle == null;
 		}
 		/// \endcond
 		
