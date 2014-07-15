@@ -299,6 +299,9 @@ namespace Cubiquity
 		{
 			// Note: For some reason this function is not called when transitioning between edit/play mode if this scriptable 
 			// object has been turned into an asset. Therefore we also call Initialize...()/Shutdown...() from the Volume class.
+			// Aditional: Would we rather do this in OnDestoy()? It would give better behaviour with read-only volumes as these
+			// can still have temporary changes which are lost when the volume is shutdown. It may be that the user would prefer
+			// such temporary changes to survive a disable/enable cycle.
 			ShutdownCubiquityVolume();
 		}
 		
