@@ -116,7 +116,12 @@ namespace Cubiquity
 				{
 					if(mVolumeHandle == null)
 					{
+						// Although the voxel database is not currently open, the path could still be registered because this is
+						// based on whether the VolumeData is configured to use a certain .vdb, rather than whether it currently
+						// has it open. Therefore we unregister and re-register it to recognise the change in permissions.
+						UnregisterPath();
 						mWritePermissions = value;
+						RegisterPath();
 					}
 					else
 					{
