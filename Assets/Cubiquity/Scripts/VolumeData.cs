@@ -19,13 +19,15 @@ namespace Cubiquity
 	 * folder (depending on the usage scenario), with the actual path being specified by the 'fullPathToVoxelDatabase' property. The VolumeData and it's
 	 * subclasses then forward requests such as finding the dimensions of the voxel data or getting/setting the values of the individual voxels.
 	 * 
-	 * Important: You should not allow multiple VolumeData instances to reference the same underlying voxel database (.vdb). That is, no two VolumeData
-	 * instances should have the same value of 'fullPathToVoxelDatabase'. This means you should not attempt to duplicate of clone VolumeData instances.
-	 * Please see the user manual for more information on duplicating, instancing, and sharing of volume data.
-	 * 
 	 * An instance of VolumeData can be created from an existing voxel database, or it can create an empty voxel database on demand. The class also
 	 * abstracts the properties and functionality which are common to all types of volume data regardless of the type of the underlying voxel. Note that
 	 * users should not interact with the VolumeData directly but should instead work with one of the derived classes.
+	 * 
+	 * When you modify the contents of a VolumeData (though GetVoxel() and SetVoxel()) the changes are immediatly visible, but they are not actually
+	 * written to the underlying voxel database. Instead they are stored in a temporary location and can be commited or discared as you wish. For example,
+	 * in play mode it may make sense to load an original volume, have it undergo changes in-game, and then discard these changes (see DiscardChanges()) 
+	 * on shutdown so that it reverts to it's original state for the next game. On the other hand, if you are writing an editor then you will probably want 
+	 * to commit the changes which have been made (see CommitChanges()). Alternatively you could use this functionality to implement an 'undo' system.
 	 * 
 	 * \sa TerrainVolumeData, ColoredCubesVolumeData
 	 */
@@ -272,6 +274,15 @@ namespace Cubiquity
 			
 			return volumeData;
 		}
+
+		/**
+		 * Writes the current state of the voxels into the voxel database.
+		 * 
+		 * 
+		 */
+		public abstract void CommitChanges();
+
+		public abstract void DiscardChanges();
 		
 		private void Awake()
 		{
@@ -380,7 +391,7 @@ namespace Cubiquity
 			// then deleting the first will remove the entry which then won't exist when deleting the second.
 			pathsAndAssets.Remove(fullPathToVoxelDatabase);
 		}
-		
+
 		/// \cond
 		protected abstract void InitializeEmptyCubiquityVolume(Region region);
 		protected abstract void InitializeExistingCubiquityVolume();
