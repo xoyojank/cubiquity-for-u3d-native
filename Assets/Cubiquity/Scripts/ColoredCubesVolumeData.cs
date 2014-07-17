@@ -63,6 +63,24 @@ namespace Cubiquity
 				}
 			}
 		}
+
+		public override void CommitChanges()
+		{
+			if(!IsVolumeHandleNull())
+			{
+				CubiquityDLL.AcceptOverrideBlocks(volumeHandle.Value);
+				//We can discard the blocks now that they have been accepted.
+				CubiquityDLL.DiscardOverrideBlocks(volumeHandle.Value);
+			}
+		}
+		
+		public override void DiscardChanges()
+		{
+			if(!IsVolumeHandleNull())
+			{
+				CubiquityDLL.DiscardOverrideBlocks(volumeHandle.Value);
+			}
+		}
 		
 		/// \cond
 		protected override void InitializeEmptyCubiquityVolume(Region region)

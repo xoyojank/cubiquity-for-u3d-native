@@ -64,6 +64,29 @@ namespace Cubiquity
 				}
 			}
 		}
+
+		public override void CommitChanges()
+		{
+			if(!IsVolumeHandleNull())
+			{
+				if(writePermissions == WritePermissions.ReadOnly)
+				{
+					throw new InvalidOperationException("Cannot commit changes to read-only voxel database (" + fullPathToVoxelDatabase +")");
+				}
+
+				CubiquityDLL.AcceptOverrideBlocksMC(volumeHandle.Value);
+				//We can discard the blocks now that they have been accepted.
+				CubiquityDLL.DiscardOverrideBlocksMC(volumeHandle.Value);
+			}
+		}
+		
+		public override void DiscardChanges()
+		{
+			if(!IsVolumeHandleNull())
+			{
+				CubiquityDLL.DiscardOverrideBlocksMC(volumeHandle.Value);
+			}
+		}
 		
 		/// \cond
 		protected override void InitializeEmptyCubiquityVolume(Region region)
