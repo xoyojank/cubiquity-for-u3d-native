@@ -17,10 +17,13 @@ namespace Cubiquity
 
 			Region volumeBounds = new Region(-planetRadius, -planetRadius, -planetRadius, planetRadius, planetRadius, planetRadius);		
 			TerrainVolumeData data = VolumeData.CreateEmptyVolumeData<TerrainVolumeData>(volumeBounds, saveLocation);
-			data.CommitChanges();
 			
 			// The numbers below control the thickness of the various layers.
 			TerrainVolumeGenerator.GeneratePlanet(data, planetRadius, planetRadius - 1, planetRadius - 10, planetRadius - 35);
+
+			// We need to commit this so that the changes made by the previous,line are actually written
+			// to the voxel database. Otherwise they are just kept in temporary storage and will be lost.
+			data.CommitChanges();
 		}
 	}
 }
