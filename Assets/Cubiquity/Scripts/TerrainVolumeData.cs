@@ -124,7 +124,7 @@ namespace Cubiquity
 				try
 				{
 					// Create an empty region of the desired size.
-					volumeHandle = CubiquityDLL.NewTerrainVolumeFromVDB(fullPathToVoxelDatabase, WritePermissions.ReadWrite, DefaultBaseNodeSize);
+					volumeHandle = CubiquityDLL.NewTerrainVolumeFromVDB(fullPathToVoxelDatabase, writePermissions, DefaultBaseNodeSize);
 				}
 				catch(CubiquityException exception)
 				{
