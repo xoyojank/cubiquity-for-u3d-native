@@ -141,7 +141,7 @@ namespace Cubiquity
 		public override void ShutdownCubiquityVolume()
 		{
 			// Shutdown could get called multiple times. E.g by OnDisable() and then by OnDestroy().
-			if(volumeHandle.HasValue)
+			if(!IsVolumeHandleNull())
 			{
 				// We only save if we are in editor mode, not if we are playing.
 				bool saveChanges = !Application.isPlaying;

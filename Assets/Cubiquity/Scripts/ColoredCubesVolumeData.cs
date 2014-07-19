@@ -134,7 +134,7 @@ namespace Cubiquity
 		/// \cond
 		public override void ShutdownCubiquityVolume()
 		{
-			if(volumeHandle.HasValue)
+			if(!IsVolumeHandleNull())
 			{
 				// We only save if we are in editor mode, not if we are playing.
 				bool saveChanges = !Application.isPlaying;
