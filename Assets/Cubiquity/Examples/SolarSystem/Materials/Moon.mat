@@ -10,6 +10,7 @@ Material:
   m_Shader: {fileID: 4800000, guid: ae5bcd03f3b87674cb4d9ea3eccb75ee, type: 3}
   m_ShaderKeywords:
   - BRUSH_MARKER_OFF
+  m_CustomRenderQueue: -1
   m_SavedProperties:
     serializedVersion: 2
     m_TexEnvs:
