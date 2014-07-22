@@ -68,6 +68,11 @@ namespace Cubiquity
 		{
 			if(!IsVolumeHandleNull())
 			{
+				if(writePermissions == WritePermissions.ReadOnly)
+				{
+					throw new InvalidOperationException("Cannot commit changes to read-only voxel database (" + fullPathToVoxelDatabase +")");
+				}
+
 				CubiquityDLL.AcceptOverrideBlocks(volumeHandle.Value);
 				//We can discard the blocks now that they have been accepted.
 				CubiquityDLL.DiscardOverrideBlocks(volumeHandle.Value);
@@ -137,13 +142,16 @@ namespace Cubiquity
 			if(!IsVolumeHandleNull())
 			{
 				// We only save if we are in editor mode, not if we are playing.
-				bool saveChanges = !Application.isPlaying;
+				bool saveChanges = (!Application.isPlaying) && (writePermissions == WritePermissions.ReadWrite);
 				
 				if(saveChanges)
 				{
-					CubiquityDLL.AcceptOverrideBlocks(volumeHandle.Value);
+					CommitChanges();
 				}
-				CubiquityDLL.DiscardOverrideBlocks(volumeHandle.Value);
+				else
+				{
+					DiscardChanges();
+				}
 				
 				CubiquityDLL.DeleteColoredCubesVolume(volumeHandle.Value);
 				volumeHandle = null;
