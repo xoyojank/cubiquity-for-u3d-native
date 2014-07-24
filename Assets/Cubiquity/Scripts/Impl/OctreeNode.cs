@@ -4,6 +4,7 @@
 using UnityEditor;
 #endif
 
+using System;
 using System.Collections;
 using System.Text;
 
@@ -268,8 +269,6 @@ namespace Cubiquity
 				Vector2[] renderingUV = new Vector2[cubiquityVertices.Length];
 				Vector2[] renderingUV2 = new Vector2[cubiquityVertices.Length];
 				
-				Vector3 normalOffset = new Vector3(1.0f, 1.0f, 1.0f);
-				
 				for(int ct = 0; ct < cubiquityVertices.Length; ct++)
 				{
 					// Get and decode the position
@@ -284,12 +283,29 @@ namespace Cubiquity
 					Vector2 uv = new Vector2(cubiquityVertices[ct].m4 / 255.0f, cubiquityVertices[ct].m5 / 255.0f);
 					Vector2 uv2 = new Vector2(cubiquityVertices[ct].m6 / 255.0f, cubiquityVertices[ct].m7 / 255.0f);
 					
-					ushort decodedX = (ushort)((cubiquityVertices[ct].normal >> (ushort)10) & (ushort)0x1F);
-					ushort decodedY = (ushort)((cubiquityVertices[ct].normal >> (ushort)5) & (ushort)0x1F);
-					ushort decodedZ = (ushort)((cubiquityVertices[ct].normal) & (ushort)0x1F);					
-					Vector3 normal = new Vector3(decodedX, decodedY, decodedZ);
-					normal *= (1.0f / 15.5f);
-					normal -= normalOffset;
+					ushort ux = (ushort)((cubiquityVertices[ct].normal >> (ushort)8) & (ushort)0xFF);
+					ushort uy = (ushort)((cubiquityVertices[ct].normal) & (ushort)0xFF);
+
+					// Convert to floats in the range [-1.0f, +1.0f].
+					float ex = ux / 127.5f - 1.0f;
+					float ey = uy / 127.5f - 1.0f;
+					
+					// Reconstruct the origninal vector. This is a C++ implementation
+					// of Listing 2 of http://jcgt.org/published/0003/02/01/
+					float vx = ex;
+					float vy = ey;
+					float vz = 1.0f - Math.Abs(ex) - Math.Abs(ey);
+					
+					if (vz < 0.0f)
+					{
+						float refX = ((1.0f - Math.Abs(vy)) * (vx >= 0.0f ? +1.0f : -1.0f));
+						float refY = ((1.0f - Math.Abs(vx)) * (vy >= 0.0f ? +1.0f : -1.0f));
+						vx = refX;
+						vy = refY;
+					}
+
+					Vector3 normal = new Vector3(vx, vy, vz);
+					normal.Normalize();
 						
 					// Copy it to the arrays.
 					renderingVertices[ct] = position;	
