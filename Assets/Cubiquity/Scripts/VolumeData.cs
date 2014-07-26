@@ -106,6 +106,17 @@ namespace Cubiquity
 
 		[SerializeField]
 		private WritePermissions mWritePermissions = WritePermissions.ReadOnly;
+
+		/// Controls whether the underlying voxel database can be written to, or only read from.
+		/**
+		 * If you specify read-only access then it is safe to have multiple VolumeData instances referenceing the same underlying
+		 * voxel database, otherwise this situation should be avoided. Please see the \ref pageCubiquityVsCubiquityForUnity "user manual" 
+		 * for more information on this.
+		 * 
+		 * Note that you cannot change the write permissions while the voxel database is open.
+		 * 
+		 * \return Write permissions for the underlying voxel database.
+		 */
 		public WritePermissions writePermissions
 		{
 			get
@@ -182,7 +193,7 @@ namespace Cubiquity
 		private static Dictionary<string, int > pathsAndAssets = new Dictionary<string, int >();
 
 		/**
-		 * It is possible for %Cubiquity voxel databse files to be created outside of the %Cubiquity for Unity3D ecosystem (see the \ref secCubiquity
+		 * It is possible for %Cubiquity voxel database files to be created outside of the %Cubiquity for Unity3D ecosystem (see the \ref pageCubiquityVsCubiquityForUnity
 		 * "user manual" if you are not clear on the difference between 'Cubiquity and 'Cubiquity for Unity3D'). For example, the %Cubiquity SDK contains
 		 * importers for converting a variety of external file formats into voxel databases. This function provides a way for you to create volume data
 		 * which is linked to such a user provided voxel database.
@@ -192,6 +203,7 @@ namespace Cubiquity
 		 *   - <b>A relative path:</b> If you provide a relative path then is it assumed to be relative to the streaming assets folder, 
 		 *   because the contents of this folder are included in the build and can therefore be accessed in the editor, during play 
 		 *   mode, and also in standalone builds.
+		 * \param writePermissions The initial write permissions for the voxel database.
 		 */
 		public static VolumeDataType CreateFromVoxelDatabase<VolumeDataType>(string pathToVoxelDatabase, WritePermissions writePermissions = WritePermissions.ReadOnly) where VolumeDataType : VolumeData
 		{			
