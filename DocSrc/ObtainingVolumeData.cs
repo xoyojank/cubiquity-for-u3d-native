@@ -17,6 +17,14 @@
  *
  * You can then copy the resulting .vdb into the `StreamingAssets\%Cubiquity\VoxelDatabases` folder before following the instruction in \ref secFromVoxelDatabase to import it into Unity.
  *
+ * \subsection secVoxlap Importing From Voxlap
+ *
+ * You can also use the 'ConvertToVDB' tool to import maps in the Voxlap '.vxl' format as used by games such as <a href="http://buildandshoot.com/">Build and Shoot</a>. This allows you to use editors designed for this game to build maps for Cubiquity.
+ * \par
+ * `ConvertToVDB.exe -i input.vxl -o output.vdb`
+ *
+ * Note that these maps are expected to have dimensions of 512x512x64 voxels.
+ *
  * \subsection secImageSlices Importing From Image Slices
  *
  * The same tool can be used to import colored cubes volume from a series of color images representing slices through the volume (see `Assets\%Cubiquity\Examples\%VolumeData\VoxeliensLevel3` for an example of such a series of slices). This provides means to get data into %Cubiquity from any other application provided you can write an exporter to output these slices. You can also use this approach if you want to write a standalone program which generates volume data off-line and which can then be imported into %Cubiquity (this is faster than generating volumes though C# scripts).
@@ -32,7 +40,8 @@
  *
  * %Cubiquity for Unity3D provides a very simple but powerful API for generating volumes through code. Each volume is essentially just a 3D grid of voxel values, and the API gives you direct access to these through the VolumeData's GetVoxel(...) and SetVoxel(...) methods. You can then choose any method you wish to decide which values should be written to which voxels. Common approaches include:
  *
- * Using a noise function: Evaluating a 3D noise function (such as Perlin noise or Simplex noise) at each point on the grid can generate both natural and surreal environments. Multiple octaves of noise can be combined to add additional detail. Please see the 'Procedural Generation' example in the examples folder.
+ * \par
+ * <b>Using a noise function:</b> Evaluating a 3D noise function (such as Perlin noise or Simplex noise) at each point on the grid can generate both natural and surreal environments. Multiple octaves of noise can be combined to add additional detail. Please see the 'Procedural Generation' example in the examples folder.
  *
  * \par
  * <b>Reading an input image:</b> The 'Maze' example (see the examples folder) reads a 2D image of a maze and sets the height of voxel columns based of whether the corresponding pixel is black or white. The same principle can be applied to generating a terrain from a heightmap.
