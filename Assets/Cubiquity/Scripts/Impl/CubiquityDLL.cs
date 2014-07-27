@@ -111,7 +111,7 @@ namespace Cubiquity
 			
 			[DllImport (dllToImport)]
 			private static extern int cuNewColoredCubesVolumeFromVDB(StringBuilder datasetName, uint writePermissions, uint baseNodeSize, out uint result);
-			public static uint NewColoredCubesVolumeFromVDB(string datasetName, WritePermissions writePermissions, uint baseNodeSize)
+			public static uint NewColoredCubesVolumeFromVDB(string datasetName, VolumeData.WritePermissions writePermissions, uint baseNodeSize)
 			{
 				uint result;
 				Validate(cuNewColoredCubesVolumeFromVDB(new StringBuilder(datasetName), (uint)writePermissions, baseNodeSize, out result));
@@ -198,7 +198,7 @@ namespace Cubiquity
 			
 			[DllImport (dllToImport)]
 			private static extern int cuNewTerrainVolumeFromVDB(StringBuilder datasetName, uint writePermissions, uint baseNodeSize, out uint result);
-			public static uint NewTerrainVolumeFromVDB(string datasetName, WritePermissions writePermissions, uint baseNodeSize)
+			public static uint NewTerrainVolumeFromVDB(string datasetName, VolumeData.WritePermissions writePermissions, uint baseNodeSize)
 			{
 				uint result;
 				Validate(cuNewTerrainVolumeFromVDB(new StringBuilder(datasetName), (uint)writePermissions, baseNodeSize, out result));

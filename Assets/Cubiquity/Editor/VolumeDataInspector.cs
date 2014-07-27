@@ -20,8 +20,8 @@ namespace Cubiquity
 			EditorGUILayout.BeginHorizontal();
 				GUI.enabled = !vdbAlreadyOpen;
 				EditorGUILayout.LabelField("Open as read-only:", EditorStyles.boldLabel, GUILayout.Width(150));
-				data.writePermissions = GUILayout.Toggle(data.writePermissions == WritePermissions.ReadOnly, "")
-					? WritePermissions.ReadOnly : WritePermissions.ReadWrite;
+				data.writePermissions = GUILayout.Toggle(data.writePermissions == VolumeData.WritePermissions.ReadOnly, "")
+					? VolumeData.WritePermissions.ReadOnly : VolumeData.WritePermissions.ReadWrite;
 				GUI.enabled = true;
 				if(vdbAlreadyOpen)
 				{
@@ -29,7 +29,7 @@ namespace Cubiquity
 				}
 			EditorGUILayout.EndHorizontal();
 			
-			if(data.writePermissions == WritePermissions.ReadOnly)
+			if(data.writePermissions == VolumeData.WritePermissions.ReadOnly)
 			{
 				EditorGUILayout.HelpBox("Opening a voxel database in read-only mode allows multiple VolumeData instances " +
 	                "to make use of it at the same time. You will still be able to modify the volume data in the editor or " +
