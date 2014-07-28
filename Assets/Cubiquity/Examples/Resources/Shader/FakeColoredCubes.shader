@@ -15,6 +15,7 @@ Shader "FakeColoredCubes"
 		// the absolute path: http://forum.unity3d.com/threads/custom-cginc-relative-to-assets-folder-in-dx11.163271/
 		#include "../../../Resources/Shaders/ColoredCubesUtilities.cginc"
 		
+		#pragma multi_compile DIFFUSE_TEXTURE_OFF DIFFUSE_TEXTURE_ON
 		#pragma surface surf Lambert alpha
 		#pragma target 3.0
 		#pragma glsl		
@@ -41,10 +42,17 @@ Shader "FakeColoredCubes"
 			float noise = positionBasedNoise(float4(_CubePosition.xyz, _NoiseStrength));
 			
 			// Sample the same surface maps that are used by the real colored cubes voxel shader.
+			// So far it hasn't seemed necessary to wrap this in an '#if' (like for the diffuse texture),
+			// presumably because the default texture (when one is not set) is ok. Would still be more
+			// effcient to wrap this of course but it's just an example.
 			float3 unpackedNormal = UnpackNormal (tex2D (_NormalMap, IN.uv_NormalMap));
 			
-			// Sample the other texture maps
+			// Sample the diffuse texture map if it's being used
+#if DIFFUSE_TEXTURE_ON
 			float3 diffuseVal = tex2D(_DiffuseMap, IN.uv_NormalMap);
+#else
+			float3 diffuseVal = float3(1.0, 1.0, 1.0);
+#endif
 			
 			// Set the appropriate attributes of the output struct.
 			o.Albedo = (_CubeColor.rgb + float3(noise, noise, noise)) * diffuseVal;

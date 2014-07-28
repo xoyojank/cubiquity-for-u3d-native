@@ -99,7 +99,13 @@ public class ClickToDestroy : MonoBehaviour
 	{
 		Material fakeVoxelMaterial = Resources.Load("Materials/FakeColoredCubes", typeof(Material)) as Material;
 		fakeVoxelMaterial.SetFloat("_CubeOpacity", 1.0f);
-		fakeVoxelMaterial.SetTexture("_DiffuseMap", coloredCubesVolume.GetComponent<ColoredCubesVolumeRenderer>().material.GetTexture("_DiffuseMap"));
+		Texture diffuseMap = coloredCubesVolume.GetComponent<ColoredCubesVolumeRenderer>().material.GetTexture("_DiffuseMap");
+		if(diffuseMap != null)
+		{
+			List<string> keywords = new List<string> { "DIFFUSE_TEXTURE_ON" };
+			fakeVoxelMaterial.shaderKeywords = keywords.ToArray();
+			fakeVoxelMaterial.SetTexture("_DiffuseMap", diffuseMap);
+		}
 		fakeVoxelMaterial.SetTexture("_NormalMap", coloredCubesVolume.GetComponent<ColoredCubesVolumeRenderer>().material.GetTexture("_NormalMap"));
 		fakeVoxelMaterial.SetFloat("_NoiseStrength", coloredCubesVolume.GetComponent<ColoredCubesVolumeRenderer>().material.GetFloat("_NoiseStrength"));
 
