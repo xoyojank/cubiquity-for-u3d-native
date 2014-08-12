@@ -1,7 +1,15 @@
 Cubiquity For Unity3D Changelog
 ===============================
 
-Version 1.1.0
+Note that in general we only list versions which actually get submitted to the assets store, but that within each entry we list all important changes which have been made since the last submitted version.
+
+Version 1.1.2
+-------------
+ - Bug fixes
+  - Cubiquity now statically linked against C runtime (fixes 'missing .dll' issue).
+  - Added compile flags to fix problems running on Windows XP.
+  
+Version 1.1.1
 -------------
  - Features
   - Colored cubes volume can now have a global diffuse and normal map applied.
