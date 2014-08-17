@@ -28,6 +28,7 @@ namespace Cubiquity
 			{
 				// Get the vertex data from Cubiquity.
 				vertices[ct] = new Vector3(cubiquityVertices[ct].x, cubiquityVertices[ct].y, cubiquityVertices[ct].z);
+				vertices[ct] *= (1.0f / 256.0f);
 			}
 			
 			// Assign vertex data to the meshes.
