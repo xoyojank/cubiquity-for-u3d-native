@@ -3,6 +3,11 @@ Cubiquity For Unity3D Changelog
 
 Note that in general we only list versions which actually get submitted to the assets store, but that within each entry we list all important changes which have been made since the last submitted version.
 
+Version 1.1.3
+-------------
+ - Bugfixes
+  - Fixed problems with terrain volume collision detection and added test.
+ 
 Version 1.1.2
 -------------
  - Bug fixes
