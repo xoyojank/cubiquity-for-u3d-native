@@ -147,6 +147,8 @@ GameObject:
   - 114: {fileID: 690550940}
   - 114: {fileID: 690550939}
   - 114: {fileID: 690550938}
+  - 114: {fileID: 690550942}
+  - 114: {fileID: 690550943}
   m_Layer: 0
   m_Name: Terrain Volume
   m_TagString: Untagged
@@ -202,6 +204,28 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
+--- !u!114 &690550942
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 690550937}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04aa3f08e7c5ac14d81c70842913a046, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &690550943
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 690550937}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfc1839ae5e58e743a487271c6168708, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!21 &1315562466
 Material:
   serializedVersion: 3
