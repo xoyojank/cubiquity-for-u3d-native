@@ -380,16 +380,22 @@ namespace Cubiquity
 			[DllImport (dllToImport)]
 			private static extern int cuGetNoOfIndices(uint octreeNodeHandle, out uint result);
 			[DllImport (dllToImport)]
-			private static extern int cuGetIndices(uint octreeNodeHandle, out int[] result);
+			private static extern int cuGetIndices(uint octreeNodeHandle, out ushort[] result);
 			public static int[] GetIndices(uint octreeNodeHandle)
 			{
 				uint noOfIndices;
 				Validate(cuGetNoOfIndices(octreeNodeHandle, out noOfIndices));
 				
-				int[] result = new int[noOfIndices];
+				ushort[] result = new ushort[noOfIndices];
 				Validate(cuGetIndices(octreeNodeHandle, out result));
+
+				// Cubiquity uses 16-bit index arrays to save space, and it appears Unity does the same (at least, there is
+				// a limit of 65535 vertices per mesh). However, the Mesh.triangles property is of the signed 32-bit int[]
+				// type rather than the unsigned 16-bit ushort[] type. Perhaps this is so they can switch to 32-bit index
+				// buffers in the future? At any rate, it means we have to perform a conversion.
+				int[] resultAsInt = Array.ConvertAll(result, b => (int)b);
 				
-				return result;
+				return resultAsInt;
 			}
 				
 			[DllImport (dllToImport)]
@@ -413,16 +419,22 @@ namespace Cubiquity
 			[DllImport (dllToImport)]
 			private static extern int cuGetNoOfIndicesMC(uint octreeNodeHandle, out uint result);
 			[DllImport (dllToImport)]
-			private static extern int cuGetIndicesMC(uint octreeNodeHandle, out int[] result);
+			private static extern int cuGetIndicesMC(uint octreeNodeHandle, out ushort[] result);
 			public static int[] GetIndicesMC(uint octreeNodeHandle)
 			{
 				uint noOfIndices;
 				Validate(cuGetNoOfIndicesMC(octreeNodeHandle, out noOfIndices));
 				
-				int[] result = new int[noOfIndices];
+				ushort[] result = new ushort[noOfIndices];
 				Validate(cuGetIndicesMC(octreeNodeHandle, out result));
+
+				// Cubiquity uses 16-bit index arrays to save space, and it appears Unity does the same (at least, there is
+				// a limit of 65535 vertices per mesh). However, the Mesh.triangles property is of the signed 32-bit int[]
+				// type rather than the unsigned 16-bit ushort[] type. Perhaps this is so they can switch to 32-bit index
+				// buffers in the future? At any rate, it means we have to perform a conversion.
+				int[] resultAsInt = Array.ConvertAll(result, b => (int)b);
 				
-				return result;
+				return resultAsInt;
 			}
 				
 			[DllImport (dllToImport)]
