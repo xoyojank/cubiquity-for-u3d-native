@@ -97,6 +97,7 @@ public class ClickToDestroy : MonoBehaviour
 	
 	void DestroyVoxels(int xPos, int yPos, int zPos, int range)
 	{
+		// Set up a material which we will apply to the cubes which we spawn to replace destroyed voxels.
 		Material fakeVoxelMaterial = Resources.Load("Materials/FakeColoredCubes", typeof(Material)) as Material;
 		fakeVoxelMaterial.SetFloat("_CubeOpacity", 1.0f);
 		Texture diffuseMap = coloredCubesVolume.GetComponent<ColoredCubesVolumeRenderer>().material.GetTexture("_DiffuseMap");
