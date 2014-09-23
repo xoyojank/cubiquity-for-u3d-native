@@ -109,7 +109,7 @@ namespace Cubiquity
 			{
 				if(data.volumeHandle.HasValue)
 				{
-					CubiquityDLL.UpdateVolumeMC(data.volumeHandle.Value);
+					CubiquityDLL.UpdateVolumeMC(data.volumeHandle.Value, 0.0f, 0.0f, 0.0f, 0.0f);
 					
 					if(CubiquityDLL.HasRootOctreeNodeMC(data.volumeHandle.Value) == 1)
 					{		

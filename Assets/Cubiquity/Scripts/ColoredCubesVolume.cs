@@ -113,7 +113,7 @@ namespace Cubiquity
 				// Syncronize the mesh data.
 				if(data.volumeHandle.HasValue)
 				{
-					CubiquityDLL.UpdateVolume(data.volumeHandle.Value);
+					CubiquityDLL.UpdateVolume(data.volumeHandle.Value, 0.0f, 0.0f, 0.0f, 0.0f);
 					
 					if(CubiquityDLL.HasRootOctreeNode(data.volumeHandle.Value) == 1)
 					{		

@@ -137,10 +137,10 @@ namespace Cubiquity
 			}
 			
 			[DllImport (dllToImport)]
-			private static extern int cuUpdateVolume(uint volumeHandle);
-			public static void UpdateVolume(uint volumeHandle)
+			private static extern int cuUpdateVolume(uint volumeHandle, float eyePosX, float eyePosY, float eyePosZ, float lodThreshold);
+			public static void UpdateVolume(uint volumeHandle, float eyePosX, float eyePosY, float eyePosZ, float lodThreshold)
 			{
-				Validate(cuUpdateVolume(volumeHandle));
+				Validate(cuUpdateVolume(volumeHandle, eyePosX, eyePosY, eyePosZ, lodThreshold));
 			}
 			
 			[DllImport (dllToImport)]
@@ -206,10 +206,10 @@ namespace Cubiquity
 			}
 			
 			[DllImport (dllToImport)]
-			private static extern int cuUpdateVolumeMC(uint volumeHandle);
-			public static void UpdateVolumeMC(uint volumeHandle)
+			private static extern int cuUpdateVolumeMC(uint volumeHandle, float eyePosX, float eyePosY, float eyePosZ, float lodThreshold);
+			public static void UpdateVolumeMC(uint volumeHandle, float eyePosX, float eyePosY, float eyePosZ, float lodThreshold)
 			{
-				Validate(cuUpdateVolumeMC(volumeHandle));
+				Validate(cuUpdateVolumeMC(volumeHandle, eyePosX, eyePosY, eyePosZ, lodThreshold));
 			}
 			
 			[DllImport (dllToImport)]
