@@ -163,10 +163,18 @@ namespace Cubiquity
 				MeshRenderer mr = gameObject.GetComponent<MeshRenderer>();
 				if(vr != null && mr != null)
 				{
-					if(mr.enabled != vr.enabled) // Not sure we really need this check?
+					uint renderThisNode = 0;
+					// Horrible hack to choose correct funtion!
+					if(voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(TerrainVolume))
 					{
-						mr.enabled = vr.enabled;
+						renderThisNode = CubiquityDLL.RenderThisNodeMC(nodeHandle);
 					}
+					else if(voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(ColoredCubesVolume))
+					{
+						renderThisNode = CubiquityDLL.RenderThisNode(nodeHandle);
+					}
+
+					mr.enabled = vr.enabled && (renderThisNode != 0);
 					
 					if(lastSyncronisedWithVolumeRenderer < vr.lastModified)
 					{

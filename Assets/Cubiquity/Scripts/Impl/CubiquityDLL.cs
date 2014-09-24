@@ -310,6 +310,15 @@ namespace Cubiquity
 				Validate(cuGetMeshLastUpdated(nodeHandle, out result));
 				return result;
 			}
+
+			[DllImport (dllToImport)]
+			private static extern int cuRenderThisNode(uint nodeHandle, out uint result);
+			public static uint RenderThisNode(uint nodeHandle)
+			{
+				uint result;
+				Validate(cuRenderThisNode(nodeHandle, out result));
+				return result;
+			}
 			
 			//----------------------------------------------------------------------
 			
@@ -371,6 +380,15 @@ namespace Cubiquity
 			{
 				uint result;
 				Validate(cuGetMeshLastUpdatedMC(nodeHandle, out result));
+				return result;
+			}
+
+			[DllImport (dllToImport)]
+			private static extern int cuRenderThisNodeMC(uint nodeHandle, out uint result);
+			public static uint RenderThisNodeMC(uint nodeHandle)
+			{
+				uint result;
+				Validate(cuRenderThisNodeMC(nodeHandle, out result));
 				return result;
 			}
 			

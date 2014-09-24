@@ -113,7 +113,8 @@ namespace Cubiquity
 				// Syncronize the mesh data.
 				if(data.volumeHandle.HasValue)
 				{
-					CubiquityDLL.UpdateVolume(data.volumeHandle.Value, 0.0f, 0.0f, 0.0f, 0.0f);
+					Vector3 camPos = CameraUtils.getCurrentCameraPosition();
+					CubiquityDLL.UpdateVolume(data.volumeHandle.Value, camPos.x, camPos.y, camPos.z, 1.0f);
 					
 					if(CubiquityDLL.HasRootOctreeNode(data.volumeHandle.Value) == 1)
 					{		

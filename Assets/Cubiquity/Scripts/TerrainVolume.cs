@@ -109,7 +109,8 @@ namespace Cubiquity
 			{
 				if(data.volumeHandle.HasValue)
 				{
-					CubiquityDLL.UpdateVolumeMC(data.volumeHandle.Value, 0.0f, 0.0f, 0.0f, 0.0f);
+					Vector3 camPos = CameraUtils.getCurrentCameraPosition();
+					CubiquityDLL.UpdateVolumeMC(data.volumeHandle.Value, camPos.x, camPos.y, camPos.z, 1.0f);
 					
 					if(CubiquityDLL.HasRootOctreeNodeMC(data.volumeHandle.Value) == 1)
 					{		
