@@ -23,6 +23,11 @@ namespace Cubiquity
 				EditorGUILayout.LabelField("Cast Shadows:", GUILayout.Width(labelWidth));
 				renderer.castShadows = EditorGUILayout.Toggle(renderer.castShadows);
 			EditorGUILayout.EndHorizontal();
+
+			EditorGUILayout.BeginHorizontal();
+			EditorGUILayout.LabelField("Show Wireframe:", GUILayout.Width(labelWidth));
+			renderer.showWireframe = EditorGUILayout.Toggle(renderer.showWireframe);
+			EditorGUILayout.EndHorizontal();
 			
 			EditorGUILayout.BeginHorizontal();
 				renderer.material = EditorGUILayout.ObjectField("Material: ", renderer.material, typeof(Material), true) as Material;

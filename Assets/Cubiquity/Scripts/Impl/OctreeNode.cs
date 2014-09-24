@@ -116,10 +116,6 @@ namespace Cubiquity
 					        meshFilter.sharedMesh = renderingMesh;
 						
 							meshRenderer.sharedMaterial = volumeRenderer.material;
-							
-							#if UNITY_EDITOR
-							EditorUtility.SetSelectedWireframeHidden(meshRenderer, true);
-							#endif
 						}
 						
 						// Set up the collision mesh
@@ -180,6 +176,11 @@ namespace Cubiquity
 					{
 						mr.receiveShadows = vr.receiveShadows;
 						mr.castShadows = vr.castShadows;
+
+						#if UNITY_EDITOR
+						EditorUtility.SetSelectedWireframeHidden(mr, !vr.showWireframe);
+						#endif
+
 						lastSyncronisedWithVolumeRenderer = Clock.timestamp;
 					}
 				}

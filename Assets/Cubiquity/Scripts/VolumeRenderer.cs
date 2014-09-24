@@ -57,6 +57,25 @@ namespace Cubiquity
 		}
 		[SerializeField]
 		private bool mReceiveShadows = true;
+
+		/// Controls whether this volume casts shadows.
+		public bool showWireframe
+		{
+			get
+			{
+				return mShowWireframe;
+			}
+			set
+			{
+				if(mShowWireframe != value)
+				{
+					mShowWireframe = value;
+					lastModified = Clock.timestamp;
+				}
+			}
+		}
+		[SerializeField]
+		private bool mShowWireframe = false;
 		
 		/// \cond
 		public uint lastModified = Clock.timestamp;
