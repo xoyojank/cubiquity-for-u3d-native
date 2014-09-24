@@ -73,9 +73,9 @@ namespace Cubiquity
 					throw new InvalidOperationException("Cannot commit changes to read-only voxel database (" + fullPathToVoxelDatabase +")");
 				}
 
-				CubiquityDLL.AcceptOverrideBlocks(volumeHandle.Value);
+				CubiquityDLL.AcceptOverrideChunks(volumeHandle.Value);
 				//We can discard the blocks now that they have been accepted.
-				CubiquityDLL.DiscardOverrideBlocks(volumeHandle.Value);
+				CubiquityDLL.DiscardOverrideChunks(volumeHandle.Value);
 			}
 		}
 		
@@ -83,7 +83,7 @@ namespace Cubiquity
 		{
 			if(!IsVolumeHandleNull())
 			{
-				CubiquityDLL.DiscardOverrideBlocks(volumeHandle.Value);
+				CubiquityDLL.DiscardOverrideChunks(volumeHandle.Value);
 			}
 		}
 		

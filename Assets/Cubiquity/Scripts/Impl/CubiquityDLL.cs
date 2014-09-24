@@ -172,17 +172,17 @@ namespace Cubiquity
 			}
 			
 			[DllImport (dllToImport)]
-			private static extern int cuAcceptOverrideBlocks(uint volumeHandle);
-			public static void AcceptOverrideBlocks(uint volumeHandle)
+			private static extern int cuAcceptOverrideChunks(uint volumeHandle);
+			public static void AcceptOverrideChunks(uint volumeHandle)
 			{
-				Validate(cuAcceptOverrideBlocks(volumeHandle));
+				Validate(cuAcceptOverrideChunks(volumeHandle));
 			}
 			
 			[DllImport (dllToImport)]
-			private static extern int cuDiscardOverrideBlocks(uint volumeHandle);
-			public static void DiscardOverrideBlocks(uint volumeHandle)
+			private static extern int cuDiscardOverrideChunks(uint volumeHandle);
+			public static void DiscardOverrideChunks(uint volumeHandle)
 			{
-				Validate(cuDiscardOverrideBlocks(volumeHandle));
+				Validate(cuDiscardOverrideChunks(volumeHandle));
 			}
 			
 			//--------------------------------------------------------------------------------
@@ -234,17 +234,17 @@ namespace Cubiquity
 			}
 			
 			[DllImport (dllToImport)]
-			private static extern int cuAcceptOverrideBlocksMC(uint volumeHandle);
-			public static void AcceptOverrideBlocksMC(uint volumeHandle)
+			private static extern int cuAcceptOverrideChunksMC(uint volumeHandle);
+			public static void AcceptOverrideChunksMC(uint volumeHandle)
 			{
-				Validate(cuAcceptOverrideBlocksMC(volumeHandle));
+				Validate(cuAcceptOverrideChunksMC(volumeHandle));
 			}
 			
 			[DllImport (dllToImport)]
-			private static extern int cuDiscardOverrideBlocksMC(uint volumeHandle);
-			public static void DiscardOverrideBlocksMC(uint volumeHandle)
+			private static extern int cuDiscardOverrideChunksMC(uint volumeHandle);
+			public static void DiscardOverrideChunksMC(uint volumeHandle)
 			{
-				Validate(cuDiscardOverrideBlocksMC(volumeHandle));
+				Validate(cuDiscardOverrideChunksMC(volumeHandle));
 			}
 			
 			////////////////////////////////////////////////////////////////////////////////
