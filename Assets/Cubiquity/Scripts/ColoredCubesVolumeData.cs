@@ -74,7 +74,7 @@ namespace Cubiquity
 				}
 
 				CubiquityDLL.AcceptOverrideChunks(volumeHandle.Value);
-				//We can discard the blocks now that they have been accepted.
+				//We can discard the chunks now that they have been accepted.
 				CubiquityDLL.DiscardOverrideChunks(volumeHandle.Value);
 			}
 		}
