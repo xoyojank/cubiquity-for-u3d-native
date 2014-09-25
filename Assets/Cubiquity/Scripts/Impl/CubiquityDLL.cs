@@ -17,7 +17,7 @@ namespace Cubiquity
 			
 			const uint requiredMajorVersion = 1;
 			const uint requiredMinorVersion = 1;
-			const uint requiredPatchVersion = 2;
+			const uint requiredPatchVersion = 4;
 			
 			// This static constructor is supposed to make sure that the Cubiquity.dll is in the right place before the DllImport is done.
 			// It doesn't seem to work, because in Standalone builds the message below is printed after the exception about the .dll not
@@ -137,10 +137,10 @@ namespace Cubiquity
 			}
 			
 			[DllImport (dllToImport)]
-			private static extern int cuUpdateVolume(uint volumeHandle);
-			public static void UpdateVolume(uint volumeHandle)
+			private static extern int cuUpdateVolume(uint volumeHandle, float eyePosX, float eyePosY, float eyePosZ, float lodThreshold);
+			public static void UpdateVolume(uint volumeHandle, float eyePosX, float eyePosY, float eyePosZ, float lodThreshold)
 			{
-				Validate(cuUpdateVolume(volumeHandle));
+				Validate(cuUpdateVolume(volumeHandle, eyePosX, eyePosY, eyePosZ, lodThreshold));
 			}
 			
 			[DllImport (dllToImport)]
@@ -172,17 +172,17 @@ namespace Cubiquity
 			}
 			
 			[DllImport (dllToImport)]
-			private static extern int cuAcceptOverrideBlocks(uint volumeHandle);
-			public static void AcceptOverrideBlocks(uint volumeHandle)
+			private static extern int cuAcceptOverrideChunks(uint volumeHandle);
+			public static void AcceptOverrideChunks(uint volumeHandle)
 			{
-				Validate(cuAcceptOverrideBlocks(volumeHandle));
+				Validate(cuAcceptOverrideChunks(volumeHandle));
 			}
 			
 			[DllImport (dllToImport)]
-			private static extern int cuDiscardOverrideBlocks(uint volumeHandle);
-			public static void DiscardOverrideBlocks(uint volumeHandle)
+			private static extern int cuDiscardOverrideChunks(uint volumeHandle);
+			public static void DiscardOverrideChunks(uint volumeHandle)
 			{
-				Validate(cuDiscardOverrideBlocks(volumeHandle));
+				Validate(cuDiscardOverrideChunks(volumeHandle));
 			}
 			
 			//--------------------------------------------------------------------------------
@@ -206,10 +206,10 @@ namespace Cubiquity
 			}
 			
 			[DllImport (dllToImport)]
-			private static extern int cuUpdateVolumeMC(uint volumeHandle);
-			public static void UpdateVolumeMC(uint volumeHandle)
+			private static extern int cuUpdateVolumeMC(uint volumeHandle, float eyePosX, float eyePosY, float eyePosZ, float lodThreshold);
+			public static void UpdateVolumeMC(uint volumeHandle, float eyePosX, float eyePosY, float eyePosZ, float lodThreshold)
 			{
-				Validate(cuUpdateVolumeMC(volumeHandle));
+				Validate(cuUpdateVolumeMC(volumeHandle, eyePosX, eyePosY, eyePosZ, lodThreshold));
 			}
 			
 			[DllImport (dllToImport)]
@@ -234,17 +234,17 @@ namespace Cubiquity
 			}
 			
 			[DllImport (dllToImport)]
-			private static extern int cuAcceptOverrideBlocksMC(uint volumeHandle);
-			public static void AcceptOverrideBlocksMC(uint volumeHandle)
+			private static extern int cuAcceptOverrideChunksMC(uint volumeHandle);
+			public static void AcceptOverrideChunksMC(uint volumeHandle)
 			{
-				Validate(cuAcceptOverrideBlocksMC(volumeHandle));
+				Validate(cuAcceptOverrideChunksMC(volumeHandle));
 			}
 			
 			[DllImport (dllToImport)]
-			private static extern int cuDiscardOverrideBlocksMC(uint volumeHandle);
-			public static void DiscardOverrideBlocksMC(uint volumeHandle)
+			private static extern int cuDiscardOverrideChunksMC(uint volumeHandle);
+			public static void DiscardOverrideChunksMC(uint volumeHandle)
 			{
-				Validate(cuDiscardOverrideBlocksMC(volumeHandle));
+				Validate(cuDiscardOverrideChunksMC(volumeHandle));
 			}
 			
 			////////////////////////////////////////////////////////////////////////////////
@@ -310,6 +310,15 @@ namespace Cubiquity
 				Validate(cuGetMeshLastUpdated(nodeHandle, out result));
 				return result;
 			}
+
+			[DllImport (dllToImport)]
+			private static extern int cuRenderThisNode(uint nodeHandle, out uint result);
+			public static uint RenderThisNode(uint nodeHandle)
+			{
+				uint result;
+				Validate(cuRenderThisNode(nodeHandle, out result));
+				return result;
+			}
 			
 			//----------------------------------------------------------------------
 			
@@ -371,6 +380,15 @@ namespace Cubiquity
 			{
 				uint result;
 				Validate(cuGetMeshLastUpdatedMC(nodeHandle, out result));
+				return result;
+			}
+
+			[DllImport (dllToImport)]
+			private static extern int cuRenderThisNodeMC(uint nodeHandle, out uint result);
+			public static uint RenderThisNodeMC(uint nodeHandle)
+			{
+				uint result;
+				Validate(cuRenderThisNodeMC(nodeHandle, out result));
 				return result;
 			}
 			

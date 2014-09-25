@@ -54,6 +54,7 @@ namespace Cubiquity
 		
 		public QuantizedColor(byte red, byte green, byte blue, byte alpha)
 		{
+            color = 0; // Required to avoid CS0188
 			this.red = red;
 			this.green = green;
 			this.blue = blue;

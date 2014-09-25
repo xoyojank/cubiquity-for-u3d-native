@@ -109,7 +109,14 @@ namespace Cubiquity
 			{
 				if(data.volumeHandle.HasValue)
 				{
-					CubiquityDLL.UpdateVolumeMC(data.volumeHandle.Value);
+					Vector3 camPos = CameraUtils.getCurrentCameraPosition();
+
+                    // This is messy - perhaps the LOD thresold shold not be a parameter to update. Instead it could be passed
+                    // as a parameter during traversal, so different traversal could retrieve differnt LODs. We then wouldn't
+                    // want a single 'renderThisNode' member of Cubiquity nodes, but instead some threshold we could compare to.
+                    float lodThreshold = GetComponent<VolumeRenderer>() ? GetComponent<VolumeRenderer>().lodThreshold : 0.0f;
+
+					CubiquityDLL.UpdateVolumeMC(data.volumeHandle.Value, camPos.x, camPos.y, camPos.z, lodThreshold);
 					
 					if(CubiquityDLL.HasRootOctreeNodeMC(data.volumeHandle.Value) == 1)
 					{		
