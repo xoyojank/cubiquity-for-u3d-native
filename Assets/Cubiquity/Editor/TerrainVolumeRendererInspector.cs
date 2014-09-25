@@ -28,6 +28,11 @@ namespace Cubiquity
 			EditorGUILayout.LabelField("Show Wireframe:", GUILayout.Width(labelWidth));
 			renderer.showWireframe = EditorGUILayout.Toggle(renderer.showWireframe);
 			EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("LOD Threshold:", GUILayout.Width(labelWidth));
+            renderer.lodThreshold = EditorGUILayout.Slider(renderer.lodThreshold, 0.0f, 10.0f);
+            EditorGUILayout.EndHorizontal();
 			
 			EditorGUILayout.BeginHorizontal();
 				renderer.material = EditorGUILayout.ObjectField("Material: ", renderer.material, typeof(Material), true) as Material;

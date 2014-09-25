@@ -58,7 +58,7 @@ namespace Cubiquity
 		[SerializeField]
 		private bool mReceiveShadows = true;
 
-		/// Controls whether this volume casts shadows.
+		/// Controls whether the wireframe overlay is displayed when this volume is selected in the editor.
 		public bool showWireframe
 		{
 			get
@@ -76,6 +76,21 @@ namespace Cubiquity
 		}
 		[SerializeField]
 		private bool mShowWireframe = false;
+
+        /// Controls whether the wireframe overlay is displayed when this volume is selected in the editor.
+        public float lodThreshold
+        {
+            get
+            {
+                return mLodThreshold;
+            }
+            set
+            {
+                mLodThreshold = value;
+            }
+        }
+        [SerializeField]
+        private float mLodThreshold = 0.0f;
 		
 		/// \cond
 		public uint lastModified = Clock.timestamp;
