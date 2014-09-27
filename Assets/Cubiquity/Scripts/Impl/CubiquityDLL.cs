@@ -437,20 +437,27 @@ namespace Cubiquity
 			[DllImport (dllToImport)]
 			private static extern int cuGetNoOfIndicesMC(uint octreeNodeHandle, out uint result);
 			[DllImport (dllToImport)]
-			private static extern int cuGetIndicesMC(uint octreeNodeHandle, out ushort[] result);
-			public static int[] GetIndicesMC(uint octreeNodeHandle)
+			unsafe private static extern int cuGetIndicesMC(uint octreeNodeHandle, ushort** result);
+			unsafe public static int[] GetIndicesMC(uint octreeNodeHandle)
 			{
 				uint noOfIndices;
 				Validate(cuGetNoOfIndicesMC(octreeNodeHandle, out noOfIndices));
 				
-				ushort[] result = new ushort[noOfIndices];
-				Validate(cuGetIndicesMC(octreeNodeHandle, out result));
+				ushort* result = null;
+				Validate(cuGetIndicesMC(octreeNodeHandle, &result));
+
+                int[] resultAsInt = new int[noOfIndices];
+                for (int ct = 0; ct < noOfIndices; ct++)
+                {
+                    resultAsInt[ct] = *result;
+                    result++;
+                }
 
 				// Cubiquity uses 16-bit index arrays to save space, and it appears Unity does the same (at least, there is
 				// a limit of 65535 vertices per mesh). However, the Mesh.triangles property is of the signed 32-bit int[]
 				// type rather than the unsigned 16-bit ushort[] type. Perhaps this is so they can switch to 32-bit index
 				// buffers in the future? At any rate, it means we have to perform a conversion.
-				int[] resultAsInt = Array.ConvertAll(result, b => (int)b);
+				//int[] resultAsInt = Array.ConvertAll(result, b => (int)b);
 				
 				return resultAsInt;
 			}
