@@ -261,10 +261,10 @@ namespace Cubiquity
 			unsafe public Mesh BuildMeshFromNodeHandleForTerrainVolume(uint nodeHandle)
 			{				
 				// Create rendering and possible collision meshes.
-				Mesh renderingMesh = new Mesh(); //Should pool these
-                renderingMesh.Clear(false); // When pooling, this will be required to share Mesh instancews between terrain and colored cubes.
+				Mesh mesh = new Mesh(); //Should pool these
+                mesh.Clear(false); // When pooling, this will be required to share Mesh instancews between terrain and colored cubes.
 
-				renderingMesh.hideFlags = HideFlags.DontSave;
+                mesh.hideFlags = HideFlags.DontSave;
 	
 				// Get the data from Cubiquity.
 
@@ -283,9 +283,9 @@ namespace Cubiquity
                 }
 				
 				// Create the arrays which we'll copy the data to.
-		        Vector3[] renderingVertices = new Vector3[cubiquityVertices.Length];		
-				Vector3[] renderingNormals = new Vector3[cubiquityVertices.Length];		
-				Color32[] renderingColors = new Color32[cubiquityVertices.Length];	
+		        Vector3[] positions = new Vector3[cubiquityVertices.Length];		
+				Vector3[] normals = new Vector3[cubiquityVertices.Length];		
+				Color32[] colors32 = new Color32[cubiquityVertices.Length];	
 				//Vector4[] renderingTangents = new Vector4[cubiquityVertices.Length];		
 				Vector2[] renderingUV = new Vector2[cubiquityVertices.Length];
 				Vector2[] renderingUV2 = new Vector2[cubiquityVertices.Length];
@@ -293,16 +293,22 @@ namespace Cubiquity
 				for(int ct = 0; ct < cubiquityVertices.Length; ct++)
 				{
 					// Get and decode the position
-					Vector3 position = new Vector3(cubiquityVertices[ct].x, cubiquityVertices[ct].y, cubiquityVertices[ct].z);
-					position *= (1.0f / 256.0f);
+					//Vector3 position = new Vector3(cubiquityVertices[ct].x, cubiquityVertices[ct].y, cubiquityVertices[ct].z);
+                    positions[ct].Set(cubiquityVertices[ct].x, cubiquityVertices[ct].y, cubiquityVertices[ct].z);
+                    positions[ct] *= (1.0f / 256.0f);
 					
 					// Get and decode the normal
 					
 					// Get the materials
-					Color32 color = new Color32(cubiquityVertices[ct].m0, cubiquityVertices[ct].m1, cubiquityVertices[ct].m2, cubiquityVertices[ct].m3);
+                    //Color32 color32 = new Color32(cubiquityVertices[ct].m0, cubiquityVertices[ct].m1, cubiquityVertices[ct].m2, cubiquityVertices[ct].m3);
+                    colors32[ct].r = cubiquityVertices[ct].m0;
+                    colors32[ct].g = cubiquityVertices[ct].m1;
+                    colors32[ct].b = cubiquityVertices[ct].m2;
+                    colors32[ct].a = cubiquityVertices[ct].m3;
+
 					//Vector4 tangents = new Vector4(cubiquityVertices[ct].m4 / 255.0f, cubiquityVertices[ct].m5 / 255.0f, cubiquityVertices[ct].m6 / 255.0f, cubiquityVertices[ct].m7 / 255.0f);
-					Vector2 uv = new Vector2(cubiquityVertices[ct].m4 / 255.0f, cubiquityVertices[ct].m5 / 255.0f);
-					Vector2 uv2 = new Vector2(cubiquityVertices[ct].m6 / 255.0f, cubiquityVertices[ct].m7 / 255.0f);
+					renderingUV[ct].Set(cubiquityVertices[ct].m4 / 255.0f, cubiquityVertices[ct].m5 / 255.0f);
+                    renderingUV2[ct].Set(cubiquityVertices[ct].m6 / 255.0f, cubiquityVertices[ct].m7 / 255.0f);
 					
 					ushort ux = (ushort)((cubiquityVertices[ct].normal >> (ushort)8) & (ushort)0xFF);
 					ushort uy = (ushort)((cubiquityVertices[ct].normal) & (ushort)0xFF);
@@ -324,26 +330,17 @@ namespace Cubiquity
 						vx = refX;
 						vy = refY;
 					}
-
-					Vector3 normal = new Vector3(vx, vy, vz);
-					normal.Normalize();
-						
-					// Copy it to the arrays.
-					renderingVertices[ct] = position;	
-					renderingNormals[ct] = normal;
-					renderingColors[ct] = color;
-					//renderingTangents[ct] = tangents;
-					renderingUV[ct] = uv;
-					renderingUV2[ct] = uv2;
+                    normals[ct].Set(vx, vy, vz);
+                    normals[ct].Normalize(); // Should be done in shader - why is this needed?
 				}
 				
 				// Assign vertex data to the meshes.
-				renderingMesh.vertices = renderingVertices; 
-				renderingMesh.normals = renderingNormals;
-				renderingMesh.colors32 = renderingColors;
+                mesh.vertices = positions;
+                mesh.normals = normals;
+                mesh.colors32 = colors32;
 				//renderingMesh.tangents = renderingTangents;
-				renderingMesh.uv = renderingUV;
-				renderingMesh.uv2 = renderingUV2;
+                mesh.uv = renderingUV;
+                mesh.uv2 = renderingUV2;
 
                 // Cubiquity uses 16-bit index arrays to save space, and it appears Unity does the same (at least, there is
                 // a limit of 65535 vertices per mesh). However, the Mesh.triangles property is of the signed 32-bit int[]
@@ -355,12 +352,12 @@ namespace Cubiquity
                     indices[ct] = *result;
                     result++;
                 }
-				renderingMesh.triangles = indices;
+                mesh.triangles = indices;
 				
 				// FIXME - Get proper bounds
-				renderingMesh.bounds.SetMinMax(new Vector3(0.0f, 0.0f, 0.0f), new Vector3(32.0f, 32.0f, 32.0f));
-				
-				return renderingMesh;
+                mesh.bounds.SetMinMax(new Vector3(0.0f, 0.0f, 0.0f), new Vector3(32.0f, 32.0f, 32.0f));
+
+                return mesh;
 			}
 			
 			public Mesh BuildMeshFromNodeHandleForColoredCubesVolume(uint nodeHandle)
