@@ -259,59 +259,53 @@ namespace Cubiquity
 			}
 			
 			unsafe public Mesh BuildMeshFromNodeHandleForTerrainVolume(uint nodeHandle)
-			{				
-				// Create rendering and possible collision meshes.
-				Mesh mesh = new Mesh(); //Should pool these
-                mesh.Clear(false); // When pooling, this will be required to share Mesh instancews between terrain and colored cubes.
-
-                mesh.hideFlags = HideFlags.DontSave;
-	
-				// Get the data from Cubiquity.
-
-                
+			{					
+				// Get the data from Cubiquity.                
                 uint noOfIndices = CubiquityDLL.GetNoOfIndicesMC(nodeHandle);
-                ushort* result = CubiquityDLL.GetIndicesMC(nodeHandle);
-
+                ushort* indices = CubiquityDLL.GetIndicesMC(nodeHandle);
                 uint noOfVertices = CubiquityDLL.GetNoOfVerticesMC(nodeHandle);
-				TerrainVertex* result2 = CubiquityDLL.GetVerticesMC(nodeHandle);
+				TerrainVertex* vertices = CubiquityDLL.GetVerticesMC(nodeHandle);
 
-                TerrainVertex[] cubiquityVertices = new TerrainVertex[noOfVertices];
-                for (int ct = 0; ct < noOfVertices; ct++)
+                // Cubiquity uses 16-bit index arrays to save space, and it appears Unity does the same (at least, there is
+                // a limit of 65535 vertices per mesh). However, the Mesh.triangles property is of the signed 32-bit int[]
+                // type rather than the unsigned 16-bit ushort[] type. Perhaps this is so they can switch to 32-bit index
+                // buffers in the future? At any rate, it means we have to perform a conversion.
+                int[] indicesAsInt = new int[noOfIndices];
+                for (int ct = 0; ct < noOfIndices; ct++)
                 {
-                    cubiquityVertices[ct] = *result2;
-                    result2++;
+                    indicesAsInt[ct] = *indices;
+                    indices++;
                 }
 				
 				// Create the arrays which we'll copy the data to.
-		        Vector3[] positions = new Vector3[cubiquityVertices.Length];		
-				Vector3[] normals = new Vector3[cubiquityVertices.Length];		
-				Color32[] colors32 = new Color32[cubiquityVertices.Length];	
-				//Vector4[] renderingTangents = new Vector4[cubiquityVertices.Length];		
-				Vector2[] renderingUV = new Vector2[cubiquityVertices.Length];
-				Vector2[] renderingUV2 = new Vector2[cubiquityVertices.Length];
+                Vector3[] positions = new Vector3[noOfVertices];
+                Vector3[] normals = new Vector3[noOfVertices];
+                Color32[] colors32 = new Color32[noOfVertices];
+                Vector2[] uv = new Vector2[noOfVertices];
+                Vector2[] uv2 = new Vector2[noOfVertices];
 				
-				for(int ct = 0; ct < cubiquityVertices.Length; ct++)
+                for (int ct = 0; ct < noOfVertices; ct++)
 				{
 					// Get and decode the position
 					//Vector3 position = new Vector3(cubiquityVertices[ct].x, cubiquityVertices[ct].y, cubiquityVertices[ct].z);
-                    positions[ct].Set(cubiquityVertices[ct].x, cubiquityVertices[ct].y, cubiquityVertices[ct].z);
+                    positions[ct].Set(vertices->x, vertices->y, vertices->z);
                     positions[ct] *= (1.0f / 256.0f);
 					
 					// Get and decode the normal
 					
 					// Get the materials
                     //Color32 color32 = new Color32(cubiquityVertices[ct].m0, cubiquityVertices[ct].m1, cubiquityVertices[ct].m2, cubiquityVertices[ct].m3);
-                    colors32[ct].r = cubiquityVertices[ct].m0;
-                    colors32[ct].g = cubiquityVertices[ct].m1;
-                    colors32[ct].b = cubiquityVertices[ct].m2;
-                    colors32[ct].a = cubiquityVertices[ct].m3;
+                    colors32[ct].r = vertices->m0;
+                    colors32[ct].g = vertices->m1;
+                    colors32[ct].b = vertices->m2;
+                    colors32[ct].a = vertices->m3;
 
 					//Vector4 tangents = new Vector4(cubiquityVertices[ct].m4 / 255.0f, cubiquityVertices[ct].m5 / 255.0f, cubiquityVertices[ct].m6 / 255.0f, cubiquityVertices[ct].m7 / 255.0f);
-					renderingUV[ct].Set(cubiquityVertices[ct].m4 / 255.0f, cubiquityVertices[ct].m5 / 255.0f);
-                    renderingUV2[ct].Set(cubiquityVertices[ct].m6 / 255.0f, cubiquityVertices[ct].m7 / 255.0f);
-					
-					ushort ux = (ushort)((cubiquityVertices[ct].normal >> (ushort)8) & (ushort)0xFF);
-					ushort uy = (ushort)((cubiquityVertices[ct].normal) & (ushort)0xFF);
+                    uv[ct].Set(vertices->m4 / 255.0f, vertices->m5 / 255.0f);
+                    uv2[ct].Set(vertices->m6 / 255.0f, vertices->m7 / 255.0f);
+
+                    ushort ux = (ushort)((vertices->normal >> (ushort)8) & (ushort)0xFF);
+                    ushort uy = (ushort)((vertices->normal) & (ushort)0xFF);
 
 					// Convert to floats in the range [-1.0f, +1.0f].
 					float ex = ux / 127.5f - 1.0f;
@@ -332,29 +326,26 @@ namespace Cubiquity
 					}
                     normals[ct].Set(vx, vy, vz);
                     normals[ct].Normalize(); // Should be done in shader - why is this needed?
+
+                    vertices++;
 				}
+
+                // Create rendering mesh
+                Mesh mesh = new Mesh(); //Should pool these
+                mesh.Clear(false); // When pooling, this will be required to share Mesh instancews between terrain and colored cubes.
+                mesh.hideFlags = HideFlags.DontSave;
 				
-				// Assign vertex data to the meshes.
+				// Assign vertex data to the mesh.
                 mesh.vertices = positions;
                 mesh.normals = normals;
                 mesh.colors32 = colors32;
-				//renderingMesh.tangents = renderingTangents;
-                mesh.uv = renderingUV;
-                mesh.uv2 = renderingUV2;
+                mesh.uv = uv;
+                mesh.uv2 = uv2;
 
-                // Cubiquity uses 16-bit index arrays to save space, and it appears Unity does the same (at least, there is
-                // a limit of 65535 vertices per mesh). However, the Mesh.triangles property is of the signed 32-bit int[]
-                // type rather than the unsigned 16-bit ushort[] type. Perhaps this is so they can switch to 32-bit index
-                // buffers in the future? At any rate, it means we have to perform a conversion.
-                int[] indices = new int[noOfIndices];
-                for (int ct = 0; ct < noOfIndices; ct++)
-                {
-                    indices[ct] = *result;
-                    result++;
-                }
-                mesh.triangles = indices;
+                // Assign index data to the meshes.
+                mesh.triangles = indicesAsInt;
 				
-				// FIXME - Get proper bounds
+				// FIXME - Value of 32 should not be hard-coded, get it from the volume?
                 mesh.bounds.SetMinMax(new Vector3(0.0f, 0.0f, 0.0f), new Vector3(32.0f, 32.0f, 32.0f));
 
                 return mesh;
