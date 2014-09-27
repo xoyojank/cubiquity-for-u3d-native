@@ -287,29 +287,26 @@ namespace Cubiquity
                 for (int ct = 0; ct < noOfVertices; ct++)
 				{
 					// Get and decode the position
-					//Vector3 position = new Vector3(cubiquityVertices[ct].x, cubiquityVertices[ct].y, cubiquityVertices[ct].z);
                     positions[ct].Set(vertices->x, vertices->y, vertices->z);
                     positions[ct] *= (1.0f / 256.0f);
 					
-					// Get and decode the normal
-					
-					// Get the materials
-                    //Color32 color32 = new Color32(cubiquityVertices[ct].m0, cubiquityVertices[ct].m1, cubiquityVertices[ct].m2, cubiquityVertices[ct].m3);
+					// Get the materials. Some are stored in color...
                     colors32[ct].r = vertices->m0;
                     colors32[ct].g = vertices->m1;
                     colors32[ct].b = vertices->m2;
                     colors32[ct].a = vertices->m3;
 
-					//Vector4 tangents = new Vector4(cubiquityVertices[ct].m4 / 255.0f, cubiquityVertices[ct].m5 / 255.0f, cubiquityVertices[ct].m6 / 255.0f, cubiquityVertices[ct].m7 / 255.0f);
+                    // And come are stored in Uvs.
                     uv[ct].Set(vertices->m4 / 255.0f, vertices->m5 / 255.0f);
                     uv2[ct].Set(vertices->m6 / 255.0f, vertices->m7 / 255.0f);
 
+                    // Get and decode the normal
                     ushort ux = (ushort)((vertices->normal >> (ushort)8) & (ushort)0xFF);
                     ushort uy = (ushort)((vertices->normal) & (ushort)0xFF);
 
 					// Convert to floats in the range [-1.0f, +1.0f].
-					float ex = ux / 127.5f - 1.0f;
-					float ey = uy / 127.5f - 1.0f;
+					float ex = ux * (1.0f / 127.5f) - 1.0f;
+                    float ey = uy * (1.0f / 127.5f) - 1.0f;
 					
 					// Reconstruct the origninal vector. This is a C++ implementation
 					// of Listing 2 of http://jcgt.org/published/0003/02/01/
@@ -325,8 +322,8 @@ namespace Cubiquity
 						vy = refY;
 					}
                     normals[ct].Set(vx, vy, vz);
-                    normals[ct].Normalize(); // Should be done in shader - why is this needed?
 
+                    // Now do the next vertes.
                     vertices++;
 				}
 

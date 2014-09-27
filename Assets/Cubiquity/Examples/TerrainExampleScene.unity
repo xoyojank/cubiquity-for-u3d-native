@@ -181,6 +181,8 @@ MonoBehaviour:
   material: {fileID: 1315562466}
   mCastShadows: 1
   mReceiveShadows: 1
+  mShowWireframe: 0
+  mLodThreshold: 0
 --- !u!114 &690550940
 MonoBehaviour:
   m_ObjectHideFlags: 0
