@@ -27,7 +27,7 @@ namespace Cubiquity
 			
 			[System.NonSerialized]
 			public uint nodeHandle;
-			
+
 			public static GameObject CreateOctreeNode(uint nodeHandle, GameObject parentGameObject)
 			{			
 				int xPos, yPos, zPos;
@@ -261,25 +261,26 @@ namespace Cubiquity
 			unsafe public Mesh BuildMeshFromNodeHandleForTerrainVolume(uint nodeHandle)
 			{				
 				// Create rendering and possible collision meshes.
-				Mesh renderingMesh = new Mesh();		
+				Mesh renderingMesh = new Mesh(); //Should pool these
+                renderingMesh.Clear(false); // When pooling, this will be required to share Mesh instancews between terrain and colored cubes.
+
 				renderingMesh.hideFlags = HideFlags.DontSave;
 	
 				// Get the data from Cubiquity.
 
-                // Cubiquity uses 16-bit index arrays to save space, and it appears Unity does the same (at least, there is
-                // a limit of 65535 vertices per mesh). However, the Mesh.triangles property is of the signed 32-bit int[]
-                // type rather than the unsigned 16-bit ushort[] type. Perhaps this is so they can switch to 32-bit index
-                // buffers in the future? At any rate, it means we have to perform a conversion.
+                
                 uint noOfIndices = CubiquityDLL.GetNoOfIndicesMC(nodeHandle);
                 ushort* result = CubiquityDLL.GetIndicesMC(nodeHandle);
-                int[] indices = new int[noOfIndices];
-                for (int ct = 0; ct < noOfIndices; ct++)
-                {
-                    indices[ct] = *result;
-                    result++;
-                }
 
-				TerrainVertex[] cubiquityVertices = CubiquityDLL.GetVerticesMC(nodeHandle);			
+                uint noOfVertices = CubiquityDLL.GetNoOfVerticesMC(nodeHandle);
+				TerrainVertex* result2 = CubiquityDLL.GetVerticesMC(nodeHandle);
+
+                TerrainVertex[] cubiquityVertices = new TerrainVertex[noOfVertices];
+                for (int ct = 0; ct < noOfVertices; ct++)
+                {
+                    cubiquityVertices[ct] = *result2;
+                    result2++;
+                }
 				
 				// Create the arrays which we'll copy the data to.
 		        Vector3[] renderingVertices = new Vector3[cubiquityVertices.Length];		
@@ -343,6 +344,17 @@ namespace Cubiquity
 				//renderingMesh.tangents = renderingTangents;
 				renderingMesh.uv = renderingUV;
 				renderingMesh.uv2 = renderingUV2;
+
+                // Cubiquity uses 16-bit index arrays to save space, and it appears Unity does the same (at least, there is
+                // a limit of 65535 vertices per mesh). However, the Mesh.triangles property is of the signed 32-bit int[]
+                // type rather than the unsigned 16-bit ushort[] type. Perhaps this is so they can switch to 32-bit index
+                // buffers in the future? At any rate, it means we have to perform a conversion.
+                int[] indices = new int[noOfIndices];
+                for (int ct = 0; ct < noOfIndices; ct++)
+                {
+                    indices[ct] = *result;
+                    result++;
+                }
 				renderingMesh.triangles = indices;
 				
 				// FIXME - Get proper bounds

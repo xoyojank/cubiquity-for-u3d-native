@@ -454,16 +454,19 @@ namespace Cubiquity
 				
 			[DllImport (dllToImport)]
 			private static extern int cuGetNoOfVerticesMC(uint octreeNodeHandle, out uint result);
+            public static uint GetNoOfVerticesMC(uint octreeNodeHandle)
+            {
+                uint noOfVertices;
+                Validate(cuGetNoOfVerticesMC(octreeNodeHandle, out noOfVertices));
+                return noOfVertices;
+            }
+
 			[DllImport (dllToImport)]
-			private static extern int cuGetVerticesMC(uint octreeNodeHandle, out TerrainVertex[] result);
-			public static TerrainVertex[] GetVerticesMC(uint octreeNodeHandle)
-			{
-				// Based on http://stackoverflow.com/a/1318929
-				uint noOfVertices;
-				Validate(cuGetNoOfVerticesMC(octreeNodeHandle, out noOfVertices));
-				
-				TerrainVertex[] result = new TerrainVertex[noOfVertices];
-				Validate(cuGetVerticesMC(octreeNodeHandle, out result));
+			unsafe private static extern int cuGetVerticesMC(uint octreeNodeHandle, TerrainVertex** result);
+			unsafe public static TerrainVertex* GetVerticesMC(uint octreeNodeHandle)
+			{			
+                TerrainVertex* result = null;
+				Validate(cuGetVerticesMC(octreeNodeHandle, &result));
 				
 				return result;
 			}

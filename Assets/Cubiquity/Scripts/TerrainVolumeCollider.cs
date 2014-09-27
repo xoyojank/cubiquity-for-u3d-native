@@ -31,7 +31,15 @@ namespace Cubiquity
                 result++;
             }
 
-			TerrainVertex[] cubiquityVertices = CubiquityDLL.GetVerticesMC(nodeHandle);			
+            uint noOfVertices = CubiquityDLL.GetNoOfVerticesMC(nodeHandle);
+            TerrainVertex* result2 = CubiquityDLL.GetVerticesMC(nodeHandle);
+
+            TerrainVertex[] cubiquityVertices = new TerrainVertex[noOfVertices];
+            for (int ct = 0; ct < noOfVertices; ct++)
+            {
+                cubiquityVertices[ct] = *result2;
+                result2++;
+            }		
 			
 			// Create the arrays which we'll copy the data to.	
 			Vector3[] vertices = new Vector3[cubiquityVertices.Length];
