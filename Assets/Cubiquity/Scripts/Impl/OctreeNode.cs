@@ -258,16 +258,27 @@ namespace Cubiquity
 				children[x, y, z] = gameObject;
 			}
 			
-			public Mesh BuildMeshFromNodeHandleForTerrainVolume(uint nodeHandle)
-			{
-				// At some point I should read this: http://forum.unity3d.com/threads/5687-C-plugin-pass-arrays-from-C
-				
+			unsafe public Mesh BuildMeshFromNodeHandleForTerrainVolume(uint nodeHandle)
+			{				
 				// Create rendering and possible collision meshes.
 				Mesh renderingMesh = new Mesh();		
 				renderingMesh.hideFlags = HideFlags.DontSave;
 	
 				// Get the data from Cubiquity.
-				int[] indices = CubiquityDLL.GetIndicesMC(nodeHandle);		
+
+                // Cubiquity uses 16-bit index arrays to save space, and it appears Unity does the same (at least, there is
+                // a limit of 65535 vertices per mesh). However, the Mesh.triangles property is of the signed 32-bit int[]
+                // type rather than the unsigned 16-bit ushort[] type. Perhaps this is so they can switch to 32-bit index
+                // buffers in the future? At any rate, it means we have to perform a conversion.
+                uint noOfIndices = CubiquityDLL.GetNoOfIndicesMC(nodeHandle);
+                ushort* result = CubiquityDLL.GetIndicesMC(nodeHandle);
+                int[] indices = new int[noOfIndices];
+                for (int ct = 0; ct < noOfIndices; ct++)
+                {
+                    indices[ct] = *result;
+                    result++;
+                }
+
 				TerrainVertex[] cubiquityVertices = CubiquityDLL.GetVerticesMC(nodeHandle);			
 				
 				// Create the arrays which we'll copy the data to.
