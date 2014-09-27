@@ -284,6 +284,8 @@ namespace Cubiquity
                 Vector2[] uv = new Vector2[noOfVertices];
                 Vector2[] uv2 = new Vector2[noOfVertices];
 				
+                // Move the data from our Cubiquity-owned memory to managed memory. We also
+                // need to decode the data as Cubiquity stores it in a compressed form.
                 for (int ct = 0; ct < noOfVertices; ct++)
 				{
 					// Get and decode the position
@@ -296,7 +298,7 @@ namespace Cubiquity
                     colors32[ct].b = vertices->m2;
                     colors32[ct].a = vertices->m3;
 
-                    // And come are stored in Uvs.
+                    // And some are stored in UVs.
                     uv[ct].Set(vertices->m4 / 255.0f, vertices->m5 / 255.0f);
                     uv2[ct].Set(vertices->m6 / 255.0f, vertices->m7 / 255.0f);
 
@@ -341,9 +343,6 @@ namespace Cubiquity
 
                 // Assign index data to the meshes.
                 mesh.triangles = indicesAsInt;
-				
-				// FIXME - Value of 32 should not be hard-coded, get it from the volume?
-                mesh.bounds.SetMinMax(new Vector3(0.0f, 0.0f, 0.0f), new Vector3(32.0f, 32.0f, 32.0f));
 
                 return mesh;
 			}
