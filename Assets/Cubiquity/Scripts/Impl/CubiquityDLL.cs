@@ -470,6 +470,13 @@ namespace Cubiquity
 				
 				return result;
 			}
+
+            [DllImport(dllToImport)]
+            unsafe private static extern int cuGetMeshMC(uint octreeNodeHandle, out uint noOfVertices, TerrainVertex** vertices, out uint noOfIndices, ushort** indices);
+            unsafe public static void GetMeshMC(uint octreeNodeHandle, out uint noOfVertices, TerrainVertex** vertices, out uint noOfIndices, ushort** indices)
+            {
+                Validate(cuGetMeshMC(octreeNodeHandle, out noOfVertices, vertices, out noOfIndices, indices));
+            }
 			
 			////////////////////////////////////////////////////////////////////////////////
 			// Clock functions
