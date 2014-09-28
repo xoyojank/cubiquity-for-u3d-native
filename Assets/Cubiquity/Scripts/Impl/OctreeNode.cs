@@ -260,7 +260,7 @@ namespace Cubiquity
 			
 			unsafe public Mesh BuildMeshFromNodeHandleForTerrainVolume(uint nodeHandle)
 			{					
-				// Get the data from Cubiquity.                
+				// Get the data from Cubiquity.    
                 uint noOfIndices = CubiquityDLL.GetNoOfIndicesMC(nodeHandle);
                 ushort* indices = CubiquityDLL.GetIndicesMC(nodeHandle);
                 uint noOfVertices = CubiquityDLL.GetNoOfVerticesMC(nodeHandle);
@@ -325,13 +325,12 @@ namespace Cubiquity
 					}
                     normals[ct].Set(vx, vy, vz);
 
-                    // Now do the next vertes.
+                    // Now do the next vertex.
                     vertices++;
 				}
 
                 // Create rendering mesh
-                Mesh mesh = new Mesh(); //Should pool these
-                mesh.Clear(false); // When pooling, this will be required to share Mesh instancews between terrain and colored cubes.
+                Mesh mesh = new Mesh();
                 mesh.hideFlags = HideFlags.DontSave;
 				
 				// Assign vertex data to the mesh.
@@ -347,45 +346,58 @@ namespace Cubiquity
                 return mesh;
 			}
 			
-			public Mesh BuildMeshFromNodeHandleForColoredCubesVolume(uint nodeHandle)
-			{
-				// At some point I should read this: http://forum.unity3d.com/threads/5687-C-plugin-pass-arrays-from-C
-				
+			unsafe public Mesh BuildMeshFromNodeHandleForColoredCubesVolume(uint nodeHandle)
+			{				
 				Vector3 offset = new Vector3(0.5f, 0.5f, 0.5f); // Required for the CubicVertex decoding process.
-					
-				// Create rendering and possible collision meshes.
-				Mesh renderingMesh = new Mesh();		
-				renderingMesh.hideFlags = HideFlags.DontSave;
-	
-				// Get the data from Cubiquity.
-				int[] indices = CubiquityDLL.GetIndices(nodeHandle);		
-				ColoredCubesVertex[] cubiquityVertices = CubiquityDLL.GetVertices(nodeHandle);			
+
+                // Get the data from Cubiquity.    
+                uint noOfIndices = CubiquityDLL.GetNoOfIndices(nodeHandle);
+                ushort* indices = CubiquityDLL.GetIndices(nodeHandle);
+                uint noOfVertices = CubiquityDLL.GetNoOfVertices(nodeHandle);
+                ColoredCubesVertex* vertices = CubiquityDLL.GetVertices(nodeHandle);
+
+                // Cubiquity uses 16-bit index arrays to save space, and it appears Unity does the same (at least, there is
+                // a limit of 65535 vertices per mesh). However, the Mesh.triangles property is of the signed 32-bit int[]
+                // type rather than the unsigned 16-bit ushort[] type. Perhaps this is so they can switch to 32-bit index
+                // buffers in the future? At any rate, it means we have to perform a conversion.
+                int[] indicesAsInt = new int[noOfIndices];
+                for (int ct = 0; ct < noOfIndices; ct++)
+                {
+                    indicesAsInt[ct] = *indices;
+                    indices++;
+                }
 				
 				// Create the arrays which we'll copy the data to.
-		        Vector3[] renderingVertices = new Vector3[cubiquityVertices.Length];	
-				Color32[] renderingColors = new Color32[cubiquityVertices.Length];
-				
-				for(int ct = 0; ct < cubiquityVertices.Length; ct++)
+                Vector3[] positions = new Vector3[noOfVertices];
+                Color32[] colors32 = new Color32[noOfVertices];
+
+                // Move the data from our Cubiquity-owned memory to managed memory. We also
+                // need to decode the data as Cubiquity stores it in a compressed form.
+                for (int ct = 0; ct < noOfVertices; ct++)
 				{
-					// Get the vertex data from Cubiquity.
-					Vector3 position = new Vector3(cubiquityVertices[ct].x, cubiquityVertices[ct].y, cubiquityVertices[ct].z);
-					position -= offset; // Part of the CubicVertex decoding process.
-					QuantizedColor color = cubiquityVertices[ct].color;
-						
-					// Copy it to the arrays.
-					renderingVertices[ct] = position;
-					renderingColors[ct] = (Color32)color;
+                    // Get and decode the position
+                    positions[ct].Set(vertices->x, vertices->y, vertices->z);
+                    positions[ct] -= offset;
+
+                    // Get and decode the color
+                    colors32[ct] = (Color32)vertices->color;
+
+                    // Now do the next vertex.
+                    vertices++;
 				}
-				
-				// Assign vertex data to the meshes.
-				renderingMesh.vertices = renderingVertices; 
-				renderingMesh.colors32 = renderingColors;
-				renderingMesh.triangles = indices;
-				
-				// FIXME - Get proper bounds
-				renderingMesh.bounds.SetMinMax(new Vector3(0.0f, 0.0f, 0.0f), new Vector3(32.0f, 32.0f, 32.0f));
-				
-				return renderingMesh;
+
+                // Create rendering mesh
+                Mesh mesh = new Mesh();
+                mesh.hideFlags = HideFlags.DontSave;
+
+                // Assign vertex data to the mesh.
+                mesh.vertices = positions;
+                mesh.colors32 = colors32;
+
+                // Assign index data to the meshes.
+                mesh.triangles = indicesAsInt;
+
+                return mesh;
 			}
 		}
 	}

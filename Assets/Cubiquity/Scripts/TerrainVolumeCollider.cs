@@ -42,13 +42,12 @@ namespace Cubiquity
                 positions[ct].Set(vertices->x, vertices->y, vertices->z);
                 positions[ct] *= (1.0f / 256.0f);
 
-                // Now do the next vertes.
+                // Now do the next vertex.
                 vertices++;
             }
 
             // Create rendering mesh
-            Mesh mesh = new Mesh(); //Should pool these
-            mesh.Clear(false); // When pooling, this will be required to share Mesh instancews between terrain and colored cubes.
+            Mesh mesh = new Mesh();
             mesh.hideFlags = HideFlags.DontSave;
 
             // Assign vertex data to the mesh.

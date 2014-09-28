@@ -12,32 +12,53 @@ namespace Cubiquity
 	 */
 	public class ColoredCubesVolumeCollider : VolumeCollider
 	{
-		public override Mesh BuildMeshFromNodeHandle(uint nodeHandle)
+		unsafe public override Mesh BuildMeshFromNodeHandle(uint nodeHandle)
 		{
-			// At some point I should read this: http://forum.unity3d.com/threads/5687-C-plugin-pass-arrays-from-C
-				
-			// Create rendering and possible collision meshes.
-			Mesh collisionMesh = new Mesh();		
-			collisionMesh.hideFlags = HideFlags.DontSave;
+            Vector3 offset = new Vector3(0.5f, 0.5f, 0.5f); // Required for the CubicVertex decoding process.
 
-			// Get the data from Cubiquity.
-			int[] indices = CubiquityDLL.GetIndices(nodeHandle);		
-			ColoredCubesVertex[] cubiquityVertices = CubiquityDLL.GetVertices(nodeHandle);			
-			
-			// Create the arrays which we'll copy the data to.
-			Vector3[] vertices = new Vector3[cubiquityVertices.Length];
-			
-			for(int ct = 0; ct < cubiquityVertices.Length; ct++)
-			{
-				// Get the vertex data from Cubiquity.
-				vertices[ct] = new Vector3(cubiquityVertices[ct].x, cubiquityVertices[ct].y, cubiquityVertices[ct].z);
-			}
-			
-			//FIXME - set collision mesh bounds as we do with rendering mesh?
-			collisionMesh.vertices = vertices;
-			collisionMesh.triangles = indices;
-		
-			return collisionMesh;
+            // Get the data from Cubiquity.    
+            uint noOfIndices = CubiquityDLL.GetNoOfIndices(nodeHandle);
+            ushort* indices = CubiquityDLL.GetIndices(nodeHandle);
+            uint noOfVertices = CubiquityDLL.GetNoOfVertices(nodeHandle);
+            ColoredCubesVertex* vertices = CubiquityDLL.GetVertices(nodeHandle);
+
+            // Cubiquity uses 16-bit index arrays to save space, and it appears Unity does the same (at least, there is
+            // a limit of 65535 vertices per mesh). However, the Mesh.triangles property is of the signed 32-bit int[]
+            // type rather than the unsigned 16-bit ushort[] type. Perhaps this is so they can switch to 32-bit index
+            // buffers in the future? At any rate, it means we have to perform a conversion.
+            int[] indicesAsInt = new int[noOfIndices];
+            for (int ct = 0; ct < noOfIndices; ct++)
+            {
+                indicesAsInt[ct] = *indices;
+                indices++;
+            }
+
+            // Create the arrays which we'll copy the data to.
+            Vector3[] positions = new Vector3[noOfVertices];
+
+            // Move the data from our Cubiquity-owned memory to managed memory. We also
+            // need to decode the data as Cubiquity stores it in a compressed form.
+            for (int ct = 0; ct < noOfVertices; ct++)
+            {
+                // Get and decode the position
+                positions[ct].Set(vertices->x, vertices->y, vertices->z);
+                positions[ct] -= offset;
+
+                // Now do the next vertex.
+                vertices++;
+            }
+
+            // Create rendering mesh
+            Mesh mesh = new Mesh();
+            mesh.hideFlags = HideFlags.DontSave;
+
+            // Assign vertex data to the mesh.
+            mesh.vertices = positions;
+
+            // Assign index data to the meshes.
+            mesh.triangles = indicesAsInt;
+
+            return mesh;
 		}
 	}
 }
