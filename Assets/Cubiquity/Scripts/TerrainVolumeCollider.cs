@@ -14,11 +14,9 @@ namespace Cubiquity
 	{
 		unsafe public override Mesh BuildMeshFromNodeHandle(uint nodeHandle)
 		{
-            // Get the data from Cubiquity.                
-            uint noOfIndices = CubiquityDLL.GetNoOfIndicesMC(nodeHandle);
-            ushort* indices = CubiquityDLL.GetIndicesMC(nodeHandle);
-            uint noOfVertices = CubiquityDLL.GetNoOfVerticesMC(nodeHandle);
-            TerrainVertex* vertices = CubiquityDLL.GetVerticesMC(nodeHandle);
+            // Get the data from Cubiquity. 
+            uint noOfVertices; TerrainVertex* vertices = null; uint noOfIndices; ushort* indices = null;
+            CubiquityDLL.GetMeshMC(nodeHandle, out noOfVertices, &vertices, out noOfIndices, &indices);
 
             // Cubiquity uses 16-bit index arrays to save space, and it appears Unity does the same (at least, there is
             // a limit of 65535 vertices per mesh). However, the Mesh.triangles property is of the signed 32-bit int[]

@@ -396,43 +396,6 @@ namespace Cubiquity
 			// Mesh functions
 			////////////////////////////////////////////////////////////////////////////////
             [DllImport(dllToImport)]
-            private static extern int cuGetNoOfIndices(uint octreeNodeHandle, out uint result);
-            public static uint GetNoOfIndices(uint octreeNodeHandle)
-            {
-                uint noOfIndices;
-                Validate(cuGetNoOfIndices(octreeNodeHandle, out noOfIndices));
-                return noOfIndices;
-            }
-
-            [DllImport(dllToImport)]
-            unsafe private static extern int cuGetIndices(uint octreeNodeHandle, ushort** result);
-            unsafe public static ushort* GetIndices(uint octreeNodeHandle)
-            {
-                ushort* result = null;
-                Validate(cuGetIndices(octreeNodeHandle, &result));
-                return result;
-            }
-
-            [DllImport(dllToImport)]
-            private static extern int cuGetNoOfVertices(uint octreeNodeHandle, out uint result);
-            public static uint GetNoOfVertices(uint octreeNodeHandle)
-            {
-                uint noOfVertices;
-                Validate(cuGetNoOfVertices(octreeNodeHandle, out noOfVertices));
-                return noOfVertices;
-            }
-
-            [DllImport(dllToImport)]
-            unsafe private static extern int cuGetVertices(uint octreeNodeHandle, ColoredCubesVertex** result);
-            unsafe public static ColoredCubesVertex* GetVertices(uint octreeNodeHandle)
-            {
-                ColoredCubesVertex* result = null;
-                Validate(cuGetVertices(octreeNodeHandle, &result));
-
-                return result;
-            }
-
-            [DllImport(dllToImport)]
             unsafe private static extern int cuGetMesh(uint octreeNodeHandle, out uint noOfVertices, ColoredCubesVertex** vertices, out uint noOfIndices, ushort** indices);
             unsafe public static void GetMesh(uint octreeNodeHandle, out uint noOfVertices, ColoredCubesVertex** vertices, out uint noOfIndices, ushort** indices)
             {
@@ -440,43 +403,6 @@ namespace Cubiquity
             }
 			
 			//--------------------------------------------------------------------------------
-			
-			[DllImport (dllToImport)]
-			private static extern int cuGetNoOfIndicesMC(uint octreeNodeHandle, out uint result);
-            public static uint GetNoOfIndicesMC(uint octreeNodeHandle)
-            {
-                uint noOfIndices;
-                Validate(cuGetNoOfIndicesMC(octreeNodeHandle, out noOfIndices));
-                return noOfIndices;
-            }
-
-			[DllImport (dllToImport)]
-			unsafe private static extern int cuGetIndicesMC(uint octreeNodeHandle, ushort** result);
-			unsafe public static ushort* GetIndicesMC(uint octreeNodeHandle)
-			{
-				ushort* result = null;
-				Validate(cuGetIndicesMC(octreeNodeHandle, &result));
-                return result;
-			}
-				
-			[DllImport (dllToImport)]
-			private static extern int cuGetNoOfVerticesMC(uint octreeNodeHandle, out uint result);
-            public static uint GetNoOfVerticesMC(uint octreeNodeHandle)
-            {
-                uint noOfVertices;
-                Validate(cuGetNoOfVerticesMC(octreeNodeHandle, out noOfVertices));
-                return noOfVertices;
-            }
-
-			[DllImport (dllToImport)]
-			unsafe private static extern int cuGetVerticesMC(uint octreeNodeHandle, TerrainVertex** result);
-			unsafe public static TerrainVertex* GetVerticesMC(uint octreeNodeHandle)
-			{			
-                TerrainVertex* result = null;
-				Validate(cuGetVerticesMC(octreeNodeHandle, &result));
-				
-				return result;
-			}
 
             [DllImport(dllToImport)]
             unsafe private static extern int cuGetMeshMC(uint octreeNodeHandle, out uint noOfVertices, TerrainVertex** vertices, out uint noOfIndices, ushort** indices);
