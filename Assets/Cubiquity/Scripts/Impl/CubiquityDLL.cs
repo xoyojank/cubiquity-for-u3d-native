@@ -431,6 +431,13 @@ namespace Cubiquity
 
                 return result;
             }
+
+            [DllImport(dllToImport)]
+            unsafe private static extern int cuGetMesh(uint octreeNodeHandle, out uint noOfVertices, ColoredCubesVertex** vertices, out uint noOfIndices, ushort** indices);
+            unsafe public static void GetMesh(uint octreeNodeHandle, out uint noOfVertices, ColoredCubesVertex** vertices, out uint noOfIndices, ushort** indices)
+            {
+                Validate(cuGetMesh(octreeNodeHandle, out noOfVertices, vertices, out noOfIndices, indices));
+            }
 			
 			//--------------------------------------------------------------------------------
 			
