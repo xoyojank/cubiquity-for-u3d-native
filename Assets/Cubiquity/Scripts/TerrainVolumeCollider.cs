@@ -15,10 +15,14 @@ namespace Cubiquity
 		unsafe public override Mesh BuildMeshFromNodeHandle(uint nodeHandle)
 		{
             // Get the data from Cubiquity.                
-            uint noOfIndices = CubiquityDLL.GetNoOfIndicesMC(nodeHandle);
+            /*uint noOfIndices = CubiquityDLL.GetNoOfIndicesMC(nodeHandle);
             ushort* indices = CubiquityDLL.GetIndicesMC(nodeHandle);
             uint noOfVertices = CubiquityDLL.GetNoOfVerticesMC(nodeHandle);
-            TerrainVertex* vertices = CubiquityDLL.GetVerticesMC(nodeHandle);
+            TerrainVertex* vertices = CubiquityDLL.GetVerticesMC(nodeHandle);*/
+
+            uint noOfVertices; TerrainVertex* vertices; uint noOfIndices; ushort* indices;
+            CubiquityDLL.GetMeshMC(nodeHandle, &noOfVertices, &vertices, &noOfIndices, &indices);
+
 
             // Cubiquity uses 16-bit index arrays to save space, and it appears Unity does the same (at least, there is
             // a limit of 65535 vertices per mesh). However, the Mesh.triangles property is of the signed 32-bit int[]
@@ -27,8 +31,7 @@ namespace Cubiquity
             int[] indicesAsInt = new int[noOfIndices];
             for (int ct = 0; ct < noOfIndices; ct++)
             {
-                indicesAsInt[ct] = *indices;
-                indices++;
+                indicesAsInt[ct] = indices[ct];
             }
 
             // Create the arrays which we'll copy the data to.
@@ -39,11 +42,8 @@ namespace Cubiquity
             for (int ct = 0; ct < noOfVertices; ct++)
             {
                 // Get and decode the position
-                positions[ct].Set(vertices->x, vertices->y, vertices->z);
+                positions[ct].Set(vertices[ct].x, vertices[ct].y, vertices[ct].z);
                 positions[ct] *= (1.0f / 256.0f);
-
-                // Now do the next vertex.
-                vertices++;
             }
 
             // Create rendering mesh

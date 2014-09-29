@@ -17,10 +17,13 @@ namespace Cubiquity
             Vector3 offset = new Vector3(0.5f, 0.5f, 0.5f); // Required for the CubicVertex decoding process.
 
             // Get the data from Cubiquity.    
-            uint noOfIndices = CubiquityDLL.GetNoOfIndices(nodeHandle);
+            /*uint noOfIndices = CubiquityDLL.GetNoOfIndices(nodeHandle);
             ushort* indices = CubiquityDLL.GetIndices(nodeHandle);
             uint noOfVertices = CubiquityDLL.GetNoOfVertices(nodeHandle);
-            ColoredCubesVertex* vertices = CubiquityDLL.GetVertices(nodeHandle);
+            ColoredCubesVertex* vertices = CubiquityDLL.GetVertices(nodeHandle);*/
+
+            uint noOfVertices; ColoredCubesVertex* vertices; uint noOfIndices; ushort* indices;
+            CubiquityDLL.GetMesh(nodeHandle, &noOfVertices, &vertices, &noOfIndices, &indices);
 
             // Cubiquity uses 16-bit index arrays to save space, and it appears Unity does the same (at least, there is
             // a limit of 65535 vertices per mesh). However, the Mesh.triangles property is of the signed 32-bit int[]
@@ -29,8 +32,7 @@ namespace Cubiquity
             int[] indicesAsInt = new int[noOfIndices];
             for (int ct = 0; ct < noOfIndices; ct++)
             {
-                indicesAsInt[ct] = *indices;
-                indices++;
+                indicesAsInt[ct] = indices[ct];
             }
 
             // Create the arrays which we'll copy the data to.
@@ -41,11 +43,8 @@ namespace Cubiquity
             for (int ct = 0; ct < noOfVertices; ct++)
             {
                 // Get and decode the position
-                positions[ct].Set(vertices->x, vertices->y, vertices->z);
+                positions[ct].Set(vertices[ct].x, vertices[ct].y, vertices[ct].z);
                 positions[ct] -= offset;
-
-                // Now do the next vertex.
-                vertices++;
             }
 
             // Create rendering mesh
