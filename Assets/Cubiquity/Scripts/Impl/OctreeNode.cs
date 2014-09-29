@@ -262,7 +262,11 @@ namespace Cubiquity
 			{
                 // Get the data from Cubiquity. 
                 uint noOfVertices; TerrainVertex* vertices = null; uint noOfIndices; ushort* indices = null;
-                CubiquityDLL.GetMeshMC(nodeHandle, out noOfVertices, &vertices, out noOfIndices, &indices);
+                CubiquityDLL.GetMeshMC(nodeHandle, out noOfVertices, &vertices, out noOfIndices, &indices);		   
+                //noOfIndices = CubiquityDLL.GetNoOfIndicesMC(nodeHandle);
+                //indices = CubiquityDLL.GetIndicesMC(nodeHandle);
+                //noOfVertices = CubiquityDLL.GetNoOfVerticesMC(nodeHandle);
+				//vertices = CubiquityDLL.GetVerticesMC(nodeHandle);
 
                 // Cubiquity uses 16-bit index arrays to save space, and it appears Unity does the same (at least, there is
                 // a limit of 65535 vertices per mesh). However, the Mesh.triangles property is of the signed 32-bit int[]
@@ -350,7 +354,11 @@ namespace Cubiquity
 
                 // Get the data from Cubiquity.
                 uint noOfVertices; ColoredCubesVertex* vertices = null; uint noOfIndices; ushort* indices = null;
-                CubiquityDLL.GetMesh(nodeHandle, out noOfVertices, &vertices, out noOfIndices, &indices);
+                CubiquityDLL.GetMesh(nodeHandle, out noOfVertices, &vertices, out noOfIndices, &indices);	
+                /*int noOfIndices = CubiquityDLL.GetNoOfIndices(nodeHandle);
+                ushort* indices = CubiquityDLL.GetIndices(nodeHandle);
+                uint noOfVertices = CubiquityDLL.GetNoOfVertices(nodeHandle);
+                ColoredCubesVertex* vertices = CubiquityDLL.GetVertices(nodeHandle);*/
 
                 // Cubiquity uses 16-bit index arrays to save space, and it appears Unity does the same (at least, there is
                 // a limit of 65535 vertices per mesh). However, the Mesh.triangles property is of the signed 32-bit int[]
