@@ -397,37 +397,37 @@ namespace Cubiquity
 			////////////////////////////////////////////////////////////////////////////////
             [DllImport(dllToImport)]
             private static extern int cuGetNoOfIndices(uint octreeNodeHandle, out uint result);
-            public static uint GetNoOfIndices(uint octreeNodeHandle)
+            [DllImport(dllToImport)]
+            private static extern int cuGetIndices(uint octreeNodeHandle, out ushort[] result);
+            public static int[] GetIndices(uint octreeNodeHandle)
             {
                 uint noOfIndices;
                 Validate(cuGetNoOfIndices(octreeNodeHandle, out noOfIndices));
-                return noOfIndices;
-            }
 
-            [DllImport(dllToImport)]
-            unsafe private static extern int cuGetIndices(uint octreeNodeHandle, ushort** result);
-            unsafe public static ushort* GetIndices(uint octreeNodeHandle)
-            {
-                ushort* result = null;
-                Validate(cuGetIndices(octreeNodeHandle, &result));
-                return result;
+                ushort[] result = new ushort[noOfIndices];
+                Validate(cuGetIndices(octreeNodeHandle, out result));
+
+                // Cubiquity uses 16-bit index arrays to save space, and it appears Unity does the same (at least, there is
+                // a limit of 65535 vertices per mesh). However, the Mesh.triangles property is of the signed 32-bit int[]
+                // type rather than the unsigned 16-bit ushort[] type. Perhaps this is so they can switch to 32-bit index
+                // buffers in the future? At any rate, it means we have to perform a conversion.
+                int[] resultAsInt = Array.ConvertAll(result, b => (int)b);
+
+                return resultAsInt;
             }
 
             [DllImport(dllToImport)]
             private static extern int cuGetNoOfVertices(uint octreeNodeHandle, out uint result);
-            public static uint GetNoOfVertices(uint octreeNodeHandle)
+            [DllImport(dllToImport)]
+            private static extern int cuGetVertices(uint octreeNodeHandle, out ColoredCubesVertex[] result);
+            public static ColoredCubesVertex[] GetVertices(uint octreeNodeHandle)
             {
+                // Based on http://stackoverflow.com/a/1318929
                 uint noOfVertices;
                 Validate(cuGetNoOfVertices(octreeNodeHandle, out noOfVertices));
-                return noOfVertices;
-            }
 
-            [DllImport(dllToImport)]
-            unsafe private static extern int cuGetVertices(uint octreeNodeHandle, ColoredCubesVertex** result);
-            unsafe public static ColoredCubesVertex* GetVertices(uint octreeNodeHandle)
-            {
-                ColoredCubesVertex* result = null;
-                Validate(cuGetVertices(octreeNodeHandle, &result));
+                ColoredCubesVertex[] result = new ColoredCubesVertex[noOfVertices];
+                Validate(cuGetVertices(octreeNodeHandle, out result));
 
                 return result;
             }
@@ -440,43 +440,37 @@ namespace Cubiquity
             }
 			
 			//--------------------------------------------------------------------------------
-			
-			[DllImport (dllToImport)]
-			private static extern int cuGetNoOfIndicesMC(uint octreeNodeHandle, out uint result);
-            public static uint GetNoOfIndicesMC(uint octreeNodeHandle)
+
+            [DllImport(dllToImport)]
+            private static extern int cuGetNoOfIndicesMC(uint octreeNodeHandle, out uint result);
+            [DllImport(dllToImport)]
+            private static extern int cuGetIndicesMC(uint octreeNodeHandle, out ushort[] result);
+            public static ushort[] GetIndicesMC(uint octreeNodeHandle)
             {
                 uint noOfIndices;
                 Validate(cuGetNoOfIndicesMC(octreeNodeHandle, out noOfIndices));
-                return noOfIndices;
+
+                ushort[] result = new ushort[noOfIndices];
+                Validate(cuGetIndicesMC(octreeNodeHandle, out result));
+
+                return result;
             }
 
-			[DllImport (dllToImport)]
-			unsafe private static extern int cuGetIndicesMC(uint octreeNodeHandle, ushort** result);
-            unsafe public static ushort* GetIndicesMC(uint octreeNodeHandle)
-			{
-                ushort* result = null;
-				Validate(cuGetIndicesMC(octreeNodeHandle, &result));
-                return result;
-			}
-				
-			[DllImport (dllToImport)]
-			private static extern int cuGetNoOfVerticesMC(uint octreeNodeHandle, out uint result);
-            public static uint GetNoOfVerticesMC(uint octreeNodeHandle)
+            [DllImport(dllToImport)]
+            private static extern int cuGetNoOfVerticesMC(uint octreeNodeHandle, out uint result);
+            [DllImport(dllToImport)]
+            private static extern int cuGetVerticesMC(uint octreeNodeHandle, out TerrainVertex[] result);
+            public static TerrainVertex[] GetVerticesMC(uint octreeNodeHandle)
             {
+                // Based on http://stackoverflow.com/a/1318929
                 uint noOfVertices;
                 Validate(cuGetNoOfVerticesMC(octreeNodeHandle, out noOfVertices));
-                return noOfVertices;
-            }
 
-			[DllImport (dllToImport)]
-			unsafe private static extern int cuGetVerticesMC(uint octreeNodeHandle, TerrainVertex** result);
-			unsafe public static TerrainVertex* GetVerticesMC(uint octreeNodeHandle)
-			{			
-                TerrainVertex* result = null;
-				Validate(cuGetVerticesMC(octreeNodeHandle, &result));
-				
-				return result;
-			}
+                TerrainVertex[] result = new TerrainVertex[noOfVertices];
+                Validate(cuGetVerticesMC(octreeNodeHandle, out result));
+
+                return result;
+            }
 
             [DllImport(dllToImport)]
             unsafe private static extern int cuGetMeshMC(uint octreeNodeHandle, uint* noOfVertices, TerrainVertex** vertices, uint* noOfIndices, ushort** indices);
