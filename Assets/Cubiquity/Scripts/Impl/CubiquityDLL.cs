@@ -395,14 +395,15 @@ namespace Cubiquity
 			////////////////////////////////////////////////////////////////////////////////
 			// Mesh functions
 			////////////////////////////////////////////////////////////////////////////////
+#if CUBIQUITY_USE_UNSAFE
             [DllImport(dllToImport)]
             unsafe private static extern int cuGetMesh(uint octreeNodeHandle, uint* noOfVertices, ColoredCubesVertex** vertices, uint* noOfIndices, ushort** indices);
             unsafe public static void GetMesh(uint octreeNodeHandle, uint* noOfVertices, ColoredCubesVertex** vertices, uint* noOfIndices, ushort** indices)
             {
                 Validate(cuGetMesh(octreeNodeHandle, noOfVertices, vertices, noOfIndices, indices));
             }
-
-            /*[DllImport(dllToImport)]
+#else
+            [DllImport(dllToImport)]
             private static extern int cuGetNoOfIndices(uint octreeNodeHandle, out uint result);
             [DllImport(dllToImport)]
             private static extern int cuGetIndices(uint octreeNodeHandle, out ushort[] result);
@@ -431,17 +432,19 @@ namespace Cubiquity
                 Validate(cuGetVertices(octreeNodeHandle, out result));
 
                 return result;
-            }*/
+            }
+#endif
 			
 			//--------------------------------------------------------------------------------
+#if CUBIQUITY_USE_UNSAFE
             [DllImport(dllToImport)]
             unsafe private static extern int cuGetMeshMC(uint octreeNodeHandle, uint* noOfVertices, TerrainVertex** vertices, uint* noOfIndices, ushort** indices);
             unsafe public static void GetMeshMC(uint octreeNodeHandle, uint* noOfVertices, TerrainVertex** vertices, uint* noOfIndices, ushort** indices)
             {
                 Validate(cuGetMeshMC(octreeNodeHandle, noOfVertices, vertices, noOfIndices, indices));
             }
-
-            /*[DllImport(dllToImport)]
+#else
+            [DllImport(dllToImport)]
             private static extern int cuGetNoOfIndicesMC(uint octreeNodeHandle, out uint result);
             [DllImport(dllToImport)]
             private static extern int cuGetIndicesMC(uint octreeNodeHandle, out ushort[] result);
@@ -470,7 +473,8 @@ namespace Cubiquity
                 Validate(cuGetVerticesMC(octreeNodeHandle, out result));
 
                 return result;
-            }*/
+            }
+#endif
 
 			////////////////////////////////////////////////////////////////////////////////
 			// Clock functions
