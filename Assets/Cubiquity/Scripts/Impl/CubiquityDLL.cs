@@ -395,11 +395,18 @@ namespace Cubiquity
 			////////////////////////////////////////////////////////////////////////////////
 			// Mesh functions
 			////////////////////////////////////////////////////////////////////////////////
+            /*[DllImport(dllToImport)]
+            unsafe private static extern int cuGetMesh(uint octreeNodeHandle, uint* noOfVertices, ColoredCubesVertex** vertices, uint* noOfIndices, ushort** indices);
+            unsafe public static void GetMesh(uint octreeNodeHandle, uint* noOfVertices, ColoredCubesVertex** vertices, uint* noOfIndices, ushort** indices)
+            {
+                Validate(cuGetMesh(octreeNodeHandle, noOfVertices, vertices, noOfIndices, indices));
+            }*/
+
             [DllImport(dllToImport)]
             private static extern int cuGetNoOfIndices(uint octreeNodeHandle, out uint result);
             [DllImport(dllToImport)]
             private static extern int cuGetIndices(uint octreeNodeHandle, out ushort[] result);
-            public static int[] GetIndices(uint octreeNodeHandle)
+            public static ushort[] GetIndices(uint octreeNodeHandle)
             {
                 uint noOfIndices;
                 Validate(cuGetNoOfIndices(octreeNodeHandle, out noOfIndices));
@@ -407,13 +414,7 @@ namespace Cubiquity
                 ushort[] result = new ushort[noOfIndices];
                 Validate(cuGetIndices(octreeNodeHandle, out result));
 
-                // Cubiquity uses 16-bit index arrays to save space, and it appears Unity does the same (at least, there is
-                // a limit of 65535 vertices per mesh). However, the Mesh.triangles property is of the signed 32-bit int[]
-                // type rather than the unsigned 16-bit ushort[] type. Perhaps this is so they can switch to 32-bit index
-                // buffers in the future? At any rate, it means we have to perform a conversion.
-                int[] resultAsInt = Array.ConvertAll(result, b => (int)b);
-
-                return resultAsInt;
+                return result;
             }
 
             [DllImport(dllToImport)]
@@ -431,15 +432,14 @@ namespace Cubiquity
 
                 return result;
             }
-
-            [DllImport(dllToImport)]
-            unsafe private static extern int cuGetMesh(uint octreeNodeHandle, uint* noOfVertices, ColoredCubesVertex** vertices, uint* noOfIndices, ushort** indices);
-            unsafe public static void GetMesh(uint octreeNodeHandle, uint* noOfVertices, ColoredCubesVertex** vertices, uint* noOfIndices, ushort** indices)
-            {
-                Validate(cuGetMesh(octreeNodeHandle, noOfVertices, vertices, noOfIndices, indices));
-            }
 			
 			//--------------------------------------------------------------------------------
+            /*[DllImport(dllToImport)]
+            unsafe private static extern int cuGetMeshMC(uint octreeNodeHandle, uint* noOfVertices, TerrainVertex** vertices, uint* noOfIndices, ushort** indices);
+            unsafe public static void GetMeshMC(uint octreeNodeHandle, uint* noOfVertices, TerrainVertex** vertices, uint* noOfIndices, ushort** indices)
+            {
+                Validate(cuGetMeshMC(octreeNodeHandle, noOfVertices, vertices, noOfIndices, indices));
+            }*/
 
             [DllImport(dllToImport)]
             private static extern int cuGetNoOfIndicesMC(uint octreeNodeHandle, out uint result);
@@ -472,13 +472,6 @@ namespace Cubiquity
                 return result;
             }
 
-            [DllImport(dllToImport)]
-            unsafe private static extern int cuGetMeshMC(uint octreeNodeHandle, uint* noOfVertices, TerrainVertex** vertices, uint* noOfIndices, ushort** indices);
-            unsafe public static void GetMeshMC(uint octreeNodeHandle, uint* noOfVertices, TerrainVertex** vertices, uint* noOfIndices, ushort** indices)
-            {
-                Validate(cuGetMeshMC(octreeNodeHandle, noOfVertices, vertices, noOfIndices, indices));
-            }
-			
 			////////////////////////////////////////////////////////////////////////////////
 			// Clock functions
 			////////////////////////////////////////////////////////////////////////////////
