@@ -12,19 +12,19 @@ namespace Cubiquity
 	 */
 	public class TerrainVolumeCollider : VolumeCollider
 	{
-        /*unsafe public override Mesh BuildMeshFromNodeHandle(uint nodeHandle)
+        unsafe public override Mesh BuildMeshFromNodeHandle(uint nodeHandle)
         {
             // Get the data from Cubiquity.
             uint noOfVertices; TerrainVertex* vertices; uint noOfIndices; ushort* indices;          
-            CubiquityDLL.GetMeshMC(nodeHandle, &noOfVertices, &vertices, &noOfIndices, &indices);*/
+            CubiquityDLL.GetMeshMC(nodeHandle, &noOfVertices, &vertices, &noOfIndices, &indices);
 
-        public override Mesh BuildMeshFromNodeHandle(uint nodeHandle)
+        /*public override Mesh BuildMeshFromNodeHandle(uint nodeHandle)
         {
             // Get the data from Cubiquity.
             ushort[] indices = CubiquityDLL.GetIndicesMC(nodeHandle);
             TerrainVertex[] vertices = CubiquityDLL.GetVerticesMC(nodeHandle);
             int noOfVertices = vertices.Length;
-            int noOfIndices = indices.Length;
+            int noOfIndices = indices.Length;*/
 
 
             // Cubiquity uses 16-bit index arrays to save space, and it appears Unity does the same (at least, there is

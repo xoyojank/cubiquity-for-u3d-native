@@ -12,18 +12,18 @@ namespace Cubiquity
 	 */
 	public class ColoredCubesVolumeCollider : VolumeCollider
 	{
-		/*unsafe */public override Mesh BuildMeshFromNodeHandle(uint nodeHandle)
+		unsafe public override Mesh BuildMeshFromNodeHandle(uint nodeHandle)
 		{
             Vector3 offset = new Vector3(0.5f, 0.5f, 0.5f); // Required for the CubicVertex decoding process.
 
             // Get the data from Cubiquity.
-            ushort[] indices = CubiquityDLL.GetIndices(nodeHandle);
+            /*ushort[] indices = CubiquityDLL.GetIndices(nodeHandle);
             ColoredCubesVertex[] vertices = CubiquityDLL.GetVertices(nodeHandle);
             int noOfVertices = vertices.Length;
-            int noOfIndices = indices.Length;
+            int noOfIndices = indices.Length;*/
 
-            /*uint noOfVertices; ColoredCubesVertex* vertices; uint noOfIndices; ushort* indices;
-            CubiquityDLL.GetMesh(nodeHandle, &noOfVertices, &vertices, &noOfIndices, &indices);*/
+            uint noOfVertices; ColoredCubesVertex* vertices; uint noOfIndices; ushort* indices;
+            CubiquityDLL.GetMesh(nodeHandle, &noOfVertices, &vertices, &noOfIndices, &indices);
 
             // Cubiquity uses 16-bit index arrays to save space, and it appears Unity does the same (at least, there is
             // a limit of 65535 vertices per mesh). However, the Mesh.triangles property is of the signed 32-bit int[]
