@@ -12,52 +12,9 @@ namespace Cubiquity
 	 */
 	public class ColoredCubesVolumeCollider : VolumeCollider
 	{
-		unsafe public override Mesh BuildMeshFromNodeHandle(uint nodeHandle)
-		{
-            Vector3 offset = new Vector3(0.5f, 0.5f, 0.5f); // Required for the CubicVertex decoding process.
-
-            // Get the data from Cubiquity.
-            /*ushort[] indices = CubiquityDLL.GetIndices(nodeHandle);
-            ColoredCubesVertex[] vertices = CubiquityDLL.GetVertices(nodeHandle);
-            int noOfVertices = vertices.Length;
-            int noOfIndices = indices.Length;*/
-
-            uint noOfVertices; ColoredCubesVertex* vertices; uint noOfIndices; ushort* indices;
-            CubiquityDLL.GetMesh(nodeHandle, &noOfVertices, &vertices, &noOfIndices, &indices);
-
-            // Cubiquity uses 16-bit index arrays to save space, and it appears Unity does the same (at least, there is
-            // a limit of 65535 vertices per mesh). However, the Mesh.triangles property is of the signed 32-bit int[]
-            // type rather than the unsigned 16-bit ushort[] type. Perhaps this is so they can switch to 32-bit index
-            // buffers in the future? At any rate, it means we have to perform a conversion.
-            int[] indicesAsInt = new int[noOfIndices];
-            for (int ct = 0; ct < noOfIndices; ct++)
-            {
-                indicesAsInt[ct] = indices[ct];
-            }
-
-            // Create the arrays which we'll copy the data to.
-            Vector3[] positions = new Vector3[noOfVertices];
-
-            // Move the data from our Cubiquity-owned memory to managed memory. We also
-            // need to decode the data as Cubiquity stores it in a compressed form.
-            for (int ct = 0; ct < noOfVertices; ct++)
-            {
-                // Get and decode the position
-                positions[ct].Set(vertices[ct].x, vertices[ct].y, vertices[ct].z);
-                positions[ct] -= offset;
-            }
-
-            // Create rendering mesh
-            Mesh mesh = new Mesh();
-            mesh.hideFlags = HideFlags.DontSave;
-
-            // Assign vertex data to the mesh.
-            mesh.vertices = positions;
-
-            // Assign index data to the meshes.
-            mesh.triangles = indicesAsInt;
-
-            return mesh;
-		}
+        public override Mesh BuildMeshFromNodeHandle(uint nodeHandle)
+        {
+            return MeshConversion.BuildMeshFromNodeHandleForColoredCubesVolume(nodeHandle);
+        }
 	}
 }
