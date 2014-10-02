@@ -98,11 +98,11 @@ namespace Cubiquity
 							Mesh renderingMesh = null;
 							if(voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(TerrainVolume))
 							{
-                                renderingMesh = MeshConversion.BuildMeshFromNodeHandleForTerrainVolume(nodeHandle);
+                                renderingMesh = MeshConversion.BuildMeshFromNodeHandleForTerrainVolume(nodeHandle, false);
 							}
 							else if(voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(ColoredCubesVolume))
 							{
-								renderingMesh = MeshConversion.BuildMeshFromNodeHandleForColoredCubesVolume(nodeHandle);
+								renderingMesh = MeshConversion.BuildMeshFromNodeHandleForColoredCubesVolume(nodeHandle, false);
 							}
 					
 					        MeshFilter meshFilter = gameObject.GetOrAddComponent<MeshFilter>() as MeshFilter;

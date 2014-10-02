@@ -14,7 +14,7 @@ namespace Cubiquity
 	{
         public override Mesh BuildMeshFromNodeHandle(uint nodeHandle)
         {
-            return MeshConversion.BuildMeshFromNodeHandleForColoredCubesVolume(nodeHandle);
+            return MeshConversion.BuildMeshFromNodeHandleForColoredCubesVolume(nodeHandle, true);
         }
 	}
 }

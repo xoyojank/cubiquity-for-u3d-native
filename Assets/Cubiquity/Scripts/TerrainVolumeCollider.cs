@@ -14,7 +14,7 @@ namespace Cubiquity
 	{
         public override Mesh BuildMeshFromNodeHandle(uint nodeHandle)
         {
-            return MeshConversion.BuildMeshFromNodeHandleForTerrainVolume(nodeHandle);
+            return MeshConversion.BuildMeshFromNodeHandleForTerrainVolume(nodeHandle, true);
         }
 	}
 }
