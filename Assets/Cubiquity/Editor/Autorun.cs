@@ -15,9 +15,10 @@ namespace Cubiquity
             if (editorJustLaunched)
             {
 #if CUBIQUITY_USE_UNSAFE
-                Debug.Log("Using 'unsafe' code (no problem!).");
+                Debug.Log("Cubiquity is currently configured to use 'unsafe' code (as recommended) for communicating with the native code library.");
 #else
-                Debug.Log("Using 'safe' code.");
+                Debug.Log("Cubiquity is currently configured to use managed code (the default) for communicating with the native code library.\n" +
+                    "Please see the installation section of the user manual for information on enabling 'unsafe' code for maximum performance.");
 #endif
             }
         }
