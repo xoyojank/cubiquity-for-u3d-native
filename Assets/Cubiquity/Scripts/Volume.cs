@@ -226,7 +226,7 @@ namespace Cubiquity
 		// is not serialize. Actually this needs more investigation. Problematic scenarios include when saving the scene, 
 		// switching from edit mode to play mode (which includes implicit serialization), or when changing and recompiling scripts.
 		//
-		// To handle thee scenarios we need the ability to explicitly destroy the root node, rather than just not serializing it.
+		// To handle these scenarios we need the ability to explicitly destroy the root node, rather than just not serializing it.
 		private void FlushInternalData()
 		{
 			DestroyImmediate(rootOctreeNodeGameObject);
@@ -248,7 +248,7 @@ namespace Cubiquity
 			}
 		}
 		
-		// Protected so that derived classes can access it, but users derive their own classes so we hide it from the docs.
+		// Protected so that derived classes can access it, but users don't derive their own classes so we hide it from the docs.
 		/// \cond
 		protected virtual void Synchronize()
 		{
