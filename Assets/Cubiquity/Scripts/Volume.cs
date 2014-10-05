@@ -130,6 +130,8 @@ namespace Cubiquity
 		protected int maxNodesPerSync = 4;
 		/// \endcond
 
+        protected GameObject ghostGameObject;
+
 		// The root node of our octree. It is protected so that derived classes can use it, but users
 		// are not supposed to create derived classes themselves so we hide this property from the docs.
 		/// \cond
@@ -229,8 +231,11 @@ namespace Cubiquity
 		// To handle these scenarios we need the ability to explicitly destroy the root node, rather than just not serializing it.
 		private void FlushInternalData()
 		{
-			DestroyImmediate(rootOctreeNodeGameObject);
-			rootOctreeNodeGameObject = null;
+			//DestroyImmediate(rootOctreeNodeGameObject);
+			//rootOctreeNodeGameObject = null;
+
+            DestroyImmediate(ghostGameObject);
+            ghostGameObject = null;
 		}
 		
 		private IEnumerator Synchronization()
@@ -265,6 +270,20 @@ namespace Cubiquity
 				gameObject.SetLayerRecursively(gameObject.layer);
 				previousLayer = gameObject.layer;
 			}
+
+            if (ghostGameObject == null)
+            {
+                ghostGameObject = new GameObject("Ghost of " + name);
+                ghostGameObject.hideFlags = HideFlags.DontSave;
+            }
+
+            if (transform.hasChanged)
+            {
+                ghostGameObject.transform.localPosition = transform.position;
+                ghostGameObject.transform.localRotation = transform.rotation;
+                ghostGameObject.transform.localScale = transform.lossyScale; // FIXME - Should be lossyScale?
+                transform.hasChanged = false;
+            }
 			
 			// NOTE - The following line passes transform.worldToLocalMatrix as a shader parameter. This is explicitly
 			// forbidden by the Unity docs which say:

@@ -128,7 +128,7 @@ namespace Cubiquity
 						
 						if(rootOctreeNodeGameObject == null)
 						{
-							rootOctreeNodeGameObject = OctreeNode.CreateOctreeNode(rootNodeHandle, gameObject);	
+                            rootOctreeNodeGameObject = OctreeNode.CreateOctreeNode(rootNodeHandle, ghostGameObject);	
 						}
 						
 						OctreeNode rootOctreeNode = rootOctreeNodeGameObject.GetComponent<OctreeNode>();

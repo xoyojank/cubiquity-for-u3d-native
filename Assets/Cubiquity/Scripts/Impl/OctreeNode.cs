@@ -34,7 +34,7 @@ namespace Cubiquity
 				//Debug.Log("Getting position for node handle = " + nodeHandle);
 				CubiquityDLL.GetNodePosition(nodeHandle, out xPos, out yPos, out zPos);
 				
-				StringBuilder name = new StringBuilder("(" + xPos + ", " + yPos + ", " + zPos + ")");
+				StringBuilder name = new StringBuilder("OctreeNode (" + xPos + ", " + yPos + ", " + zPos + ")");
 				
 				GameObject newGameObject = new GameObject(name.ToString ());
 				newGameObject.AddComponent<OctreeNode>();
@@ -69,7 +69,7 @@ namespace Cubiquity
 					newGameObject.transform.localPosition = octreeNode.lowerCorner;
 				}
 				
-				newGameObject.hideFlags = HideFlags.HideInHierarchy;
+				//newGameObject.hideFlags = HideFlags.HideInHierarchy;
 				
 				return newGameObject;
 			}
