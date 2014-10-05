@@ -130,11 +130,13 @@ namespace Cubiquity
 		protected int maxNodesPerSync = 4;
 		/// \endcond
 
+        [System.NonSerialized]
         protected GameObject ghostGameObject;
 
 		// The root node of our octree. It is protected so that derived classes can use it, but users
 		// are not supposed to create derived classes themselves so we hide this property from the docs.
 		/// \cond
+        [System.NonSerialized]
 		protected GameObject rootOctreeNodeGameObject;
 		/// \endcond
 		
@@ -195,6 +197,8 @@ namespace Cubiquity
 			#if UNITY_EDITOR
 				EditorApplication.update -= EditModeUpdate;
 			#endif
+
+                FlushInternalData();
 			
 			// Ideally the VolumeData would handle it's own initialization and shutdown, but it's OnEnable()/OnDisable() methods don't seems to be
 			// called when switching between edit/play mode if it has been turned into an asset. Therefore we do it here as well just to be sure.
@@ -231,10 +235,11 @@ namespace Cubiquity
 		// To handle these scenarios we need the ability to explicitly destroy the root node, rather than just not serializing it.
 		private void FlushInternalData()
 		{
+            Debug.Log("Flushing");
 			//DestroyImmediate(rootOctreeNodeGameObject);
 			//rootOctreeNodeGameObject = null;
 
-            DestroyImmediate(ghostGameObject);
+            Impl.Utility.DestroyImmediateWithChildren(ghostGameObject);
             ghostGameObject = null;
 		}
 		
@@ -363,44 +368,5 @@ namespace Cubiquity
 				volumeDataAndVolumes.Remove(mData.GetInstanceID());
 			}
 		}
-
-		#if UNITY_EDITOR
-			private class OnSaveHandler : UnityEditor.AssetModificationProcessor
-			{
-			    public static void OnWillSaveAssets( string[] assets )
-			    {
-					Object[] volumes = Object.FindObjectsOfType(typeof(Volume));
-					foreach(Object volume in volumes)
-					{
-						((Volume)volume).FlushInternalData();
-					}
-			    }
-			}
-			
-			[InitializeOnLoad]
-			private class OnPlayHandler
-			{
-			    static OnPlayHandler()
-			    {
-					// Catch the event which occurs when switching modes.
-			        EditorApplication.playmodeStateChanged += OnPlaymodeStateChanged;
-			    }
-			 
-			    static void OnPlaymodeStateChanged ()
-			    {
-					// We only need to discard the octree in edit mode, beacause when leaving play mode serialization is not
-					// performed. This event occurs both when leaving the old mode and again when entering the new mode, but 
-					// when entering edit mode the root null should already be null and ddiscarding it again is harmless.
-					if(!EditorApplication.isPlaying)
-					{
-						Object[] volumes = Object.FindObjectsOfType(typeof(Volume));
-						foreach(Object volume in volumes)
-						{
-							((Volume)volume).FlushInternalData();
-						}
-					}
-			    }
-			}
-		#endif
 	}
 }

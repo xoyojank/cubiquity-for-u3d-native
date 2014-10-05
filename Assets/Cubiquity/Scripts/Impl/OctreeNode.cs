@@ -70,6 +70,7 @@ namespace Cubiquity
 				}
 				
 				//newGameObject.hideFlags = HideFlags.HideInHierarchy;
+                newGameObject.hideFlags = HideFlags.DontSave;
 				
 				return newGameObject;
 			}
