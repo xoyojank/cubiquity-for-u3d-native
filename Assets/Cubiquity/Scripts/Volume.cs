@@ -46,6 +46,7 @@ namespace Cubiquity
 					this.mData = value;
 					RegisterVolumeData();
 					RequestFlushInternalData();
+                    this.Synchronize();
 				}
 			}
 	    }
@@ -127,7 +128,7 @@ namespace Cubiquity
 		 * updates rather than 'x' times per update?
 		 */
 		/// \cond
-		protected int maxNodesPerSync = 4;
+		protected int maxNodesPerSync = 400;
 		/// \endcond
 
         [System.NonSerialized]
@@ -175,10 +176,13 @@ namespace Cubiquity
 			// is set then it executes only when something changes. For our purposes we need a continuous stream of updates in order to
 			// handle background loading of the volume. Therefore we define a new function 'EditModeUpdate' and connect it to the editor's
 			// update delegate.
+
+            Synchronize();
+
 			#if UNITY_EDITOR
 				if(!EditorApplication.isPlaying)
 				{
-					EditorApplication.update += EditModeUpdate;
+					//EditorApplication.update += EditModeUpdate;
 				}
 				else
 				{
@@ -195,7 +199,7 @@ namespace Cubiquity
 			// We don't need to stop the Syncronization() coroutine as this happens automatically:
 			// http://answers.unity3d.com/questions/34169/does-deactivating-a-gameobject-automatically-stop.html
 			#if UNITY_EDITOR
-				EditorApplication.update -= EditModeUpdate;
+				//EditorApplication.update -= EditModeUpdate;
 			#endif
 
                 FlushInternalData();
@@ -214,13 +218,13 @@ namespace Cubiquity
 		}
 		
 		#if UNITY_EDITOR
-		void EditModeUpdate()
+		/*void EditModeUpdate()
 		{
 			// Just a sanity check to make sure our understanding of edit/play mode behaviour is correct.
 			DebugUtils.Assert(!EditorApplication.isPlaying, "EditModeUpdate() is not expected to be executing in play mode!");
 			
 			Synchronize();
-		}
+		}*/
 		#endif
 		private void RequestFlushInternalData()
 		{
@@ -260,7 +264,7 @@ namespace Cubiquity
 		
 		// Protected so that derived classes can access it, but users don't derive their own classes so we hide it from the docs.
 		/// \cond
-		protected virtual void Synchronize()
+		public virtual void Synchronize()
 		{
 			if(flushRequested)
 			{

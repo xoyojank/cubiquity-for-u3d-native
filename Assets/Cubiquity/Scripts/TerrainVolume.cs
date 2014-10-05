@@ -100,7 +100,7 @@ namespace Cubiquity
 	    }
 		
 		/// \cond
-		protected override void Synchronize()
+        public override void Synchronize()
 		{
 			base.Synchronize();
 			
