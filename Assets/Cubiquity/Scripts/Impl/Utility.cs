@@ -18,21 +18,35 @@ namespace Cubiquity.Impl
 
         public static void DestroyImmediateWithChildren(GameObject gameObject)
         {
+            // Nothing to do is the object is null
             if (gameObject == null)
                 return;
 
+            // Find all the child objects
             List<GameObject> childObjects = new List<GameObject>();
             foreach (Transform childTransform in gameObject.transform)
             {
                 childObjects.Add(childTransform.gameObject);
             }
 
+            // Destroy all children
             foreach(GameObject childObject in childObjects)
             {
                 DestroyImmediateWithChildren(childObject);
             }
 
-            Debug.Log("Detroying " + gameObject.name);
+            // Destroy all components. Not sure if this is useful, or if it happens anyway?
+            Component[] components = gameObject.GetComponents<Component>();
+            foreach(Component component in components)
+            {
+                // We can't destroy the transform of a GameObject.
+                if (component is Transform == false)
+                {
+                    Object.DestroyImmediate(component);
+                }
+            }
+
+            // Destroy the object itself.
             Object.DestroyImmediate(gameObject);
         }
 	}
