@@ -46,7 +46,6 @@ namespace Cubiquity
 					this.mData = value;
 					RegisterVolumeData();
 					RequestFlushInternalData();
-                    this.Synchronize();
 				}
 			}
 	    }
@@ -177,7 +176,7 @@ namespace Cubiquity
 			// handle background loading of the volume. Therefore we define a new function 'EditModeUpdate' and connect it to the editor's
 			// update delegate.
 
-            Synchronize();
+            /*Synchronize();
 
 			#if UNITY_EDITOR
 				if(!EditorApplication.isPlaying)
@@ -190,7 +189,7 @@ namespace Cubiquity
 				}
 			#else
 				StartCoroutine(Synchronization());
-			#endif
+			#endif*/
 		}
 		
 		void OnDisable()
@@ -247,7 +246,7 @@ namespace Cubiquity
             ghostGameObject = null;
 		}
 		
-		private IEnumerator Synchronization()
+		/*private IEnumerator Synchronization()
 		{			
 			// Perform the syncronization.
 			while(true)
@@ -260,11 +259,13 @@ namespace Cubiquity
 				Synchronize();
 				yield return null;
 			}
-		}
+		}*/
+
+        public abstract void SynchronizeMesh();
 		
 		// Protected so that derived classes can access it, but users don't derive their own classes so we hide it from the docs.
 		/// \cond
-		public virtual void Synchronize()
+		void Update()
 		{
 			if(flushRequested)
 			{
@@ -315,6 +316,8 @@ namespace Cubiquity
 					volumeRenderer.material.SetMatrix("_World2Volume", transform.worldToLocalMatrix);
 				}
 			}
+
+            SynchronizeMesh();
 		}
 		/// \endcond
 

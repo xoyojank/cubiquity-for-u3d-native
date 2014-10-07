@@ -100,10 +100,8 @@ namespace Cubiquity
 	    }
 		
 		/// \cond
-        public override void Synchronize()
+        public override void SynchronizeMesh()
 		{
-			base.Synchronize();
-			
 			// Syncronize the mesh data.
 			if(data != null)
 			{

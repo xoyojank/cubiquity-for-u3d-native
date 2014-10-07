@@ -87,10 +87,8 @@ namespace Cubiquity
 	    }
 		
 		/// \cond
-		public override void Synchronize()
+        public override void SynchronizeMesh()
 		{			
-			base.Synchronize();
-			
 			ColoredCubesVolumeRenderer volumeRenderer = gameObject.GetComponent<ColoredCubesVolumeRenderer>();
 			if(volumeRenderer != null)
 			{

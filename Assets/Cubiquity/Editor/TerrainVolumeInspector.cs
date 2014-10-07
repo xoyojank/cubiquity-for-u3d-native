@@ -314,7 +314,7 @@ namespace Cubiquity
 							TerrainVolumeEditor.PaintTerrainVolume(terrainVolume, pickResult.volumeSpacePos.x, pickResult.volumeSpacePos.y, pickResult.volumeSpacePos.z, brushInnerRadius, brushOuterRadius, brushOpacity, (uint)selectedTexture);
 						}
 
-                        terrainVolume.Synchronize();
+                        terrainVolume.SynchronizeMesh();
 					}
 				}
 				
