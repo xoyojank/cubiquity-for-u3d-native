@@ -127,7 +127,7 @@ namespace Cubiquity
 		 * updates rather than 'x' times per update?
 		 */
 		/// \cond
-		protected int maxNodesPerSync = 400;
+		protected int maxNodesPerSync = 4;
 		/// \endcond
 
         [System.NonSerialized]
@@ -151,13 +151,6 @@ namespace Cubiquity
 		void Awake()
 		{
 			RegisterVolumeData();
-
-			if(rootOctreeNodeGameObject != null)
-			{
-				// This should not happen because the rootOctreeNodeGameObject should have been set to null before being serialized.
-				Debug.LogWarning("Root octree node is already set. This is probably a bug in Cubiquity for Unity3D, but it is not serious.");
-				FlushInternalData();
-			}
 		}
 		
 		void OnEnable()
@@ -169,39 +162,17 @@ namespace Cubiquity
 			//
 			// We set the flag here (rather than OnDisable() where it might make more sense) because the flag doesn't survive the
 			// script reload, and we don't really want to serialize it.
-			RequestFlushInternalData();
-			
-			// When in edit mode a component's Update() function is not normally called, and even if the 'ExecuteInEditMode' attribute
-			// is set then it executes only when something changes. For our purposes we need a continuous stream of updates in order to
-			// handle background loading of the volume. Therefore we define a new function 'EditModeUpdate' and connect it to the editor's
-			// update delegate.
+			//RequestFlushInternalData();
 
-            /*Synchronize();
-
-			#if UNITY_EDITOR
-				if(!EditorApplication.isPlaying)
-				{
-					//EditorApplication.update += EditModeUpdate;
-				}
-				else
-				{
-					StartCoroutine(Synchronization());
-				}
-			#else
-				StartCoroutine(Synchronization());
-			#endif*/
+            if(Application.isPlaying == false)
+            {
+                SynchronizeMesh(10000);
+            }
 		}
 		
 		void OnDisable()
-		{			
-			// Disconnect the edit-mode update. It will be reconnected in OnEnable() if we are in edit mode.
-			// We don't need to stop the Syncronization() coroutine as this happens automatically:
-			// http://answers.unity3d.com/questions/34169/does-deactivating-a-gameobject-automatically-stop.html
-			#if UNITY_EDITOR
-				//EditorApplication.update -= EditModeUpdate;
-			#endif
-
-                FlushInternalData();
+		{
+            FlushInternalData();
 			
 			// Ideally the VolumeData would handle it's own initialization and shutdown, but it's OnEnable()/OnDisable() methods don't seems to be
 			// called when switching between edit/play mode if it has been turned into an asset. Therefore we do it here as well just to be sure.
@@ -215,16 +186,7 @@ namespace Cubiquity
 		{
 			UnregisterVolumeData();
 		}
-		
-		#if UNITY_EDITOR
-		/*void EditModeUpdate()
-		{
-			// Just a sanity check to make sure our understanding of edit/play mode behaviour is correct.
-			DebugUtils.Assert(!EditorApplication.isPlaying, "EditModeUpdate() is not expected to be executing in play mode!");
-			
-			Synchronize();
-		}*/
-		#endif
+
 		private void RequestFlushInternalData()
 		{
 			flushRequested = true;
@@ -238,30 +200,11 @@ namespace Cubiquity
 		// To handle these scenarios we need the ability to explicitly destroy the root node, rather than just not serializing it.
 		private void FlushInternalData()
 		{
-            Debug.Log("Flushing");
-			//DestroyImmediate(rootOctreeNodeGameObject);
-			//rootOctreeNodeGameObject = null;
-
             Impl.Utility.DestroyImmediateWithChildren(ghostGameObject);
             ghostGameObject = null;
 		}
-		
-		/*private IEnumerator Synchronization()
-		{			
-			// Perform the syncronization.
-			while(true)
-			{
-				#if UNITY_EDITOR
-					// Just a sanity check to make sure our understanding of edit/play mode behaviour is correct.
-					DebugUtils.Assert(EditorApplication.isPlaying, "Synchronization coroutine is not expected to be executing in edit mode!");
-				#endif
-				
-				Synchronize();
-				yield return null;
-			}
-		}*/
 
-        public abstract void SynchronizeMesh();
+        public abstract void SynchronizeMesh(int maxSyncs);
 		
 		// Protected so that derived classes can access it, but users don't derive their own classes so we hide it from the docs.
 		/// \cond
@@ -317,7 +260,7 @@ namespace Cubiquity
 				}
 			}
 
-            SynchronizeMesh();
+            SynchronizeMesh(maxNodesPerSync);
 		}
 		/// \endcond
 

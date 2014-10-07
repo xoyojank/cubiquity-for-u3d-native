@@ -87,8 +87,15 @@ namespace Cubiquity
 	    }
 		
 		/// \cond
-        public override void SynchronizeMesh()
-		{			
+        public override void SynchronizeMesh(int maxSyncs)
+		{
+            if (ghostGameObject == null)
+            {
+                ghostGameObject = new GameObject("Ghost of " + name);
+                ghostGameObject.hideFlags = HideFlags.DontSave;
+            }
+
+            // FIXME - This doesn't really belong in Synchronize()
 			ColoredCubesVolumeRenderer volumeRenderer = gameObject.GetComponent<ColoredCubesVolumeRenderer>();
 			if(volumeRenderer != null)
 			{
@@ -130,7 +137,7 @@ namespace Cubiquity
 						}
 						
 						OctreeNode rootOctreeNode = rootOctreeNodeGameObject.GetComponent<OctreeNode>();
-						int nodeSyncsPerformed = rootOctreeNode.syncNode(maxNodesPerSync, gameObject);
+						int nodeSyncsPerformed = rootOctreeNode.syncNode(maxSyncs, gameObject);
 						
 						// If no node were syncronized then the mesh data is up to
 						// date and we can set the flag to convey this to the user.
