@@ -45,7 +45,17 @@ namespace Cubiquity
 					UnregisterVolumeData();
 					this.mData = value;
 					RegisterVolumeData();
-					RequestFlushInternalData();
+
+                    // Delete the octree, so that next time Update() is called a new octree is constructed to match the new volume data.
+                    Impl.Utility.DestroyImmediateWithChildren(rootOctreeNodeGameObject);
+                    rootOctreeNodeGameObject = null;
+
+                    // In editor mode we manually drive the update because it is not being called repeatedly.
+                    // This means that the user sees volume data being loaded as soon as they select it.
+                    if (Application.isPlaying == false)
+                    {
+                        this.Update();
+                    }
 				}
 			}
 	    }
@@ -140,8 +150,6 @@ namespace Cubiquity
 		protected GameObject rootOctreeNodeGameObject;
 		/// \endcond
 		
-		private bool flushRequested;
-		
 		private int previousLayer = -1;
 
 		// Used to catch the user using the same volume data for multiple volumes (which they should not do).
@@ -154,12 +162,16 @@ namespace Cubiquity
 		}
 		
 		void OnEnable()
-		{            
+		{
+            // Calling the ghost node the 'octree' makes more sense to the user is they see it.
+            ghostGameObject = new GameObject("Octree for \'" + name + "\'");
+            ghostGameObject.hideFlags = HideFlags.DontSave;
 		}
 		
 		void OnDisable()
 		{
-            FlushInternalData();
+            Impl.Utility.DestroyImmediateWithChildren(ghostGameObject);
+            ghostGameObject = null;
 			
 			// Ideally the VolumeData would handle it's own initialization and shutdown, but it's OnEnable()/OnDisable() methods don't seems to be
 			// called when switching between edit/play mode if it has been turned into an asset. Therefore we do it here as well just to be sure.
@@ -174,42 +186,13 @@ namespace Cubiquity
 			UnregisterVolumeData();
 		}
 
-		private void RequestFlushInternalData()
-		{
-			flushRequested = true;
-		}
-		
-		// We do not serialize the root octree node but in practice we have still seen some issues. It seems that Unity does
-		// still serialize other data (meshes, etc) in the scene even though the root game object which they are a child of
-		// is not serialize. Actually this needs more investigation. Problematic scenarios include when saving the scene, 
-		// switching from edit mode to play mode (which includes implicit serialization), or when changing and recompiling scripts.
-		//
-		// To handle these scenarios we need the ability to explicitly destroy the root node, rather than just not serializing it.
-		private void FlushInternalData()
-		{
-            Impl.Utility.DestroyImmediateWithChildren(ghostGameObject);
-            ghostGameObject = null;
-		}
-
         protected abstract void SynchronizeMesh(int maxSyncs);
 		
 		// Public so that we can manually drive it from the editor as required,
         // but user code should not so this so it's hidden from the docs.
 		/// \cond
 		public void Update()
-		{
-			if(flushRequested)
-			{
-				FlushInternalData();
-				flushRequested = false;
-			}
-
-            if (ghostGameObject == null)
-            {
-                ghostGameObject = new GameObject("Ghost of " + name);
-                ghostGameObject.hideFlags = HideFlags.DontSave;
-            }
-			
+		{			
 			// Check whether the gameObject has been moved to a new layer.
 			if(gameObject.layer != previousLayer)
 			{

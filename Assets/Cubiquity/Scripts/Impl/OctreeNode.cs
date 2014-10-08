@@ -209,12 +209,12 @@ namespace Cubiquity
 					{
 						for(uint x = 0; x < 2; x++)
 						{
+                            GameObject childGameObject = GetChild(x,y,z);
+
 							if(CubiquityDLL.HasChildNode(nodeHandle, x, y, z) == 1)
 							{					
 							
-								uint childNodeHandle = CubiquityDLL.GetChildNode(nodeHandle, x, y, z);					
-								
-								GameObject childGameObject = GetChild(x,y,z);
+								uint childNodeHandle = CubiquityDLL.GetChildNode(nodeHandle, x, y, z);	
 								
 								if(childGameObject == null)
 								{							
@@ -230,6 +230,14 @@ namespace Cubiquity
 								availableNodeSyncs -= syncs;
 								nodeSyncsPerformed += syncs;
 							}
+                            else
+                            {
+                                if(childGameObject)
+                                {
+                                    Utility.DestroyImmediateWithChildren(childGameObject);
+                                    childGameObject = null;
+                                }
+                            }
 						}
 					}
 				}
