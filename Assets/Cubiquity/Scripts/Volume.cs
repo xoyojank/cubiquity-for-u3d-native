@@ -154,20 +154,7 @@ namespace Cubiquity
 		}
 		
 		void OnEnable()
-		{				
-			// When switching to MonoDevelop, editing code, and then switching back to Unity, some kind of scene reload is performed.
-			// It's actually a bit unclear, but it results in a new octree being built without the old one being destroyed first. It
-			// seems Awake/OnDestroy() are not called as part of this process, and we are not allowed to modify the scene graph from
-			// OnEnable()/OnDisable(). Therefore we just set a flag to say that the root node shot be deleted at the next update cycle.
-			//
-			// We set the flag here (rather than OnDisable() where it might make more sense) because the flag doesn't survive the
-			// script reload, and we don't really want to serialize it.
-			//RequestFlushInternalData();
-
-            if(Application.isPlaying == false)
-            {
-                SynchronizeMesh(10000);
-            }
+		{            
 		}
 		
 		void OnDisable()
@@ -215,6 +202,12 @@ namespace Cubiquity
 				FlushInternalData();
 				flushRequested = false;
 			}
+
+            if (ghostGameObject == null)
+            {
+                ghostGameObject = new GameObject("Ghost of " + name);
+                ghostGameObject.hideFlags = HideFlags.DontSave;
+            }
 			
 			// Check whether the gameObject has been moved to a new layer.
 			if(gameObject.layer != previousLayer)
@@ -222,13 +215,7 @@ namespace Cubiquity
 				// If so we update the children to match and then clear the flag.
 				gameObject.SetLayerRecursively(gameObject.layer);
 				previousLayer = gameObject.layer;
-			}
-
-            if (ghostGameObject == null)
-            {
-                ghostGameObject = new GameObject("Ghost of " + name);
-                ghostGameObject.hideFlags = HideFlags.DontSave;
-            }
+			}            
 
             if (transform.hasChanged)
             {
@@ -260,7 +247,18 @@ namespace Cubiquity
 				}
 			}
 
-            SynchronizeMesh(maxNodesPerSync);
+            // When we are in game mode we limit the number of nodes which we update per frame, to maintain a nice framerate. The Update()
+            // method is called repeatedly and so over time the whole terrain mesh gets syncronized. However, when in edit mode the function
+            // is not called repeatedly, and so we choose just to syncronize the whole mesh at once. We can get away with this because there
+            // are no colliders in edit mode and usualy these are the slowest part of the mesh syncronization process.
+            if (Application.isPlaying)
+            {
+                SynchronizeMesh(maxNodesPerSync);
+            }
+            else
+            {
+                SynchronizeMesh(int.MaxValue);
+            }
 		}
 		/// \endcond
 

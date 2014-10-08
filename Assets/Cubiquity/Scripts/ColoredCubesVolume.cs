@@ -89,12 +89,6 @@ namespace Cubiquity
 		/// \cond
         public override void SynchronizeMesh(int maxSyncs)
 		{
-            if (ghostGameObject == null)
-            {
-                ghostGameObject = new GameObject("Ghost of " + name);
-                ghostGameObject.hideFlags = HideFlags.DontSave;
-            }
-
             // FIXME - This doesn't really belong in Synchronize()
 			ColoredCubesVolumeRenderer volumeRenderer = gameObject.GetComponent<ColoredCubesVolumeRenderer>();
 			if(volumeRenderer != null)

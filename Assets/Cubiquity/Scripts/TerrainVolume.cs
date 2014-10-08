@@ -102,12 +102,6 @@ namespace Cubiquity
 		/// \cond
         public override void SynchronizeMesh(int maxSyncs)
 		{
-            if (ghostGameObject == null)
-            {
-                ghostGameObject = new GameObject("Ghost of " + name);
-                ghostGameObject.hideFlags = HideFlags.DontSave;
-            }
-
 			// Syncronize the mesh data.
 			if(data != null)
 			{
