@@ -87,7 +87,7 @@ namespace Cubiquity
 	    }
 		
 		/// \cond
-        public override void SynchronizeMesh(int maxSyncs)
+        protected override void SynchronizeMesh(int maxSyncs)
 		{
             // FIXME - This doesn't really belong in Synchronize()
 			ColoredCubesVolumeRenderer volumeRenderer = gameObject.GetComponent<ColoredCubesVolumeRenderer>();
@@ -122,7 +122,7 @@ namespace Cubiquity
                     CubiquityDLL.UpdateVolume(data.volumeHandle.Value, camPos.x, camPos.y, camPos.z, lodThreshold);
 					
 					if(CubiquityDLL.HasRootOctreeNode(data.volumeHandle.Value) == 1)
-					{		
+					{                        
 						uint rootNodeHandle = CubiquityDLL.GetRootOctreeNode(data.volumeHandle.Value);
 						
 						if(rootOctreeNodeGameObject == null)

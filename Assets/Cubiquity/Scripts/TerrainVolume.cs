@@ -100,7 +100,7 @@ namespace Cubiquity
 	    }
 		
 		/// \cond
-        public override void SynchronizeMesh(int maxSyncs)
+        protected override void SynchronizeMesh(int maxSyncs)
 		{
 			// Syncronize the mesh data.
 			if(data != null)

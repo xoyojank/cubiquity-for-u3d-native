@@ -125,7 +125,7 @@ namespace Cubiquity
 		}
 		
 		public void OnSceneGUI()
-		{
+		{            
 			if(addMode || deleteMode || paintMode)
 			{
 				//Debug.Log ("ColoredCubesVolumeEditor.OnSceneGUI()");
@@ -170,6 +170,10 @@ namespace Cubiquity
 			       HandleUtility.AddDefaultControl( GUIUtility.GetControlID( GetHashCode(), FocusType.Passive ) );
 			    }
 			}
+
+            // Both Update() and Repaint() seem to be required - one does not trigger the other.
+            coloredCubesVolume.Update();
+            HandleUtility.Repaint();
 		}
 		
 		private static void OnEditorToolChanged()

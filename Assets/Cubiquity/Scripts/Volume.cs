@@ -191,11 +191,12 @@ namespace Cubiquity
             ghostGameObject = null;
 		}
 
-        public abstract void SynchronizeMesh(int maxSyncs);
+        protected abstract void SynchronizeMesh(int maxSyncs);
 		
-		// Protected so that derived classes can access it, but users don't derive their own classes so we hide it from the docs.
+		// Public so that we can manually drive it from the editor as required,
+        // but user code should not so this so it's hidden from the docs.
 		/// \cond
-		void Update()
+		public void Update()
 		{
 			if(flushRequested)
 			{
