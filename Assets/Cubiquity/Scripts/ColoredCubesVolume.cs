@@ -87,8 +87,10 @@ namespace Cubiquity
 	    }
 		
 		/// \cond
-        protected override void SynchronizeMesh(int maxSyncs)
+        protected override bool SynchronizeMesh(int maxSyncs)
 		{
+            bool allNodesSynced = false;
+
             // FIXME - This doesn't really belong in Synchronize()
 			ColoredCubesVolumeRenderer volumeRenderer = gameObject.GetComponent<ColoredCubesVolumeRenderer>();
 			if(volumeRenderer != null)
@@ -109,6 +111,8 @@ namespace Cubiquity
 			// Syncronize the mesh data.
 			if(data != null)
 			{
+                allNodesSynced = true;
+
 				// Syncronize the mesh data.
 				if(data.volumeHandle.HasValue)
 				{
@@ -135,10 +139,12 @@ namespace Cubiquity
 						
 						// If no node were syncronized then the mesh data is up to
 						// date and we can set the flag to convey this to the user.
-						isMeshSyncronized = (nodeSyncsPerformed == 0);
+                        if (nodeSyncsPerformed > 0) allNodesSynced = false;
 					}
 				}
 			}
+
+            return allNodesSynced;
 		}
 		/// \endcond
 	}

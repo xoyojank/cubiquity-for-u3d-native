@@ -137,7 +137,8 @@ namespace Cubiquity
 		 * updates rather than 'x' times per update?
 		 */
 		/// \cond
-		protected int maxNodesPerSync = 4;
+		protected int maxNodesPerSyncInPlayMode = 4;
+        protected int maxNodesPerSyncInEditMode = 8; // Can be higher than play as we have no collision mehses
 		/// \endcond
 
         [System.NonSerialized]
@@ -163,9 +164,17 @@ namespace Cubiquity
 		
 		void OnEnable()
 		{
-            // Calling the ghost node the 'octree' makes more sense to the user is they see it.
+            // Calling the ghost node the 'octree' makes more sense to the user if they see it.
             ghostGameObject = new GameObject("Octree for \'" + name + "\'");
             ghostGameObject.hideFlags = HideFlags.DontSave;
+
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+            {
+                Debug.Log("Adding Update");
+                EditorApplication.update += EditModeUpdate;
+            }
+#endif
 		}
 		
 		void OnDisable()
@@ -186,13 +195,21 @@ namespace Cubiquity
 			UnregisterVolumeData();
 		}
 
-        protected abstract void SynchronizeMesh(int maxSyncs);
+        protected abstract bool SynchronizeMesh(int maxSyncs);
+
+#if UNITY_EDITOR
+        void EditModeUpdate()
+        {
+            Update();
+        }
+#endif
 		
 		// Public so that we can manually drive it from the editor as required,
         // but user code should not so this so it's hidden from the docs.
 		/// \cond
 		public void Update()
-		{			
+		{
+            //Debug.Log("Doing Update");
 			// Check whether the gameObject has been moved to a new layer.
 			if(gameObject.layer != previousLayer)
 			{
@@ -237,11 +254,16 @@ namespace Cubiquity
             // are no colliders in edit mode and usualy these are the slowest part of the mesh syncronization process.
             if (Application.isPlaying)
             {
-                SynchronizeMesh(maxNodesPerSync);
+                isMeshSyncronized = SynchronizeMesh(maxNodesPerSyncInPlayMode);
             }
             else
             {
-                SynchronizeMesh(int.MaxValue);
+                bool allNodesSynced = SynchronizeMesh(maxNodesPerSyncInEditMode);
+                if (allNodesSynced)
+                {
+                    Debug.Log("Removing Update");
+                    EditorApplication.update -= EditModeUpdate;
+                }
             }
 		}
 		/// \endcond

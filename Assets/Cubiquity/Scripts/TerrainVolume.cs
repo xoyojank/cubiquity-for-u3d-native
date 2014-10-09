@@ -100,11 +100,15 @@ namespace Cubiquity
 	    }
 		
 		/// \cond
-        protected override void SynchronizeMesh(int maxSyncs)
+        protected override bool SynchronizeMesh(int maxSyncs)
 		{
+            bool allNodesSynced = false;
+
 			// Syncronize the mesh data.
 			if(data != null)
 			{
+                allNodesSynced = true;
+
 				if(data.volumeHandle.HasValue)
 				{
 					Vector3 camPos = CameraUtils.getCurrentCameraPosition();
@@ -130,10 +134,12 @@ namespace Cubiquity
 						
 						// If no node were syncronized then the mesh data is up to
 						// date and we can set the flag to convey this to the user.
-						isMeshSyncronized = (nodeSyncsPerformed == 0);
+                        if (nodeSyncsPerformed > 0) allNodesSynced = false;
 					}
 				}
 			}
+
+            return allNodesSynced;
 		}
 		/// \endcond
 	}
