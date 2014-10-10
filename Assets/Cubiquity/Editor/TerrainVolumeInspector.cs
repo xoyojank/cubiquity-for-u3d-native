@@ -256,6 +256,8 @@ namespace Cubiquity
 		
 		public void OnSceneGUI()
 		{
+            
+
 			// If we don't have a renderer then there's no terrain being
 			// displayed, and so not much we can do in this function.
 			TerrainVolumeRenderer terrainVolumeRenderer = terrainVolume.GetComponent<TerrainVolumeRenderer>();
@@ -314,6 +316,8 @@ namespace Cubiquity
 							TerrainVolumeEditor.PaintTerrainVolume(terrainVolume, pickResult.volumeSpacePos.x, pickResult.volumeSpacePos.y, pickResult.volumeSpacePos.z, brushInnerRadius, brushOuterRadius, brushOpacity, (uint)selectedTexture);
 						}
 					}
+
+                    // Note: We don't call Update() here, that seems to happen automatically later as a result of assigning the shader keywords.
 				}
 				
 				if ( e.type == EventType.Layout )
@@ -322,8 +326,8 @@ namespace Cubiquity
 			       HandleUtility.AddDefaultControl( GUIUtility.GetControlID( GetHashCode(), FocusType.Passive ) );
 			    }
 				
-				// We need to repaint so that the brush marker follows
-				// the mouse even when a mouse button is not pressed.
+				// We need to repaint so that the brush marker follows the mouse even when a mouse button is not pressed.
+                // This does not seem to call Update(), but that seems to happen automatically later as a result of assigning the shader keywords.
 				HandleUtility.Repaint();
 			}
 			
