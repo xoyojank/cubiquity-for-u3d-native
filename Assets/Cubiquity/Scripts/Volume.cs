@@ -161,7 +161,7 @@ namespace Cubiquity
         // Update() to be called automatically in edit mode, but it only happens in response to user-driven events such as moving the mouse in the editor
         // window. We want to support background loading of our terrain and so we hook into the 'EditorApplication.update' even for this purpose.
         // ------------------------------------------------------------------------------
-        [System.Diagnostics.Conditional("UNITY_EDITOR")]
+#if UNITY_EDITOR
         void StartEditModeUpdateIfInEditMode()
         {
             if (Application.isPlaying == false)
@@ -170,13 +170,11 @@ namespace Cubiquity
             }
         }
 
-        [System.Diagnostics.Conditional("UNITY_EDITOR")]
         void StopEditModeUpdate()
         {
             EditorApplication.update -= EditModeUpdate;
         }
 
-        [System.Diagnostics.Conditional("UNITY_EDITOR")]
         void EditModeUpdate()
         {
             DebugUtils.Assert(Application.isPlaying == false, "EditModeUpdate() should never be called in play mode!");
@@ -187,6 +185,7 @@ namespace Cubiquity
                 SceneView.RepaintAll();
             }
         }
+#endif
         // ------------------------------------------------------------------------------
 		
 		void Awake()
