@@ -50,19 +50,8 @@ namespace Cubiquity
                     Impl.Utility.DestroyImmediateWithChildren(rootOctreeNodeGameObject);
                     rootOctreeNodeGameObject = null;
 
-                    // In editor mode we manually drive the update because it is not being called repeatedly.
-                    // This means that the user sees volume data being loaded as soon as they select it.
-                    /*if (Application.isPlaying == false)
-                    {
-                        this.Update();
-                    }*/
-
 #if UNITY_EDITOR
-                    if (!Application.isPlaying)
-                    {
-                        Debug.Log("Adding Update");
-                        EditorApplication.update += EditModeUpdate;
-                    }
+                    StartEditModeUpdateIfInEditMode();
 #endif
 				}
 			}
@@ -177,17 +166,15 @@ namespace Cubiquity
             ghostGameObject.hideFlags = HideFlags.DontSave;
 
 #if UNITY_EDITOR
-            if (!Application.isPlaying)
-            {
-                Debug.Log("Adding Update");
-                EditorApplication.update += EditModeUpdate;
-            }
+            StartEditModeUpdateIfInEditMode();
 #endif
 		}
 		
 		void OnDisable()
 		{
-            EditorApplication.update -= EditModeUpdate;
+#if UNITY_EDITOR
+            StopEditModeUpdate();
+#endif
 
             Impl.Utility.DestroyImmediateWithChildren(ghostGameObject);
             ghostGameObject = null;
@@ -207,16 +194,32 @@ namespace Cubiquity
 
         protected abstract bool SynchronizeMesh(int maxSyncs);
 
-#if UNITY_EDITOR
+        [System.Diagnostics.Conditional("UNITY_EDITOR")]
+        void StartEditModeUpdateIfInEditMode()
+        {
+            if (Application.isPlaying == false)
+            {
+                EditorApplication.update += EditModeUpdate;
+            }
+        }
+
+        [System.Diagnostics.Conditional("UNITY_EDITOR")]
+        void StopEditModeUpdate()
+        {
+            EditorApplication.update -= EditModeUpdate;
+        }
+
+        [System.Diagnostics.Conditional("UNITY_EDITOR")]
         void EditModeUpdate()
         {
+            DebugUtils.Assert(Application.isPlaying == false, "EditModeUpdate() should never be called in play mode!");
+
             if (enabled)
             {
                 Update();
                 SceneView.RepaintAll();
             }
         }
-#endif
 		
 		// Public so that we can manually drive it from the editor as required,
         // but user code should not so this so it's hidden from the docs.
@@ -277,8 +280,11 @@ namespace Cubiquity
                     bool allNodesSynced = SynchronizeMesh(maxNodesPerSyncInEditMode);
                     if (allNodesSynced)
                     {
-                        Debug.Log("Removing Update");
-                        EditorApplication.update -= EditModeUpdate;
+                        // If we reach this point then UNITY_EDITOR must be defined as we are in edit mode, but we don't know this
+                        // at compile time so the #if is still needed to ensure that the StopEditModeUpdate() method is defined.
+#if UNITY_EDITOR
+                        StopEditModeUpdate();
+#endif
                     }
                 }
             }
