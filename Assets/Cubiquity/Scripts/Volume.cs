@@ -50,6 +50,7 @@ namespace Cubiquity
                     Impl.Utility.DestroyImmediateWithChildren(rootOctreeNodeGameObject);
                     rootOctreeNodeGameObject = null;
 
+                    // When in the editor we need to restart the updates so that the mesh for the new volume data can start syncing in the background.
 #if UNITY_EDITOR
                     StartEditModeUpdateIfInEditMode();
 #endif
@@ -135,7 +136,7 @@ namespace Cubiquity
 		 */
 		/// \cond
 		protected int maxNodesPerSyncInPlayMode = 4;
-        protected int maxNodesPerSyncInEditMode = 8; // Can be higher than play as we have no collision mehses
+        protected int maxNodesPerSyncInEditMode = 16; // Can be higher than in play mode as we have no collision mehses
 		/// \endcond
 
         [System.NonSerialized]
@@ -148,52 +149,18 @@ namespace Cubiquity
 		protected GameObject rootOctreeNodeGameObject;
 		/// \endcond
 		
+        // Used to check when the game object changes layer, so we can move the ghost object to match.
 		private int previousLayer = -1;
 
 		// Used to catch the user using the same volume data for multiple volumes (which they should not do).
 		// It's not a really robust approach but it works well enough and only serves to issue a warning anyway.
 		private static Dictionary<int, int> volumeDataAndVolumes = new Dictionary<int, int>();
-		
-		void Awake()
-		{
-			RegisterVolumeData();
-		}
-		
-		void OnEnable()
-		{
-            // Calling the ghost node the 'octree' makes more sense to the user if they see it.
-            ghostGameObject = new GameObject("Octree for \'" + name + "\'");
-            ghostGameObject.hideFlags = HideFlags.DontSave;
 
-#if UNITY_EDITOR
-            StartEditModeUpdateIfInEditMode();
-#endif
-		}
-		
-		void OnDisable()
-		{
-#if UNITY_EDITOR
-            StopEditModeUpdate();
-#endif
-
-            Impl.Utility.DestroyImmediateWithChildren(ghostGameObject);
-            ghostGameObject = null;
-			
-			// Ideally the VolumeData would handle it's own initialization and shutdown, but it's OnEnable()/OnDisable() methods don't seems to be
-			// called when switching between edit/play mode if it has been turned into an asset. Therefore we do it here as well just to be sure.
-			if(data != null)
-			{
-				data.ShutdownCubiquityVolume();
-			}
-		}
-
-		void OnDestroy()
-		{
-			UnregisterVolumeData();
-		}
-
-        protected abstract bool SynchronizeMesh(int maxSyncs);
-
+        // ------------------------------------------------------------------------------
+        // These editor-only functions are used to emulate repeated calls to Update() in edit mode. Setting the '[ExecuteInEditMode]' attribute does cause
+        // Update() to be called automatically in edit mode, but it only happens in response to user-driven events such as moving the mouse in the editor
+        // window. We want to support background loading of our terrain and so we hook into the 'EditorApplication.update' even for this purpose.
+        // ------------------------------------------------------------------------------
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
         void StartEditModeUpdateIfInEditMode()
         {
@@ -220,13 +187,55 @@ namespace Cubiquity
                 SceneView.RepaintAll();
             }
         }
+        // ------------------------------------------------------------------------------
+		
+		void Awake()
+		{
+			RegisterVolumeData();
+		}
+		
+		void OnEnable()
+		{
+            // Calling the ghost node the 'octree' makes more sense to the user if they see it.
+            ghostGameObject = new GameObject("Octree for \'" + name + "\'");
+            ghostGameObject.hideFlags = HideFlags.DontSave;
+
+#if UNITY_EDITOR
+            StartEditModeUpdateIfInEditMode();
+#endif
+		}
+		
+		void OnDisable()
+		{
+            // It important to stop the EditModeUpdate() here, as the user might create a volume and then destroy it
+            // before it has finsihed syncing. Unity would then be trying to call EditModeUpdate() on a deleted object.
+#if UNITY_EDITOR
+            StopEditModeUpdate();
+#endif
+
+            Impl.Utility.DestroyImmediateWithChildren(ghostGameObject);
+            ghostGameObject = null;
+			
+			// Ideally the VolumeData would handle it's own initialization and shutdown, but it's OnEnable()/OnDisable() methods don't seems to be
+			// called when switching between edit/play mode if it has been turned into an asset. Therefore we do it here as well just to be sure.
+			if(data != null)
+			{
+				data.ShutdownCubiquityVolume();
+			}
+		}
+
+		void OnDestroy()
+		{
+			UnregisterVolumeData();
+		}
+
+        protected abstract bool SynchronizeMesh(int maxSyncs);
 		
 		// Public so that we can manually drive it from the editor as required,
         // but user code should not so this so it's hidden from the docs.
 		/// \cond
 		public void Update()
 		{
-            //Debug.Log("Doing Update");
 			// Check whether the gameObject has been moved to a new layer.
 			if(gameObject.layer != previousLayer)
 			{
@@ -235,11 +244,12 @@ namespace Cubiquity
 				previousLayer = gameObject.layer;
 			}            
 
+            // Use of the 'hasChanged' flag seems ok even when volumes are in a hierarchy. Moving a parent sets the 'hasChanged' flag of it's children.
             if (transform.hasChanged)
             {
                 ghostGameObject.transform.localPosition = transform.position;
                 ghostGameObject.transform.localRotation = transform.rotation;
-                ghostGameObject.transform.localScale = transform.lossyScale; // FIXME - Should be lossyScale?
+                ghostGameObject.transform.localScale = transform.lossyScale;
                 transform.hasChanged = false;
             }
 			
@@ -267,10 +277,8 @@ namespace Cubiquity
 
             if (data != null && data.volumeHandle.HasValue)
             {
-                // When we are in game mode we limit the number of nodes which we update per frame, to maintain a nice framerate. The Update()
-                // method is called repeatedly and so over time the whole terrain mesh gets syncronized. However, when in edit mode the function
-                // is not called repeatedly, and so we choose just to syncronize the whole mesh at once. We can get away with this because there
-                // are no colliders in edit mode and usualy these are the slowest part of the mesh syncronization process.
+                // When we are in game mode we limit the number of nodes which we update per frame, to maintain a nice.
+                // framerate The Update() method is called repeatedly and so over time the whole mesh gets syncronized. 
                 if (Application.isPlaying)
                 {
                     isMeshSyncronized = SynchronizeMesh(maxNodesPerSyncInPlayMode);
@@ -278,10 +286,15 @@ namespace Cubiquity
                 else
                 {
                     bool allNodesSynced = SynchronizeMesh(maxNodesPerSyncInEditMode);
+
+                    // Once the mesh is synced we can disconnect this event. Further changes to the volume will only happen due to
+                    // the user changing something and in this case we can drive updates from the code which caused the changes.
+                    // Note that we try to stop EditModeUpdate() even if it's not running (which most of the time it won't be),
+                    // but this shouldn't matter and could even have benefits if somehow we start it multiple times.
                     if (allNodesSynced)
                     {
-                        // If we reach this point then UNITY_EDITOR must be defined as we are in edit mode, but we don't know this
-                        // at compile time so the #if is still needed to ensure that the StopEditModeUpdate() method is defined.
+                        // If we reach this point at runtime then UNITY_EDITOR must be defined as we are in edit mode, but we don't know
+                        // this at compile time so the #if is still needed to check that the StopEditModeUpdate() method is defined.
 #if UNITY_EDITOR
                         StopEditModeUpdate();
 #endif
