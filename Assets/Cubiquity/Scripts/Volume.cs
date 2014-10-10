@@ -52,10 +52,18 @@ namespace Cubiquity
 
                     // In editor mode we manually drive the update because it is not being called repeatedly.
                     // This means that the user sees volume data being loaded as soon as they select it.
-                    if (Application.isPlaying == false)
+                    /*if (Application.isPlaying == false)
                     {
                         this.Update();
+                    }*/
+
+#if UNITY_EDITOR
+                    if (!Application.isPlaying)
+                    {
+                        Debug.Log("Adding Update");
+                        EditorApplication.update += EditModeUpdate;
                     }
+#endif
 				}
 			}
 	    }
@@ -179,6 +187,8 @@ namespace Cubiquity
 		
 		void OnDisable()
 		{
+            EditorApplication.update -= EditModeUpdate;
+
             Impl.Utility.DestroyImmediateWithChildren(ghostGameObject);
             ghostGameObject = null;
 			
@@ -200,7 +210,11 @@ namespace Cubiquity
 #if UNITY_EDITOR
         void EditModeUpdate()
         {
-            Update();
+            if (enabled)
+            {
+                Update();
+                SceneView.RepaintAll();
+            }
         }
 #endif
 		
@@ -248,21 +262,24 @@ namespace Cubiquity
 				}
 			}
 
-            // When we are in game mode we limit the number of nodes which we update per frame, to maintain a nice framerate. The Update()
-            // method is called repeatedly and so over time the whole terrain mesh gets syncronized. However, when in edit mode the function
-            // is not called repeatedly, and so we choose just to syncronize the whole mesh at once. We can get away with this because there
-            // are no colliders in edit mode and usualy these are the slowest part of the mesh syncronization process.
-            if (Application.isPlaying)
+            if (data != null && data.volumeHandle.HasValue)
             {
-                isMeshSyncronized = SynchronizeMesh(maxNodesPerSyncInPlayMode);
-            }
-            else
-            {
-                bool allNodesSynced = SynchronizeMesh(maxNodesPerSyncInEditMode);
-                if (allNodesSynced)
+                // When we are in game mode we limit the number of nodes which we update per frame, to maintain a nice framerate. The Update()
+                // method is called repeatedly and so over time the whole terrain mesh gets syncronized. However, when in edit mode the function
+                // is not called repeatedly, and so we choose just to syncronize the whole mesh at once. We can get away with this because there
+                // are no colliders in edit mode and usualy these are the slowest part of the mesh syncronization process.
+                if (Application.isPlaying)
                 {
-                    Debug.Log("Removing Update");
-                    EditorApplication.update -= EditModeUpdate;
+                    isMeshSyncronized = SynchronizeMesh(maxNodesPerSyncInPlayMode);
+                }
+                else
+                {
+                    bool allNodesSynced = SynchronizeMesh(maxNodesPerSyncInEditMode);
+                    if (allNodesSynced)
+                    {
+                        Debug.Log("Removing Update");
+                        EditorApplication.update -= EditModeUpdate;
+                    }
                 }
             }
 		}

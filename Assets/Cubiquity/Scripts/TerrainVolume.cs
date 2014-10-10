@@ -102,41 +102,34 @@ namespace Cubiquity
 		/// \cond
         protected override bool SynchronizeMesh(int maxSyncs)
 		{
-            bool allNodesSynced = false;
+            bool allNodesSynced = true;
 
-			// Syncronize the mesh data.
-			if(data != null)
-			{
-                allNodesSynced = true;
+			Vector3 camPos = CameraUtils.getCurrentCameraPosition();
 
-				if(data.volumeHandle.HasValue)
-				{
-					Vector3 camPos = CameraUtils.getCurrentCameraPosition();
+            // This is messy - perhaps the LOD thresold shold not be a parameter to update. Instead it could be passed
+            // as a parameter during traversal, so different traversal could retrieve differnt LODs. We then wouldn't
+            // want a single 'renderThisNode' member of Cubiquity nodes, but instead some threshold we could compare to.
+            float lodThreshold = GetComponent<VolumeRenderer>() ? GetComponent<VolumeRenderer>().lodThreshold : 0.0f;
 
-                    // This is messy - perhaps the LOD thresold shold not be a parameter to update. Instead it could be passed
-                    // as a parameter during traversal, so different traversal could retrieve differnt LODs. We then wouldn't
-                    // want a single 'renderThisNode' member of Cubiquity nodes, but instead some threshold we could compare to.
-                    float lodThreshold = GetComponent<VolumeRenderer>() ? GetComponent<VolumeRenderer>().lodThreshold : 0.0f;
-
-					CubiquityDLL.UpdateVolumeMC(data.volumeHandle.Value, camPos.x, camPos.y, camPos.z, lodThreshold);
+			CubiquityDLL.UpdateVolumeMC(data.volumeHandle.Value, camPos.x, camPos.y, camPos.z, lodThreshold);
 					
-					if(CubiquityDLL.HasRootOctreeNodeMC(data.volumeHandle.Value) == 1)
-					{		
-						uint rootNodeHandle = CubiquityDLL.GetRootOctreeNodeMC(data.volumeHandle.Value);
+			if(CubiquityDLL.HasRootOctreeNodeMC(data.volumeHandle.Value) == 1)
+			{		
+				uint rootNodeHandle = CubiquityDLL.GetRootOctreeNodeMC(data.volumeHandle.Value);
 						
-						if(rootOctreeNodeGameObject == null)
-						{
-                            rootOctreeNodeGameObject = OctreeNode.CreateOctreeNode(rootNodeHandle, ghostGameObject);	
-						}
-						
-						OctreeNode rootOctreeNode = rootOctreeNodeGameObject.GetComponent<OctreeNode>();
-						int nodeSyncsPerformed = rootOctreeNode.syncNode(maxSyncs, gameObject);
-						
-						// If no node were syncronized then the mesh data is up to
-						// date and we can set the flag to convey this to the user.
-                        if (nodeSyncsPerformed > 0) allNodesSynced = false;
-					}
+				if(rootOctreeNodeGameObject == null)
+				{
+                    rootOctreeNodeGameObject = OctreeNode.CreateOctreeNode(rootNodeHandle, ghostGameObject);	
 				}
+						
+				OctreeNode rootOctreeNode = rootOctreeNodeGameObject.GetComponent<OctreeNode>();
+				int nodeSyncsPerformed = rootOctreeNode.syncNode(maxSyncs, gameObject);
+
+                Debug.Log("Node syncs = " + nodeSyncsPerformed);
+						
+				// If no node were syncronized then the mesh data is up to
+				// date and we can set the flag to convey this to the user.
+                if (nodeSyncsPerformed > 0) allNodesSynced = false;
 			}
 
             return allNodesSynced;
