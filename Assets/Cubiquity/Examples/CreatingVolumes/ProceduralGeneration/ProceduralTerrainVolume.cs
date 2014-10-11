@@ -117,7 +117,7 @@ public class ProceduralTerrainVolume : MonoBehaviour
 						materialSet.weights[2] = excess;
 					}
 					
-					// We can now write out computed voxel value into the volume.
+					// We can now write our computed voxel value into the volume.
 					data.SetVoxel(x, y, z, materialSet);
 				}
 			}
