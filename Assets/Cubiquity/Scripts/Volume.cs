@@ -197,7 +197,7 @@ namespace Cubiquity
 		{
             // Calling the ghost node the 'octree' makes more sense to the user if they see it.
             ghostGameObject = new GameObject("Octree for \'" + name + "\'");
-            ghostGameObject.hideFlags = HideFlags.DontSave;
+            ghostGameObject.hideFlags = HideFlags.HideAndDontSave;
 
 #if UNITY_EDITOR
             StartEditModeUpdateIfInEditMode();
