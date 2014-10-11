@@ -9,7 +9,7 @@ namespace Cubiquity
         void Start()
         {
             System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
-            CreateSimplexNoiseVDB();
+            Create2DSimplexNoiseVolumeVDB();
             stopwatch.Stop();
             Debug.Log("Created data and VDB in " + stopwatch.ElapsedMilliseconds / 1000 + " seconds");
         }
@@ -38,13 +38,12 @@ namespace Cubiquity
             Debug.Log("Voxel database has been saved to '" + saveLocation + "'");
 		}
 
-        // Use this for initialization
-        void CreateSimplexNoiseVDB()
+        void Create3DSimplexNoiseVolumeVDB()
         {
             // Randomize the filename incase the file already exists
             System.Random randomIntGenerator = new System.Random();
             int randomInt = randomIntGenerator.Next();
-            string saveLocation = Paths.voxelDatabases + "/simplex-noise-" + randomInt + ".vdb";
+            string saveLocation = Paths.voxelDatabases + "/3d-simplex-noise-" + randomInt + ".vdb";
 
             // The size of the volume we will generate
             int width = 256;
@@ -63,7 +62,7 @@ namespace Cubiquity
             // Iterate over every voxel of our volume
             for (int z = 0; z < depth; z++)
             {
-                for (int y = height - 1; y > 0; y--)
+                for (int y = 0; y < height; y++)
                 {
                     for (int x = 0; x < width; x++)
                     {
@@ -98,6 +97,70 @@ namespace Cubiquity
                         // Write the final value value into the first material channel (the one with the rock texture).
                         // The value being written is usually 0 (empty) or 255 (solid) except around the transition.
                         materialSet.weights[0] = (byte)simplexNoiseValue;
+
+                        // We can now write our computed voxel value into the volume.
+                        data.SetVoxel(x, y, z, materialSet);
+                    }
+                }
+            }
+
+            // We need to commit this so that the changes made by the previous,line are actually written
+            // to the voxel database. Otherwise they are just kept in temporary storage and will be lost.
+            data.CommitChanges();
+
+            Debug.Log("Voxel database has been saved to '" + saveLocation + "'");
+        }
+
+        void Create2DSimplexNoiseVolumeVDB()
+        {
+            // Randomize the filename incase the file already exists
+            System.Random randomIntGenerator = new System.Random();
+            int randomInt = randomIntGenerator.Next();
+            string saveLocation = Paths.voxelDatabases + "/2d-simplex-noise-" + randomInt + ".vdb";
+
+            // The size of the volume we will generate
+            int width = 256;
+            int height = 32;
+            int depth = 256;
+
+            TerrainVolumeData data = VolumeData.CreateEmptyVolumeData<TerrainVolumeData>(new Region(0, 0, 0, width - 1, height - 1, depth - 1), saveLocation);
+
+            // This scale factor comtrols the size of the rocks which are generated.
+            float rockScale = 32.0f;
+            float invRockScale = 1.0f / rockScale;
+
+            // Let's keep the allocation outside of the loop.
+            MaterialSet materialSet = new MaterialSet();
+
+            // Iterate over every voxel of our volume
+            for (int z = 0; z < depth; z++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    // Simplex noise is quite high frequency. We scale the sample position to reduce this.
+                    float sampleX = (float)x * invRockScale;
+                    float sampleZ = (float)z * invRockScale;
+
+                    // Get the noise value for the current position.
+                    // Returned value should be in the range -1 to +1.
+                    float simplexNoiseValue = SimplexNoise.Noise.Generate(sampleX, sampleZ);
+
+                    simplexNoiseValue += 1.0f;
+                    simplexNoiseValue *= 16.0f;
+
+                    for (int y = 0; y < height; y++)
+                    {
+                        // Make sure we don't have anything left in here from the previous voxel
+                        materialSet.weights[0] = 0;
+                        materialSet.weights[1] = 0;
+                        materialSet.weights[2] = 0;
+
+                        if (y < simplexNoiseValue)
+                        {
+                            // Write the final value value into the first material channel (the one with the rock texture).
+                            // The value being written is usually 0 (empty) or 255 (solid) except around the transition.
+                            materialSet.weights[0] = (byte)255;
+                        }
 
                         // We can now write our computed voxel value into the volume.
                         data.SetVoxel(x, y, z, materialSet);
