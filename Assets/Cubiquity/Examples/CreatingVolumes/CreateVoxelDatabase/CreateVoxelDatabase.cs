@@ -24,6 +24,8 @@ namespace Cubiquity
 			// We need to commit this so that the changes made by the previous,line are actually written
 			// to the voxel database. Otherwise they are just kept in temporary storage and will be lost.
 			data.CommitChanges();
+
+            Debug.Log("Voxel database has been saved to '" + saveLocation + "'");
 		}
 	}
 }
