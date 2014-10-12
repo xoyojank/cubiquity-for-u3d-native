@@ -333,13 +333,13 @@ namespace Cubiquity
             }
 
             [DllImport(dllToImport)]
-            private static extern int cuGetNoOfVertices(uint octreeNodeHandle, out uint result);
+            private static extern int cuGetNoOfVertices(uint octreeNodeHandle, out ushort result);
             [DllImport(dllToImport)]
             private static extern int cuGetVertices(uint octreeNodeHandle, out ColoredCubesVertex[] result);
             public static ColoredCubesVertex[] GetVertices(uint octreeNodeHandle)
             {
                 // Based on http://stackoverflow.com/a/1318929
-                uint noOfVertices;
+                ushort noOfVertices;
                 Validate(cuGetNoOfVertices(octreeNodeHandle, out noOfVertices));
 
                 ColoredCubesVertex[] result = new ColoredCubesVertex[noOfVertices];
@@ -372,15 +372,15 @@ namespace Cubiquity
 
                 return result;
             }
-
+            
             [DllImport(dllToImport)]
-            private static extern int cuGetNoOfVerticesMC(uint octreeNodeHandle, out uint result);
+            private static extern int cuGetNoOfVerticesMC(uint octreeNodeHandle, out ushort result);
             [DllImport(dllToImport)]
             private static extern int cuGetVerticesMC(uint octreeNodeHandle, out TerrainVertex[] result);
             public static TerrainVertex[] GetVerticesMC(uint octreeNodeHandle)
             {
                 // Based on http://stackoverflow.com/a/1318929
-                uint noOfVertices;
+                ushort noOfVertices;
                 Validate(cuGetNoOfVerticesMC(octreeNodeHandle, out noOfVertices));
 
                 TerrainVertex[] result = new TerrainVertex[noOfVertices];
