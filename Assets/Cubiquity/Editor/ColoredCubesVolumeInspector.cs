@@ -163,6 +163,8 @@ namespace Cubiquity
 					}
 					
 					Selection.activeGameObject = coloredCubesVolume.gameObject;
+
+                    coloredCubesVolume.EditModeUpdate();
 				}
 				else if ( e.type == EventType.Layout )
 			    {
@@ -171,9 +173,7 @@ namespace Cubiquity
 			    }
 			}
 
-            // Both Update() and Repaint() seem to be required - one does not trigger the other.
-            coloredCubesVolume.Update();
-            HandleUtility.Repaint();
+            coloredCubesVolume.EditModeUpdate();
 		}
 		
 		private static void OnEditorToolChanged()

@@ -162,20 +162,27 @@ namespace Cubiquity
         // window. We want to support background loading of our terrain and so we hook into the 'EditorApplication.update' even for this purpose.
         // ------------------------------------------------------------------------------
 #if UNITY_EDITOR
+        private bool mEditModeUpdateRunning = false;
+
         void StartEditModeUpdateIfInEditMode()
         {
-            if (Application.isPlaying == false)
+            if (Application.isPlaying == false && mEditModeUpdateRunning == false)
             {
                 EditorApplication.update += EditModeUpdate;
+                mEditModeUpdateRunning = true;
             }
         }
 
         void StopEditModeUpdate()
         {
+            // We allow multiple stop attempts... these should be harmless and may even
+            // help if we somehow end up adding the EditModeUpdate() method multiple times.
             EditorApplication.update -= EditModeUpdate;
+            mEditModeUpdateRunning = false;
         }
 
-        void EditModeUpdate()
+        /// \cond
+        public void EditModeUpdate() // Public so we can call it from Editor scripts
         {
             DebugUtils.Assert(Application.isPlaying == false, "EditModeUpdate() should never be called in play mode!");
 
@@ -185,6 +192,7 @@ namespace Cubiquity
                 SceneView.RepaintAll();
             }
         }
+        /// \endcond
 #endif
         // ------------------------------------------------------------------------------
 		
@@ -233,7 +241,7 @@ namespace Cubiquity
 		// Public so that we can manually drive it from the editor as required,
         // but user code should not so this so it's hidden from the docs.
 		/// \cond
-		public void Update()
+		private void Update()
 		{
 			// Check whether the gameObject has been moved to a new layer.
 			if(gameObject.layer != previousLayer)
