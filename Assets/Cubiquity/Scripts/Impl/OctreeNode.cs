@@ -164,7 +164,7 @@ namespace Cubiquity
 					// Horrible hack to choose correct funtion!
 					if(voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(TerrainVolume))
 					{
-						renderThisNode = CubiquityDLL.RenderThisNodeMC(nodeHandle);
+						renderThisNode = CubiquityDLL.RenderThisNode(nodeHandle);
 					}
 					else if(voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(ColoredCubesVolume))
 					{

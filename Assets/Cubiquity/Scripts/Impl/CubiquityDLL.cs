@@ -233,20 +233,6 @@ namespace Cubiquity
 				Validate(cuDeleteTerrainVolume(volumeHandle));
 			}
 			
-			[DllImport (dllToImport)]
-			private static extern int cuAcceptOverrideChunksMC(uint volumeHandle);
-			public static void AcceptOverrideChunksMC(uint volumeHandle)
-			{
-				Validate(cuAcceptOverrideChunksMC(volumeHandle));
-			}
-			
-			[DllImport (dllToImport)]
-			private static extern int cuDiscardOverrideChunksMC(uint volumeHandle);
-			public static void DiscardOverrideChunksMC(uint volumeHandle)
-			{
-				Validate(cuDiscardOverrideChunksMC(volumeHandle));
-			}
-			
 			////////////////////////////////////////////////////////////////////////////////
 			// Octree functions
 			////////////////////////////////////////////////////////////////////////////////
@@ -317,78 +303,6 @@ namespace Cubiquity
 			{
 				uint result;
 				Validate(cuRenderThisNode(nodeHandle, out result));
-				return result;
-			}
-			
-			//----------------------------------------------------------------------
-			
-			[DllImport (dllToImport)]
-			private static extern int cuHasRootOctreeNodeMC(uint volumeHandle, out uint result);
-			public static uint HasRootOctreeNodeMC(uint volumeHandle)
-			{
-				uint result;
-				Validate(cuHasRootOctreeNodeMC(volumeHandle, out result));
-				return result;
-			}
-			
-			[DllImport (dllToImport)]
-			private static extern int cuGetRootOctreeNodeMC(uint volumeHandle, out uint result);
-			public static uint GetRootOctreeNodeMC(uint volumeHandle)
-			{
-				uint result;
-				Validate(cuGetRootOctreeNodeMC(volumeHandle, out result));
-				return result;
-			}
-			
-			[DllImport (dllToImport)]
-			private static extern int cuHasChildNodeMC(uint nodeHandle, uint childX, uint childY, uint childZ, out uint result);
-			public static uint HasChildNodeMC(uint nodeHandle, uint childX, uint childY, uint childZ)
-			{
-				uint result;
-				Validate(cuHasChildNodeMC(nodeHandle, childX, childY, childZ, out result));
-				return result;
-			}
-			
-			[DllImport (dllToImport)]
-			private static extern int cuGetChildNodeMC(uint nodeHandle, uint childX, uint childY, uint childZ, out uint result);
-			public static uint GetChildNodeMC(uint nodeHandle, uint childX, uint childY, uint childZ)
-			{
-				uint result;
-				Validate(cuGetChildNodeMC(nodeHandle, childX, childY, childZ, out result));
-				return result;
-			}
-			
-			[DllImport (dllToImport)]
-			private static extern int cuNodeHasMeshMC(uint nodeHandle, out uint result);
-			public static uint NodeHasMeshMC(uint nodeHandle)
-			{
-				uint result;
-				Validate(cuNodeHasMeshMC(nodeHandle, out result));
-				return result;
-			}
-			
-			[DllImport (dllToImport)]
-			private static extern int cuGetNodePositionMC(uint nodeHandle, out int x, out int y, out int z);
-			public static void GetNodePositionMC(uint nodeHandle, out int x, out int y, out int z)
-			{
-				Validate(cuGetNodePositionMC(nodeHandle, out x, out y, out z));
-			}
-			
-			[DllImport (dllToImport)]
-			private static extern int cuGetMeshLastUpdatedMC(uint nodeHandle, out uint result);
-			public static uint GetMeshLastUpdatedMC(uint nodeHandle)
-			{
-				uint result;
-				Validate(cuGetMeshLastUpdatedMC(nodeHandle, out result));
-				return result;
-			}
-
-			[DllImport (dllToImport)]
-			private static extern int cuRenderThisNodeMC(uint nodeHandle, out uint result);
-			public static uint RenderThisNodeMC(uint nodeHandle)
-			{
-				uint result;
-				Validate(cuRenderThisNodeMC(nodeHandle, out result));
 				return result;
 			}
 			

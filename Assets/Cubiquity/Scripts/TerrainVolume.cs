@@ -113,9 +113,9 @@ namespace Cubiquity
 
 			CubiquityDLL.UpdateVolumeMC(data.volumeHandle.Value, camPos.x, camPos.y, camPos.z, lodThreshold);
 					
-			if(CubiquityDLL.HasRootOctreeNodeMC(data.volumeHandle.Value) == 1)
+			if(CubiquityDLL.HasRootOctreeNode(data.volumeHandle.Value) == 1)
 			{		
-				uint rootNodeHandle = CubiquityDLL.GetRootOctreeNodeMC(data.volumeHandle.Value);
+				uint rootNodeHandle = CubiquityDLL.GetRootOctreeNode(data.volumeHandle.Value);
 						
 				if(rootOctreeNodeGameObject == null)
 				{
