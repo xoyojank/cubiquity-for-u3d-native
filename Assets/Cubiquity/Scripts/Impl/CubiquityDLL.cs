@@ -311,8 +311,8 @@ namespace Cubiquity
 			////////////////////////////////////////////////////////////////////////////////
 #if CUBIQUITY_USE_UNSAFE
             [DllImport(dllToImport)]
-            unsafe private static extern int cuGetMesh(uint octreeNodeHandle, uint* noOfVertices, ColoredCubesVertex** vertices, uint* noOfIndices, ushort** indices);
-            unsafe public static void GetMesh(uint octreeNodeHandle, uint* noOfVertices, ColoredCubesVertex** vertices, uint* noOfIndices, ushort** indices)
+            unsafe private static extern int cuGetMesh(uint octreeNodeHandle, ushort* noOfVertices, ColoredCubesVertex** vertices, uint* noOfIndices, ushort** indices);
+            unsafe public static void GetMesh(uint octreeNodeHandle, ushort* noOfVertices, ColoredCubesVertex** vertices, uint* noOfIndices, ushort** indices)
             {
                 Validate(cuGetMesh(octreeNodeHandle, noOfVertices, vertices, noOfIndices, indices));
             }
@@ -352,8 +352,8 @@ namespace Cubiquity
 			//--------------------------------------------------------------------------------
 #if CUBIQUITY_USE_UNSAFE
             [DllImport(dllToImport)]
-            unsafe private static extern int cuGetMeshMC(uint octreeNodeHandle, uint* noOfVertices, TerrainVertex** vertices, uint* noOfIndices, ushort** indices);
-            unsafe public static void GetMeshMC(uint octreeNodeHandle, uint* noOfVertices, TerrainVertex** vertices, uint* noOfIndices, ushort** indices)
+            unsafe private static extern int cuGetMeshMC(uint octreeNodeHandle, ushort* noOfVertices, TerrainVertex** vertices, uint* noOfIndices, ushort** indices);
+            unsafe public static void GetMeshMC(uint octreeNodeHandle, ushort* noOfVertices, TerrainVertex** vertices, uint* noOfIndices, ushort** indices)
             {
                 Validate(cuGetMeshMC(octreeNodeHandle, noOfVertices, vertices, noOfIndices, indices));
             }

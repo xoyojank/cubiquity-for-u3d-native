@@ -14,7 +14,7 @@ namespace Cubiquity
             unsafe public static Mesh BuildMeshFromNodeHandleForColoredCubesVolume(uint nodeHandle, bool onlyPositions)
             {
                 // Get the data from Cubiquity.
-                uint noOfVertices; ColoredCubesVertex* vertices; uint noOfIndices; ushort* indices;
+                ushort noOfVertices; ColoredCubesVertex* vertices; uint noOfIndices; ushort* indices;
                 CubiquityDLL.GetMesh(nodeHandle, &noOfVertices, &vertices, &noOfIndices, &indices);
 #else
             public static Mesh BuildMeshFromNodeHandleForColoredCubesVolume(uint nodeHandle, bool onlyPositions)
@@ -78,7 +78,7 @@ namespace Cubiquity
             unsafe public static Mesh BuildMeshFromNodeHandleForTerrainVolume(uint nodeHandle, bool onlyPositions)
             {
                 // Get the data from Cubiquity.
-                uint noOfVertices; TerrainVertex* vertices; uint noOfIndices; ushort* indices;
+                ushort noOfVertices; TerrainVertex* vertices; uint noOfIndices; ushort* indices;
                 CubiquityDLL.GetMeshMC(nodeHandle, &noOfVertices, &vertices, &noOfIndices, &indices);
 #else
             public static Mesh BuildMeshFromNodeHandleForTerrainVolume(uint nodeHandle, bool onlyPositions)
