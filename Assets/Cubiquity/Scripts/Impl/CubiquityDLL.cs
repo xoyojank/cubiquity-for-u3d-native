@@ -335,17 +335,28 @@ namespace Cubiquity
             [DllImport(dllToImport)]
             private static extern int cuGetNoOfVertices(uint octreeNodeHandle, out ushort result);
             [DllImport(dllToImport)]
-            private static extern int cuGetVertices(uint octreeNodeHandle, out ColoredCubesVertex[] result);
-            public static ColoredCubesVertex[] GetVertices(uint octreeNodeHandle)
+            private static extern int cuGetVertices(uint octreeNodeHandle, out IntPtr result);
+            public static VertexType[] GetVertices<VertexType>(uint octreeNodeHandle)
             {
                 // Based on http://stackoverflow.com/a/1318929
                 ushort noOfVertices;
                 Validate(cuGetNoOfVertices(octreeNodeHandle, out noOfVertices));
 
-                ColoredCubesVertex[] result = new ColoredCubesVertex[noOfVertices];
-                Validate(cuGetVertices(octreeNodeHandle, out result));
+                IntPtr ptr;
+                Validate(cuGetVertices(octreeNodeHandle, out ptr));
 
-                return result;
+                VertexType[] vertices = new VertexType[noOfVertices];
+
+                // Based on http://stackoverflow.com/a/1086462
+                long longPtr = ptr.ToInt64(); 
+                for (ushort ct = 0; ct < noOfVertices; ct++)
+                {
+                    IntPtr offsetPtr = new IntPtr(longPtr);
+                    vertices[ct] = (VertexType)(Marshal.PtrToStructure(offsetPtr, typeof(VertexType)));
+                    longPtr += Marshal.SizeOf(typeof(VertexType));
+                }
+
+                return vertices;
             }
 #endif
 			
@@ -358,7 +369,7 @@ namespace Cubiquity
                 Validate(cuGetMeshMC(octreeNodeHandle, noOfVertices, vertices, noOfIndices, indices));
             }
 #else
-            [DllImport(dllToImport)]
+            /*[DllImport(dllToImport)]
             private static extern int cuGetNoOfIndicesMC(uint octreeNodeHandle, out uint result);
             [DllImport(dllToImport)]
             private static extern int cuGetIndicesMC(uint octreeNodeHandle, out ushort[] result);
@@ -371,9 +382,9 @@ namespace Cubiquity
                 Validate(cuGetIndicesMC(octreeNodeHandle, out result));
 
                 return result;
-            }
+            }*/
             
-            [DllImport(dllToImport)]
+            /*[DllImport(dllToImport)]
             private static extern int cuGetNoOfVerticesMC(uint octreeNodeHandle, out ushort result);
             [DllImport(dllToImport)]
             private static extern int cuGetVerticesMC(uint octreeNodeHandle, out TerrainVertex[] result);
@@ -387,7 +398,7 @@ namespace Cubiquity
                 Validate(cuGetVerticesMC(octreeNodeHandle, out result));
 
                 return result;
-            }
+            }*/
 #endif
 
 			////////////////////////////////////////////////////////////////////////////////
