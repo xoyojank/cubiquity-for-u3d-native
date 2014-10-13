@@ -22,7 +22,7 @@ namespace Cubiquity
                 // Get the data from Cubiquity.
                 ColoredCubesVertex[] vertices;
                 ushort[] indices;
-                CubiquityDLL.GetColoredCubesMesh(nodeHandle, out vertices, out indices);
+                CubiquityDLL.GetMesh<ColoredCubesVertex>(nodeHandle, out vertices, out indices);
                 int noOfVertices = vertices.Length;
                 int noOfIndices = indices.Length;
 #endif
@@ -87,7 +87,7 @@ namespace Cubiquity
                 // Get the data from Cubiquity.
                 TerrainVertex[] vertices;
                 ushort[] indices;
-                CubiquityDLL.GetTerrainMesh(nodeHandle, out vertices, out indices);
+                CubiquityDLL.GetMesh<TerrainVertex>(nodeHandle, out vertices, out indices);
                 int noOfVertices = vertices.Length;
                 int noOfIndices = indices.Length;
 #endif

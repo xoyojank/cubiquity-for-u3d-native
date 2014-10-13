@@ -323,8 +323,7 @@ namespace Cubiquity
 #else
             [DllImport(dllToImport)]
             private static extern int cuGetMesh(uint octreeNodeHandle, out ushort noOfVertices, out IntPtr vertices, out uint noOfIndices, out IntPtr indices);
-
-            public static void GetColoredCubesMesh(uint octreeNodeHandle, out ColoredCubesVertex[] vertices, out ushort[] indices)
+            public static void GetMesh<VertexType>(uint octreeNodeHandle, out VertexType[] vertices, out ushort[] indices)
             {
                 ushort noOfVertices;
                 IntPtr ptrVertices;
@@ -333,101 +332,28 @@ namespace Cubiquity
 
                 Validate(cuGetMesh(octreeNodeHandle, out noOfVertices, out ptrVertices, out noOfIndices, out ptrIndices));
 
-                vertices = new ColoredCubesVertex[noOfVertices];
+                vertices = new VertexType[noOfVertices];
 
                 // Based on http://stackoverflow.com/a/1086462
                 long longPtrVertices = ptrVertices.ToInt64();
                 for (ushort ct = 0; ct < noOfVertices; ct++)
                 {
                     IntPtr offsetPtr = new IntPtr(longPtrVertices);
-                    vertices[ct] = (ColoredCubesVertex)(Marshal.PtrToStructure(offsetPtr, typeof(ColoredCubesVertex)));
-                    longPtrVertices += Marshal.SizeOf(typeof(ColoredCubesVertex));
-                }
-
-                indices = new ushort[noOfIndices];
-
-                // Based on http://stackoverflow.com/a/1086462
-                long longPtrIndices = ptrIndices.ToInt64();
-                for (ushort ct = 0; ct < noOfIndices; ct++)
-                {
-                    IntPtr offsetPtr = new IntPtr(longPtrIndices);
-                    indices[ct] = (ushort)(Marshal.PtrToStructure(offsetPtr, typeof(ushort)));
-                    longPtrIndices += Marshal.SizeOf(typeof(ushort));
-                }
-            }
-
-            public static void GetTerrainMesh(uint octreeNodeHandle, out TerrainVertex[] vertices, out ushort[] indices)
-            {
-                ushort noOfVertices;
-                IntPtr ptrVertices;
-                uint noOfIndices;
-                IntPtr ptrIndices;
-
-                Validate(cuGetMesh(octreeNodeHandle, out noOfVertices, out ptrVertices, out noOfIndices, out ptrIndices));
-
-                vertices = new TerrainVertex[noOfVertices];
-
-                // Based on http://stackoverflow.com/a/1086462
-                long longPtrVertices = ptrVertices.ToInt64();
-                for (ushort ct = 0; ct < noOfVertices; ct++)
-                {
-                    IntPtr offsetPtr = new IntPtr(longPtrVertices);
-                    vertices[ct] = (TerrainVertex)(Marshal.PtrToStructure(offsetPtr, typeof(TerrainVertex)));
-                    longPtrVertices += Marshal.SizeOf(typeof(TerrainVertex));
-                }
-
-                indices = new ushort[noOfIndices];
-
-                // Based on http://stackoverflow.com/a/1086462
-                long longPtrIndices = ptrIndices.ToInt64();
-                for (ushort ct = 0; ct < noOfIndices; ct++)
-                {
-                    IntPtr offsetPtr = new IntPtr(longPtrIndices);
-                    indices[ct] = (ushort)(Marshal.PtrToStructure(offsetPtr, typeof(ushort)));
-                    longPtrIndices += Marshal.SizeOf(typeof(ushort));
-                }
-            }
-
-            /*[DllImport(dllToImport)]
-            private static extern int cuGetNoOfIndices(uint octreeNodeHandle, out uint result);
-            [DllImport(dllToImport)]
-            private static extern int cuGetIndices(uint octreeNodeHandle, out ushort[] result);
-            public static ushort[] GetIndices(uint octreeNodeHandle)
-            {
-                uint noOfIndices;
-                Validate(cuGetNoOfIndices(octreeNodeHandle, out noOfIndices));
-
-                ushort[] result = new ushort[noOfIndices];
-                Validate(cuGetIndices(octreeNodeHandle, out result));
-
-                return result;
-            }
-
-            [DllImport(dllToImport)]
-            private static extern int cuGetNoOfVertices(uint octreeNodeHandle, out ushort result);
-            [DllImport(dllToImport)]
-            private static extern int cuGetVertices(uint octreeNodeHandle, out IntPtr result);
-            public static VertexType[] GetVertices<VertexType>(uint octreeNodeHandle)
-            {
-                ushort noOfVertices;
-                Validate(cuGetNoOfVertices(octreeNodeHandle, out noOfVertices));
-
-                IntPtr ptr;
-                Validate(cuGetVertices(octreeNodeHandle, out ptr));
-
-                VertexType[] vertices = new VertexType[noOfVertices];
-
-                // Based on http://stackoverflow.com/a/1086462
-                long longPtr = ptr.ToInt64(); 
-                for (ushort ct = 0; ct < noOfVertices; ct++)
-                {
-                    IntPtr offsetPtr = new IntPtr(longPtr);
                     vertices[ct] = (VertexType)(Marshal.PtrToStructure(offsetPtr, typeof(VertexType)));
-                    longPtr += Marshal.SizeOf(typeof(VertexType));
+                    longPtrVertices += Marshal.SizeOf(typeof(VertexType));
                 }
 
-                return vertices;
-            }*/
+                indices = new ushort[noOfIndices];
+
+                // Based on http://stackoverflow.com/a/1086462
+                long longPtrIndices = ptrIndices.ToInt64();
+                for (ushort ct = 0; ct < noOfIndices; ct++)
+                {
+                    IntPtr offsetPtr = new IntPtr(longPtrIndices);
+                    indices[ct] = (ushort)(Marshal.PtrToStructure(offsetPtr, typeof(ushort)));
+                    longPtrIndices += Marshal.SizeOf(typeof(ushort));
+                }
+            }
 #endif
 
 			////////////////////////////////////////////////////////////////////////////////
