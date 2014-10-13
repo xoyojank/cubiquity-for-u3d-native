@@ -311,10 +311,14 @@ namespace Cubiquity
 			////////////////////////////////////////////////////////////////////////////////
 #if CUBIQUITY_USE_UNSAFE
             [DllImport(dllToImport)]
-            unsafe private static extern int cuGetMesh(uint octreeNodeHandle, ushort* noOfVertices, ColoredCubesVertex** vertices, uint* noOfIndices, ushort** indices);
-            unsafe public static void GetMesh(uint octreeNodeHandle, ushort* noOfVertices, ColoredCubesVertex** vertices, uint* noOfIndices, ushort** indices)
+            unsafe private static extern int cuGetMesh(uint octreeNodeHandle, ushort* noOfVertices, void** vertices, uint* noOfIndices, ushort** indices);
+            unsafe public static void GetColoredCubesMesh(uint octreeNodeHandle, ushort* noOfVertices, ColoredCubesVertex** vertices, uint* noOfIndices, ushort** indices)
             {
-                Validate(cuGetMesh(octreeNodeHandle, noOfVertices, vertices, noOfIndices, indices));
+                Validate(cuGetMesh(octreeNodeHandle, noOfVertices, (void**)vertices, noOfIndices, indices));
+            }
+            unsafe public static void GetTerrainMesh(uint octreeNodeHandle, ushort* noOfVertices, TerrainVertex** vertices, uint* noOfIndices, ushort** indices)
+            {
+                Validate(cuGetMesh(octreeNodeHandle, noOfVertices, (void**)vertices, noOfIndices, indices));
             }
 #else
             [DllImport(dllToImport)]
@@ -338,7 +342,6 @@ namespace Cubiquity
             private static extern int cuGetVertices(uint octreeNodeHandle, out IntPtr result);
             public static VertexType[] GetVertices<VertexType>(uint octreeNodeHandle)
             {
-                // Based on http://stackoverflow.com/a/1318929
                 ushort noOfVertices;
                 Validate(cuGetNoOfVertices(octreeNodeHandle, out noOfVertices));
 
@@ -358,47 +361,6 @@ namespace Cubiquity
 
                 return vertices;
             }
-#endif
-			
-			//--------------------------------------------------------------------------------
-#if CUBIQUITY_USE_UNSAFE
-            [DllImport(dllToImport)]
-            unsafe private static extern int cuGetMeshMC(uint octreeNodeHandle, ushort* noOfVertices, TerrainVertex** vertices, uint* noOfIndices, ushort** indices);
-            unsafe public static void GetMeshMC(uint octreeNodeHandle, ushort* noOfVertices, TerrainVertex** vertices, uint* noOfIndices, ushort** indices)
-            {
-                Validate(cuGetMeshMC(octreeNodeHandle, noOfVertices, vertices, noOfIndices, indices));
-            }
-#else
-            /*[DllImport(dllToImport)]
-            private static extern int cuGetNoOfIndicesMC(uint octreeNodeHandle, out uint result);
-            [DllImport(dllToImport)]
-            private static extern int cuGetIndicesMC(uint octreeNodeHandle, out ushort[] result);
-            public static ushort[] GetIndicesMC(uint octreeNodeHandle)
-            {
-                uint noOfIndices;
-                Validate(cuGetNoOfIndicesMC(octreeNodeHandle, out noOfIndices));
-
-                ushort[] result = new ushort[noOfIndices];
-                Validate(cuGetIndicesMC(octreeNodeHandle, out result));
-
-                return result;
-            }*/
-            
-            /*[DllImport(dllToImport)]
-            private static extern int cuGetNoOfVerticesMC(uint octreeNodeHandle, out ushort result);
-            [DllImport(dllToImport)]
-            private static extern int cuGetVerticesMC(uint octreeNodeHandle, out TerrainVertex[] result);
-            public static TerrainVertex[] GetVerticesMC(uint octreeNodeHandle)
-            {
-                // Based on http://stackoverflow.com/a/1318929
-                ushort noOfVertices;
-                Validate(cuGetNoOfVerticesMC(octreeNodeHandle, out noOfVertices));
-
-                TerrainVertex[] result = new TerrainVertex[noOfVertices];
-                Validate(cuGetVerticesMC(octreeNodeHandle, out result));
-
-                return result;
-            }*/
 #endif
 
 			////////////////////////////////////////////////////////////////////////////////
