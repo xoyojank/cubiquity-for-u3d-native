@@ -348,7 +348,7 @@ namespace Cubiquity
 
                 // Based on http://stackoverflow.com/a/1086462
                 long longPtrIndices = ptrIndices.ToInt64();
-                for (ushort ct = 0; ct < noOfVertices; ct++)
+                for (ushort ct = 0; ct < noOfIndices; ct++)
                 {
                     IntPtr offsetPtr = new IntPtr(longPtrIndices);
                     indices[ct] = (ushort)(Marshal.PtrToStructure(offsetPtr, typeof(ushort)));
@@ -373,14 +373,14 @@ namespace Cubiquity
                 {
                     IntPtr offsetPtr = new IntPtr(longPtrVertices);
                     vertices[ct] = (TerrainVertex)(Marshal.PtrToStructure(offsetPtr, typeof(TerrainVertex)));
-                    longPtrVertices += Marshal.SizeOf(typeof(ColoredCubesVertex));
+                    longPtrVertices += Marshal.SizeOf(typeof(TerrainVertex));
                 }
 
                 indices = new ushort[noOfIndices];
 
                 // Based on http://stackoverflow.com/a/1086462
                 long longPtrIndices = ptrIndices.ToInt64();
-                for (ushort ct = 0; ct < noOfVertices; ct++)
+                for (ushort ct = 0; ct < noOfIndices; ct++)
                 {
                     IntPtr offsetPtr = new IntPtr(longPtrIndices);
                     indices[ct] = (ushort)(Marshal.PtrToStructure(offsetPtr, typeof(ushort)));
