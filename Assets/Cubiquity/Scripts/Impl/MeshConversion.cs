@@ -20,8 +20,9 @@ namespace Cubiquity
             public static Mesh BuildMeshFromNodeHandleForColoredCubesVolume(uint nodeHandle, bool onlyPositions)
             {
                 // Get the data from Cubiquity.
-                ushort[] indices = CubiquityDLL.GetIndices(nodeHandle);
-                ColoredCubesVertex[] vertices = CubiquityDLL.GetVertices<ColoredCubesVertex>(nodeHandle);
+                ColoredCubesVertex[] vertices;
+                ushort[] indices;
+                CubiquityDLL.GetColoredCubesMesh(nodeHandle, out vertices, out indices);
                 int noOfVertices = vertices.Length;
                 int noOfIndices = indices.Length;
 #endif
@@ -84,8 +85,9 @@ namespace Cubiquity
             public static Mesh BuildMeshFromNodeHandleForTerrainVolume(uint nodeHandle, bool onlyPositions)
             {
                 // Get the data from Cubiquity.
-                ushort[] indices = CubiquityDLL.GetIndices(nodeHandle);
-                TerrainVertex[] vertices = CubiquityDLL.GetVertices<TerrainVertex>(nodeHandle);
+                TerrainVertex[] vertices;
+                ushort[] indices;
+                CubiquityDLL.GetTerrainMesh(nodeHandle, out vertices, out indices);
                 int noOfVertices = vertices.Length;
                 int noOfIndices = indices.Length;
 #endif

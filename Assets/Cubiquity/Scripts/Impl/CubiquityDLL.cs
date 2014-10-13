@@ -388,7 +388,7 @@ namespace Cubiquity
                 }
             }
 
-            [DllImport(dllToImport)]
+            /*[DllImport(dllToImport)]
             private static extern int cuGetNoOfIndices(uint octreeNodeHandle, out uint result);
             [DllImport(dllToImport)]
             private static extern int cuGetIndices(uint octreeNodeHandle, out ushort[] result);
@@ -427,7 +427,7 @@ namespace Cubiquity
                 }
 
                 return vertices;
-            }
+            }*/
 #endif
 
 			////////////////////////////////////////////////////////////////////////////////
