@@ -310,6 +310,8 @@ namespace Cubiquity
 			// Mesh functions
 			////////////////////////////////////////////////////////////////////////////////
 #if CUBIQUITY_USE_UNSAFE
+            // It seems we can't make a generic version of this functions as it gives error CS0208.
+            // Apparently that is not easily fixed in our situation, see here: http://goo.gl/blN834
             [DllImport(dllToImport)]
             unsafe private static extern int cuGetMesh(uint octreeNodeHandle, ushort* noOfVertices, void** vertices, uint* noOfIndices, ushort** indices);
             unsafe public static void GetColoredCubesMesh(uint octreeNodeHandle, ushort* noOfVertices, ColoredCubesVertex** vertices, uint* noOfIndices, ushort** indices)
