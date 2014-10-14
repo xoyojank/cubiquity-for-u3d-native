@@ -60,7 +60,7 @@ namespace Cubiquity
 				if(x >= enclosingRegion.lowerCorner.x && y >= enclosingRegion.lowerCorner.y && z >= enclosingRegion.lowerCorner.z
 					&& x <= enclosingRegion.upperCorner.x && y <= enclosingRegion.upperCorner.y && z <= enclosingRegion.upperCorner.z)
 				{						
-					CubiquityDLL.SetVoxelMC(volumeHandle.Value, x, y, z, materialSet);
+					CubiquityDLL.SetVoxel(volumeHandle.Value, x, y, z, materialSet);
 				}
 			}
 		}

@@ -110,6 +110,7 @@ namespace Cubiquity
 	 * and it's generally good to break the process down into such a series of smaller steps.
 	 *
 	 */
+    [StructLayout(LayoutKind.Sequential)]
 	public struct MaterialSet
 	{		
 		/// The array of weight values controlling the distribution of materials for this voxel.

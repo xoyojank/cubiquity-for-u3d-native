@@ -8,6 +8,17 @@ namespace Cubiquity
 {
 	namespace Impl
 	{
+        [StructLayout(
+            LayoutKind.Sequential,      //must specify a layout
+            CharSet = CharSet.Ansi)]    //if you intend to use char
+        public struct ToBePassed
+        {
+            public Int32 Num1;
+            public Int32 Num2;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 255)]
+            public Char[] Data;    //specify the size using MarshalAs
+        }
+
 		public class CubiquityDLL
 		{
 			private const string dllToImport = "CubiquityC";
@@ -151,27 +162,6 @@ namespace Cubiquity
 			}
 			
 			[DllImport (dllToImport)]
-            private static extern int cuSetVoxel(uint volumeHandle, int x, int y, int z, IntPtr value);
-			public static void SetVoxel(uint volumeHandle, int x, int y, int z, QuantizedColor color)
-			{
-                // See http://stackoverflow.com/a/3939963
-                IntPtr ptrColor = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(QuantizedColor)));
-                Marshal.StructureToPtr(typeof(QuantizedColor), ptrColor, true);
-                Validate(cuSetVoxel(volumeHandle, x, y, z, ptrColor));
-                Marshal.FreeHGlobal(ptrColor);
-			}
-			
-			[DllImport (dllToImport)]
-			private static extern int cuGetVoxel(uint volumeHandle, int x, int y, int z, IntPtr value);
-            public static void GetVoxel<VoxelType>(uint volumeHandle, int x, int y, int z, out VoxelType color)
-			{
-                IntPtr pointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(VoxelType)));
-                Validate(cuGetVoxel(volumeHandle, x, y, z, pointer));
-                color = (VoxelType)(Marshal.PtrToStructure(pointer, typeof(VoxelType)));
-                Marshal.FreeHGlobal(pointer);
-			}
-			
-			[DllImport (dllToImport)]
 			private static extern int cuDeleteColoredCubesVolume(uint volumeHandle);
 			public static void DeleteColoredCubesVolume(uint volumeHandle)
 			{
@@ -219,27 +209,37 @@ namespace Cubiquity
 				Validate(cuUpdateVolumeMC(volumeHandle, eyePosX, eyePosY, eyePosZ, lodThreshold));
 			}
 			
-			/*[DllImport (dllToImport)]
-			private static extern int cuGetVoxelMC(uint volumeHandle, int x, int y, int z, out MaterialSet materialSet);	
-			public static void GetVoxelMC(uint volumeHandle, int x, int y, int z, out MaterialSet materialSet)
-			{		
-				Validate(cuGetVoxelMC(volumeHandle, x, y, z, out materialSet));
-			}*/
-			
-			[DllImport (dllToImport)]
-			private static extern int cuSetVoxelMC(uint volumeHandle, int x, int y, int z, MaterialSet materialSet);
-			public static void SetVoxelMC(uint volumeHandle, int x, int y, int z, MaterialSet materialSet)
-			{
-				Validate(cuSetVoxelMC(volumeHandle, x, y, z, materialSet));
-			}
-			
 			[DllImport (dllToImport)]
 			private static extern int cuDeleteTerrainVolume(uint volumeHandle);
 			public static void DeleteTerrainVolume(uint volumeHandle)
 			{
 				Validate(cuDeleteTerrainVolume(volumeHandle));
 			}
-			
+
+            ////////////////////////////////////////////////////////////////////////////////
+            // Voxel functions
+            ////////////////////////////////////////////////////////////////////////////////
+            [DllImport(dllToImport)]
+            private static extern int cuGetVoxel(uint volumeHandle, int x, int y, int z, IntPtr value);
+            public static void GetVoxel<VoxelType>(uint volumeHandle, int x, int y, int z, out VoxelType color)
+            {
+                IntPtr pointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(VoxelType)));
+                Validate(cuGetVoxel(volumeHandle, x, y, z, pointer));
+                color = (VoxelType)(Marshal.PtrToStructure(pointer, typeof(VoxelType)));
+                Marshal.FreeHGlobal(pointer);
+            }
+
+            [DllImport(dllToImport)]
+            private static extern int cuSetVoxel(uint volumeHandle, int x, int y, int z, IntPtr value);
+            public static void SetVoxel<VoxelType>(uint volumeHandle, int x, int y, int z, VoxelType value)
+            {
+                // See http://stackoverflow.com/a/3939963 
+                IntPtr ptrValue = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(VoxelType)));
+                Marshal.StructureToPtr(value, ptrValue, true);
+                Validate(cuSetVoxel(volumeHandle, x, y, z, ptrValue));
+                Marshal.FreeHGlobal(ptrValue);
+            }            
+
 			////////////////////////////////////////////////////////////////////////////////
 			// Octree functions
 			////////////////////////////////////////////////////////////////////////////////
