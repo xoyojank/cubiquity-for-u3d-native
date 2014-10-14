@@ -35,7 +35,7 @@ namespace Cubiquity
 			MaterialSet materialSet;
 			if(volumeHandle.HasValue)
 			{
-				CubiquityDLL.GetVoxelMC(volumeHandle.Value, x, y, z, out materialSet);
+				CubiquityDLL.GetVoxel(volumeHandle.Value, x, y, z, out materialSet);
 			}
 			else
 			{

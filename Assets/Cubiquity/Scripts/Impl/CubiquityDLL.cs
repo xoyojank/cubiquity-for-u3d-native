@@ -158,12 +158,12 @@ namespace Cubiquity
 			}
 			
 			[DllImport (dllToImport)]
-			private static extern int cuGetVoxel(uint volumeHandle, int x, int y, int z, IntPtr value);	
-			public static void GetVoxel(uint volumeHandle, int x, int y, int z, out QuantizedColor color)
+			private static extern int cuGetVoxel(uint volumeHandle, int x, int y, int z, IntPtr value);
+            public static void GetVoxel<VoxelType>(uint volumeHandle, int x, int y, int z, out VoxelType color)
 			{
-                IntPtr pointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(QuantizedColor)));
+                IntPtr pointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(VoxelType)));
                 Validate(cuGetVoxel(volumeHandle, x, y, z, pointer));
-                color = (QuantizedColor)(Marshal.PtrToStructure(pointer, typeof(QuantizedColor)));
+                color = (VoxelType)(Marshal.PtrToStructure(pointer, typeof(VoxelType)));
                 Marshal.FreeHGlobal(pointer);
 			}
 			
@@ -215,12 +215,12 @@ namespace Cubiquity
 				Validate(cuUpdateVolumeMC(volumeHandle, eyePosX, eyePosY, eyePosZ, lodThreshold));
 			}
 			
-			[DllImport (dllToImport)]
+			/*[DllImport (dllToImport)]
 			private static extern int cuGetVoxelMC(uint volumeHandle, int x, int y, int z, out MaterialSet materialSet);	
 			public static void GetVoxelMC(uint volumeHandle, int x, int y, int z, out MaterialSet materialSet)
 			{		
 				Validate(cuGetVoxelMC(volumeHandle, x, y, z, out materialSet));
-			}
+			}*/
 			
 			[DllImport (dllToImport)]
 			private static extern int cuSetVoxelMC(uint volumeHandle, int x, int y, int z, MaterialSet materialSet);
