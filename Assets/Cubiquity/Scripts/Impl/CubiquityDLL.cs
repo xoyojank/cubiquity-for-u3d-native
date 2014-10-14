@@ -151,10 +151,14 @@ namespace Cubiquity
 			}
 			
 			[DllImport (dllToImport)]
-			private static extern int cuSetVoxel(uint volumeHandle, int x, int y, int z, QuantizedColor color);
+            private static extern int cuSetVoxel(uint volumeHandle, int x, int y, int z, IntPtr value);
 			public static void SetVoxel(uint volumeHandle, int x, int y, int z, QuantizedColor color)
 			{
-				Validate(cuSetVoxel(volumeHandle, x, y, z, color));
+                // See http://stackoverflow.com/a/3939963
+                IntPtr ptrColor = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(QuantizedColor)));
+                Marshal.StructureToPtr(typeof(QuantizedColor), ptrColor, true);
+                Validate(cuSetVoxel(volumeHandle, x, y, z, ptrColor));
+                Marshal.FreeHGlobal(ptrColor);
 			}
 			
 			[DllImport (dllToImport)]

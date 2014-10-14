@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Runtime.InteropServices;
 
 namespace Cubiquity
 {	
@@ -27,6 +28,7 @@ namespace Cubiquity
 	 *
 	 * It is important to remember that a QuantizedColor is passed by value rather than by reference.
 	 */
+    [StructLayout(LayoutKind.Sequential)]
 	public struct QuantizedColor
 	{
 		private static int MaxInOutValue = byte.MaxValue;
