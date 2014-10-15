@@ -32,17 +32,14 @@ namespace Cubiquity
 		public MaterialSet GetVoxel(int x, int y, int z)
 		{
 			// The initialization can fail (bad filename, database locked, etc), so the volume handle could still be null.
-			MaterialSet materialSet;
 			if(volumeHandle.HasValue)
 			{
-				CubiquityDLL.GetVoxel(volumeHandle.Value, x, y, z, out materialSet);
+                return CubiquityDLL.GetMaterialSetVoxel(volumeHandle.Value, x, y, z);
 			}
 			else
 			{
-				materialSet  = new MaterialSet();
+				return new MaterialSet();
 			}
-
-			return materialSet;
 		}
 		
 		/// Sets the material weights of the specified position.

@@ -224,21 +224,21 @@ namespace Cubiquity
             // Apparently that is not easily fixed in our situation, see here: http://goo.gl/blN834
             [DllImport(dllToImport)]
             unsafe private static extern int cuGetVoxel(uint volumeHandle, int x, int y, int z, void* result);
-            unsafe public static void GetVoxel(uint volumeHandle, int x, int y, int z, out QuantizedColor result)
+            unsafe public static QuantizedColor GetQuantizedColorVoxel(uint volumeHandle, int x, int y, int z)
             {
-                fixed(void* p = &result)
-                {
-                    Validate(cuGetVoxel(volumeHandle, x, y, z, p));
-                }
+                QuantizedColor result;
+                Validate(cuGetVoxel(volumeHandle, x, y, z, &result));
+                return result;
             }
-            unsafe public static void GetVoxel(uint volumeHandle, int x, int y, int z, out MaterialSet result)
+            unsafe public static MaterialSet GetMaterialSetVoxel(uint volumeHandle, int x, int y, int z)
             {
-                fixed(void* p = &result)
-                {
-                    Validate(cuGetVoxel(volumeHandle, x, y, z, p));
-                }
+                MaterialSet result;
+                Validate(cuGetVoxel(volumeHandle, x, y, z, &result));
+                return result;
             }
 
+            // It seems we can't make a generic version of this functions as it gives error CS0208.
+            // Apparently that is not easily fixed in our situation, see here: http://goo.gl/blN834
             [DllImport(dllToImport)]
             unsafe private static extern int cuSetVoxel(uint volumeHandle, int x, int y, int z, void* value);
             unsafe public static void SetVoxel(uint volumeHandle, int x, int y, int z, QuantizedColor value)
@@ -252,12 +252,23 @@ namespace Cubiquity
 #else
             [DllImport(dllToImport)]
             private static extern int cuGetVoxel(uint volumeHandle, int x, int y, int z, IntPtr result);
-            public static void GetVoxel<VoxelType>(uint volumeHandle, int x, int y, int z, out VoxelType color)
+            public static VoxelType GetVoxel<VoxelType>(uint volumeHandle, int x, int y, int z)
             {
                 IntPtr pointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(VoxelType)));
                 Validate(cuGetVoxel(volumeHandle, x, y, z, pointer));
-                color = (VoxelType)(Marshal.PtrToStructure(pointer, typeof(VoxelType)));
+                VoxelType value = (VoxelType)(Marshal.PtrToStructure(pointer, typeof(VoxelType)));
                 Marshal.FreeHGlobal(pointer);
+                return value;
+            }
+            // The unsafe version of this code cannot provide a generic version so
+            // to mathch that interface we also provide non-generic versions here.
+            public static QuantizedColor GetQuantizedColorVoxel(uint volumeHandle, int x, int y, int z)
+            {
+                return GetVoxel<QuantizedColor>(volumeHandle, x, y, z);
+            }
+            public static MaterialSet GetMaterialSetVoxel(uint volumeHandle, int x, int y, int z)
+            {
+                return GetVoxel < MaterialSet>(volumeHandle, x, y, z);
             }
 
             [DllImport(dllToImport)]
