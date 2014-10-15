@@ -219,8 +219,39 @@ namespace Cubiquity
             ////////////////////////////////////////////////////////////////////////////////
             // Voxel functions
             ////////////////////////////////////////////////////////////////////////////////
+#if CUBIQUITY_USE_UNSAFE
+            // It seems we can't make a generic version of this functions as it gives error CS0208.
+            // Apparently that is not easily fixed in our situation, see here: http://goo.gl/blN834
             [DllImport(dllToImport)]
-            private static extern int cuGetVoxel(uint volumeHandle, int x, int y, int z, IntPtr value);
+            unsafe private static extern int cuGetVoxel(uint volumeHandle, int x, int y, int z, void* result);
+            unsafe public static void GetVoxel(uint volumeHandle, int x, int y, int z, out QuantizedColor result)
+            {
+                fixed(void* p = &result)
+                {
+                    Validate(cuGetVoxel(volumeHandle, x, y, z, p));
+                }
+            }
+            unsafe public static void GetVoxel(uint volumeHandle, int x, int y, int z, out MaterialSet result)
+            {
+                fixed(void* p = &result)
+                {
+                    Validate(cuGetVoxel(volumeHandle, x, y, z, p));
+                }
+            }
+
+            [DllImport(dllToImport)]
+            unsafe private static extern int cuSetVoxel(uint volumeHandle, int x, int y, int z, void* value);
+            unsafe public static void SetVoxel(uint volumeHandle, int x, int y, int z, QuantizedColor value)
+            {
+                   Validate(cuSetVoxel(volumeHandle, x, y, z, &value));
+            }
+            unsafe public static void SetVoxel(uint volumeHandle, int x, int y, int z, MaterialSet value)
+            {
+                   Validate(cuSetVoxel(volumeHandle, x, y, z, &value));
+            }
+#else
+            [DllImport(dllToImport)]
+            private static extern int cuGetVoxel(uint volumeHandle, int x, int y, int z, IntPtr result);
             public static void GetVoxel<VoxelType>(uint volumeHandle, int x, int y, int z, out VoxelType color)
             {
                 IntPtr pointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(VoxelType)));
@@ -238,7 +269,8 @@ namespace Cubiquity
                 Marshal.StructureToPtr(value, ptrValue, true);
                 Validate(cuSetVoxel(volumeHandle, x, y, z, ptrValue));
                 Marshal.FreeHGlobal(ptrValue);
-            }            
+            }
+#endif
 
 			////////////////////////////////////////////////////////////////////////////////
 			// Octree functions
