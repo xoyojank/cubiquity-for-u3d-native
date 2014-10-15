@@ -111,7 +111,7 @@ namespace Cubiquity
             // want a single 'renderThisNode' member of Cubiquity nodes, but instead some threshold we could compare to.
             float lodThreshold = GetComponent<VolumeRenderer>() ? GetComponent<VolumeRenderer>().lodThreshold : 0.0f;
 
-			CubiquityDLL.UpdateVolumeMC(data.volumeHandle.Value, camPos.x, camPos.y, camPos.z, lodThreshold);
+			CubiquityDLL.UpdateVolume(data.volumeHandle.Value, camPos.x, camPos.y, camPos.z, lodThreshold);
 					
 			if(CubiquityDLL.HasRootOctreeNode(data.volumeHandle.Value) == 1)
 			{		

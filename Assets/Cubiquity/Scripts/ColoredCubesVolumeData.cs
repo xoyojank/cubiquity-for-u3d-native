@@ -151,7 +151,7 @@ namespace Cubiquity
 					DiscardChanges();
 				}
 				
-				CubiquityDLL.DeleteColoredCubesVolume(volumeHandle.Value);
+				CubiquityDLL.DeleteVolume(volumeHandle.Value);
 				volumeHandle = null;
 			}
 		}

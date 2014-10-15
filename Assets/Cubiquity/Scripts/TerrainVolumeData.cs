@@ -152,7 +152,7 @@ namespace Cubiquity
 					DiscardChanges();
 				}
 				
-				CubiquityDLL.DeleteTerrainVolume(volumeHandle.Value);
+				CubiquityDLL.DeleteVolume(volumeHandle.Value);
 				volumeHandle = null;
 			}
 		}

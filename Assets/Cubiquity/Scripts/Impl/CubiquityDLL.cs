@@ -162,10 +162,10 @@ namespace Cubiquity
 			}
 			
 			[DllImport (dllToImport)]
-			private static extern int cuDeleteColoredCubesVolume(uint volumeHandle);
-			public static void DeleteColoredCubesVolume(uint volumeHandle)
+			private static extern int cuDeleteVolume(uint volumeHandle);
+			public static void DeleteVolume(uint volumeHandle)
 			{
-				Validate(cuDeleteColoredCubesVolume(volumeHandle));
+				Validate(cuDeleteVolume(volumeHandle));
 			}
 			
 			[DllImport (dllToImport)]
@@ -200,20 +200,6 @@ namespace Cubiquity
 				uint result;
 				Validate(cuNewTerrainVolumeFromVDB(new StringBuilder(datasetName), (uint)writePermissions, baseNodeSize, out result));
 				return result;
-			}
-			
-			[DllImport (dllToImport)]
-			private static extern int cuUpdateVolumeMC(uint volumeHandle, float eyePosX, float eyePosY, float eyePosZ, float lodThreshold);
-			public static void UpdateVolumeMC(uint volumeHandle, float eyePosX, float eyePosY, float eyePosZ, float lodThreshold)
-			{
-				Validate(cuUpdateVolumeMC(volumeHandle, eyePosX, eyePosY, eyePosZ, lodThreshold));
-			}
-			
-			[DllImport (dllToImport)]
-			private static extern int cuDeleteTerrainVolume(uint volumeHandle);
-			public static void DeleteTerrainVolume(uint volumeHandle)
-			{
-				Validate(cuDeleteTerrainVolume(volumeHandle));
 			}
 
             ////////////////////////////////////////////////////////////////////////////////
