@@ -32,16 +32,14 @@ namespace Cubiquity
 		public QuantizedColor GetVoxel(int x, int y, int z)
 		{
 			// The initialization can fail (bad filename, database locked, etc), so the volume handle could still be null.
-			QuantizedColor result;
 			if(volumeHandle.HasValue)
 			{
-				CubiquityDLL.GetVoxel(volumeHandle.Value, x, y, z, out result);
+                return CubiquityDLL.GetQuantizedColorVoxel(volumeHandle.Value, x, y, z);
 			}
 			else
 			{
-				result = new QuantizedColor();
+				return new QuantizedColor();
 			}
-			return result;
 		}
 		
 		/// Sets the color of the specified position.
@@ -153,7 +151,7 @@ namespace Cubiquity
 					DiscardChanges();
 				}
 				
-				CubiquityDLL.DeleteColoredCubesVolume(volumeHandle.Value);
+				CubiquityDLL.DeleteVolume(volumeHandle.Value);
 				volumeHandle = null;
 			}
 		}

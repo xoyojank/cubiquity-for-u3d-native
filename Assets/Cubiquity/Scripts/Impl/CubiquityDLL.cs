@@ -8,6 +8,17 @@ namespace Cubiquity
 {
 	namespace Impl
 	{
+        [StructLayout(
+            LayoutKind.Sequential,      //must specify a layout
+            CharSet = CharSet.Ansi)]    //if you intend to use char
+        public struct ToBePassed
+        {
+            public Int32 Num1;
+            public Int32 Num2;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 255)]
+            public Char[] Data;    //specify the size using MarshalAs
+        }
+
 		public class CubiquityDLL
 		{
 			private const string dllToImport = "CubiquityC";
@@ -16,8 +27,8 @@ namespace Cubiquity
 			const int CU_OK = 0;
 			
 			const uint requiredMajorVersion = 1;
-			const uint requiredMinorVersion = 1;
-			const uint requiredPatchVersion = 4;
+			const uint requiredMinorVersion = 2;
+			const uint requiredPatchVersion = 0;
 			
 			// This static constructor is supposed to make sure that the Cubiquity.dll is in the right place before the DllImport is done.
 			// It doesn't seem to work, because in Standalone builds the message below is printed after the exception about the .dll not
@@ -151,24 +162,10 @@ namespace Cubiquity
 			}
 			
 			[DllImport (dllToImport)]
-			private static extern int cuSetVoxel(uint volumeHandle, int x, int y, int z, QuantizedColor color);
-			public static void SetVoxel(uint volumeHandle, int x, int y, int z, QuantizedColor color)
+			private static extern int cuDeleteVolume(uint volumeHandle);
+			public static void DeleteVolume(uint volumeHandle)
 			{
-				Validate(cuSetVoxel(volumeHandle, x, y, z, color));
-			}
-			
-			[DllImport (dllToImport)]
-			private static extern int cuGetVoxel(uint volumeHandle, int x, int y, int z, out QuantizedColor color);	
-			public static void GetVoxel(uint volumeHandle, int x, int y, int z, out QuantizedColor color)
-			{		
-				Validate(cuGetVoxel(volumeHandle, x, y, z, out color));
-			}
-			
-			[DllImport (dllToImport)]
-			private static extern int cuDeleteColoredCubesVolume(uint volumeHandle);
-			public static void DeleteColoredCubesVolume(uint volumeHandle)
-			{
-				Validate(cuDeleteColoredCubesVolume(volumeHandle));
+				Validate(cuDeleteVolume(volumeHandle));
 			}
 			
 			[DllImport (dllToImport)]
@@ -204,49 +201,74 @@ namespace Cubiquity
 				Validate(cuNewTerrainVolumeFromVDB(new StringBuilder(datasetName), (uint)writePermissions, baseNodeSize, out result));
 				return result;
 			}
-			
-			[DllImport (dllToImport)]
-			private static extern int cuUpdateVolumeMC(uint volumeHandle, float eyePosX, float eyePosY, float eyePosZ, float lodThreshold);
-			public static void UpdateVolumeMC(uint volumeHandle, float eyePosX, float eyePosY, float eyePosZ, float lodThreshold)
-			{
-				Validate(cuUpdateVolumeMC(volumeHandle, eyePosX, eyePosY, eyePosZ, lodThreshold));
-			}
-			
-			[DllImport (dllToImport)]
-			private static extern int cuGetVoxelMC(uint volumeHandle, int x, int y, int z, out MaterialSet materialSet);	
-			public static void GetVoxelMC(uint volumeHandle, int x, int y, int z, out MaterialSet materialSet)
-			{		
-				Validate(cuGetVoxelMC(volumeHandle, x, y, z, out materialSet));
-			}
-			
-			[DllImport (dllToImport)]
-			private static extern int cuSetVoxelMC(uint volumeHandle, int x, int y, int z, MaterialSet materialSet);
-			public static void SetVoxelMC(uint volumeHandle, int x, int y, int z, MaterialSet materialSet)
-			{
-				Validate(cuSetVoxelMC(volumeHandle, x, y, z, materialSet));
-			}
-			
-			[DllImport (dllToImport)]
-			private static extern int cuDeleteTerrainVolume(uint volumeHandle);
-			public static void DeleteTerrainVolume(uint volumeHandle)
-			{
-				Validate(cuDeleteTerrainVolume(volumeHandle));
-			}
-			
-			[DllImport (dllToImport)]
-			private static extern int cuAcceptOverrideChunksMC(uint volumeHandle);
-			public static void AcceptOverrideChunksMC(uint volumeHandle)
-			{
-				Validate(cuAcceptOverrideChunksMC(volumeHandle));
-			}
-			
-			[DllImport (dllToImport)]
-			private static extern int cuDiscardOverrideChunksMC(uint volumeHandle);
-			public static void DiscardOverrideChunksMC(uint volumeHandle)
-			{
-				Validate(cuDiscardOverrideChunksMC(volumeHandle));
-			}
-			
+
+            ////////////////////////////////////////////////////////////////////////////////
+            // Voxel functions
+            ////////////////////////////////////////////////////////////////////////////////
+#if CUBIQUITY_USE_UNSAFE
+            // It seems we can't make a generic version of this functions as it gives error CS0208.
+            // Apparently that is not easily fixed in our situation, see here: http://goo.gl/blN834
+            [DllImport(dllToImport)]
+            unsafe private static extern int cuGetVoxel(uint volumeHandle, int x, int y, int z, void* result);
+            unsafe public static QuantizedColor GetQuantizedColorVoxel(uint volumeHandle, int x, int y, int z)
+            {
+                QuantizedColor result;
+                Validate(cuGetVoxel(volumeHandle, x, y, z, &result));
+                return result;
+            }
+            unsafe public static MaterialSet GetMaterialSetVoxel(uint volumeHandle, int x, int y, int z)
+            {
+                MaterialSet result;
+                Validate(cuGetVoxel(volumeHandle, x, y, z, &result));
+                return result;
+            }
+
+            // It seems we can't make a generic version of this functions as it gives error CS0208.
+            // Apparently that is not easily fixed in our situation, see here: http://goo.gl/blN834
+            [DllImport(dllToImport)]
+            unsafe private static extern int cuSetVoxel(uint volumeHandle, int x, int y, int z, void* value);
+            unsafe public static void SetVoxel(uint volumeHandle, int x, int y, int z, QuantizedColor value)
+            {
+                   Validate(cuSetVoxel(volumeHandle, x, y, z, &value));
+            }
+            unsafe public static void SetVoxel(uint volumeHandle, int x, int y, int z, MaterialSet value)
+            {
+                   Validate(cuSetVoxel(volumeHandle, x, y, z, &value));
+            }
+#else
+            [DllImport(dllToImport)]
+            private static extern int cuGetVoxel(uint volumeHandle, int x, int y, int z, IntPtr result);
+            public static VoxelType GetVoxel<VoxelType>(uint volumeHandle, int x, int y, int z)
+            {
+                IntPtr pointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(VoxelType)));
+                Validate(cuGetVoxel(volumeHandle, x, y, z, pointer));
+                VoxelType value = (VoxelType)(Marshal.PtrToStructure(pointer, typeof(VoxelType)));
+                Marshal.FreeHGlobal(pointer);
+                return value;
+            }
+            // The unsafe version of this code cannot provide a generic version so
+            // to mathch that interface we also provide non-generic versions here.
+            public static QuantizedColor GetQuantizedColorVoxel(uint volumeHandle, int x, int y, int z)
+            {
+                return GetVoxel<QuantizedColor>(volumeHandle, x, y, z);
+            }
+            public static MaterialSet GetMaterialSetVoxel(uint volumeHandle, int x, int y, int z)
+            {
+                return GetVoxel < MaterialSet>(volumeHandle, x, y, z);
+            }
+
+            [DllImport(dllToImport)]
+            private static extern int cuSetVoxel(uint volumeHandle, int x, int y, int z, IntPtr value);
+            public static void SetVoxel<VoxelType>(uint volumeHandle, int x, int y, int z, VoxelType value)
+            {
+                // See http://stackoverflow.com/a/3939963 
+                IntPtr ptrValue = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(VoxelType)));
+                Marshal.StructureToPtr(value, ptrValue, true);
+                Validate(cuSetVoxel(volumeHandle, x, y, z, ptrValue));
+                Marshal.FreeHGlobal(ptrValue);
+            }
+#endif
+
 			////////////////////////////////////////////////////////////////////////////////
 			// Octree functions
 			////////////////////////////////////////////////////////////////////////////////
@@ -320,159 +342,55 @@ namespace Cubiquity
 				return result;
 			}
 			
-			//----------------------------------------------------------------------
-			
-			[DllImport (dllToImport)]
-			private static extern int cuHasRootOctreeNodeMC(uint volumeHandle, out uint result);
-			public static uint HasRootOctreeNodeMC(uint volumeHandle)
-			{
-				uint result;
-				Validate(cuHasRootOctreeNodeMC(volumeHandle, out result));
-				return result;
-			}
-			
-			[DllImport (dllToImport)]
-			private static extern int cuGetRootOctreeNodeMC(uint volumeHandle, out uint result);
-			public static uint GetRootOctreeNodeMC(uint volumeHandle)
-			{
-				uint result;
-				Validate(cuGetRootOctreeNodeMC(volumeHandle, out result));
-				return result;
-			}
-			
-			[DllImport (dllToImport)]
-			private static extern int cuHasChildNodeMC(uint nodeHandle, uint childX, uint childY, uint childZ, out uint result);
-			public static uint HasChildNodeMC(uint nodeHandle, uint childX, uint childY, uint childZ)
-			{
-				uint result;
-				Validate(cuHasChildNodeMC(nodeHandle, childX, childY, childZ, out result));
-				return result;
-			}
-			
-			[DllImport (dllToImport)]
-			private static extern int cuGetChildNodeMC(uint nodeHandle, uint childX, uint childY, uint childZ, out uint result);
-			public static uint GetChildNodeMC(uint nodeHandle, uint childX, uint childY, uint childZ)
-			{
-				uint result;
-				Validate(cuGetChildNodeMC(nodeHandle, childX, childY, childZ, out result));
-				return result;
-			}
-			
-			[DllImport (dllToImport)]
-			private static extern int cuNodeHasMeshMC(uint nodeHandle, out uint result);
-			public static uint NodeHasMeshMC(uint nodeHandle)
-			{
-				uint result;
-				Validate(cuNodeHasMeshMC(nodeHandle, out result));
-				return result;
-			}
-			
-			[DllImport (dllToImport)]
-			private static extern int cuGetNodePositionMC(uint nodeHandle, out int x, out int y, out int z);
-			public static void GetNodePositionMC(uint nodeHandle, out int x, out int y, out int z)
-			{
-				Validate(cuGetNodePositionMC(nodeHandle, out x, out y, out z));
-			}
-			
-			[DllImport (dllToImport)]
-			private static extern int cuGetMeshLastUpdatedMC(uint nodeHandle, out uint result);
-			public static uint GetMeshLastUpdatedMC(uint nodeHandle)
-			{
-				uint result;
-				Validate(cuGetMeshLastUpdatedMC(nodeHandle, out result));
-				return result;
-			}
-
-			[DllImport (dllToImport)]
-			private static extern int cuRenderThisNodeMC(uint nodeHandle, out uint result);
-			public static uint RenderThisNodeMC(uint nodeHandle)
-			{
-				uint result;
-				Validate(cuRenderThisNodeMC(nodeHandle, out result));
-				return result;
-			}
-			
 			////////////////////////////////////////////////////////////////////////////////
 			// Mesh functions
 			////////////////////////////////////////////////////////////////////////////////
 #if CUBIQUITY_USE_UNSAFE
+            // It seems we can't make a generic version of this functions as it gives error CS0208.
+            // Apparently that is not easily fixed in our situation, see here: http://goo.gl/blN834
             [DllImport(dllToImport)]
-            unsafe private static extern int cuGetMesh(uint octreeNodeHandle, uint* noOfVertices, ColoredCubesVertex** vertices, uint* noOfIndices, ushort** indices);
-            unsafe public static void GetMesh(uint octreeNodeHandle, uint* noOfVertices, ColoredCubesVertex** vertices, uint* noOfIndices, ushort** indices)
+            unsafe private static extern int cuGetMesh(uint octreeNodeHandle, ushort* noOfVertices, void** vertices, uint* noOfIndices, ushort** indices);
+            unsafe public static void GetColoredCubesMesh(uint octreeNodeHandle, ushort* noOfVertices, ColoredCubesVertex** vertices, uint* noOfIndices, ushort** indices)
             {
-                Validate(cuGetMesh(octreeNodeHandle, noOfVertices, vertices, noOfIndices, indices));
+                Validate(cuGetMesh(octreeNodeHandle, noOfVertices, (void**)vertices, noOfIndices, indices));
+            }
+            unsafe public static void GetTerrainMesh(uint octreeNodeHandle, ushort* noOfVertices, TerrainVertex** vertices, uint* noOfIndices, ushort** indices)
+            {
+                Validate(cuGetMesh(octreeNodeHandle, noOfVertices, (void**)vertices, noOfIndices, indices));
             }
 #else
             [DllImport(dllToImport)]
-            private static extern int cuGetNoOfIndices(uint octreeNodeHandle, out uint result);
-            [DllImport(dllToImport)]
-            private static extern int cuGetIndices(uint octreeNodeHandle, out ushort[] result);
-            public static ushort[] GetIndices(uint octreeNodeHandle)
+            private static extern int cuGetMesh(uint octreeNodeHandle, out ushort noOfVertices, out IntPtr vertices, out uint noOfIndices, out IntPtr indices);
+            public static void GetMesh<VertexType>(uint octreeNodeHandle, out VertexType[] vertices, out ushort[] indices)
             {
+                ushort noOfVertices;
+                IntPtr ptrVertices;
                 uint noOfIndices;
-                Validate(cuGetNoOfIndices(octreeNodeHandle, out noOfIndices));
+                IntPtr ptrIndices;
 
-                ushort[] result = new ushort[noOfIndices];
-                Validate(cuGetIndices(octreeNodeHandle, out result));
+                Validate(cuGetMesh(octreeNodeHandle, out noOfVertices, out ptrVertices, out noOfIndices, out ptrIndices));
 
-                return result;
-            }
+                vertices = new VertexType[noOfVertices];
 
-            [DllImport(dllToImport)]
-            private static extern int cuGetNoOfVertices(uint octreeNodeHandle, out uint result);
-            [DllImport(dllToImport)]
-            private static extern int cuGetVertices(uint octreeNodeHandle, out ColoredCubesVertex[] result);
-            public static ColoredCubesVertex[] GetVertices(uint octreeNodeHandle)
-            {
-                // Based on http://stackoverflow.com/a/1318929
-                uint noOfVertices;
-                Validate(cuGetNoOfVertices(octreeNodeHandle, out noOfVertices));
+                // Based on http://stackoverflow.com/a/1086462
+                long longPtrVertices = ptrVertices.ToInt64();
+                for (ushort ct = 0; ct < noOfVertices; ct++)
+                {
+                    IntPtr offsetPtr = new IntPtr(longPtrVertices);
+                    vertices[ct] = (VertexType)(Marshal.PtrToStructure(offsetPtr, typeof(VertexType)));
+                    longPtrVertices += Marshal.SizeOf(typeof(VertexType));
+                }
 
-                ColoredCubesVertex[] result = new ColoredCubesVertex[noOfVertices];
-                Validate(cuGetVertices(octreeNodeHandle, out result));
+                indices = new ushort[noOfIndices];
 
-                return result;
-            }
-#endif
-			
-			//--------------------------------------------------------------------------------
-#if CUBIQUITY_USE_UNSAFE
-            [DllImport(dllToImport)]
-            unsafe private static extern int cuGetMeshMC(uint octreeNodeHandle, uint* noOfVertices, TerrainVertex** vertices, uint* noOfIndices, ushort** indices);
-            unsafe public static void GetMeshMC(uint octreeNodeHandle, uint* noOfVertices, TerrainVertex** vertices, uint* noOfIndices, ushort** indices)
-            {
-                Validate(cuGetMeshMC(octreeNodeHandle, noOfVertices, vertices, noOfIndices, indices));
-            }
-#else
-            [DllImport(dllToImport)]
-            private static extern int cuGetNoOfIndicesMC(uint octreeNodeHandle, out uint result);
-            [DllImport(dllToImport)]
-            private static extern int cuGetIndicesMC(uint octreeNodeHandle, out ushort[] result);
-            public static ushort[] GetIndicesMC(uint octreeNodeHandle)
-            {
-                uint noOfIndices;
-                Validate(cuGetNoOfIndicesMC(octreeNodeHandle, out noOfIndices));
-
-                ushort[] result = new ushort[noOfIndices];
-                Validate(cuGetIndicesMC(octreeNodeHandle, out result));
-
-                return result;
-            }
-
-            [DllImport(dllToImport)]
-            private static extern int cuGetNoOfVerticesMC(uint octreeNodeHandle, out uint result);
-            [DllImport(dllToImport)]
-            private static extern int cuGetVerticesMC(uint octreeNodeHandle, out TerrainVertex[] result);
-            public static TerrainVertex[] GetVerticesMC(uint octreeNodeHandle)
-            {
-                // Based on http://stackoverflow.com/a/1318929
-                uint noOfVertices;
-                Validate(cuGetNoOfVerticesMC(octreeNodeHandle, out noOfVertices));
-
-                TerrainVertex[] result = new TerrainVertex[noOfVertices];
-                Validate(cuGetVerticesMC(octreeNodeHandle, out result));
-
-                return result;
+                // Based on http://stackoverflow.com/a/1086462
+                long longPtrIndices = ptrIndices.ToInt64();
+                for (ushort ct = 0; ct < noOfIndices; ct++)
+                {
+                    IntPtr offsetPtr = new IntPtr(longPtrIndices);
+                    indices[ct] = (ushort)(Marshal.PtrToStructure(offsetPtr, typeof(ushort)));
+                    longPtrIndices += Marshal.SizeOf(typeof(ushort));
+                }
             }
 #endif
 

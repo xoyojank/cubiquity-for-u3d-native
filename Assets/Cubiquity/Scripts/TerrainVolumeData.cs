@@ -32,17 +32,14 @@ namespace Cubiquity
 		public MaterialSet GetVoxel(int x, int y, int z)
 		{
 			// The initialization can fail (bad filename, database locked, etc), so the volume handle could still be null.
-			MaterialSet materialSet;
 			if(volumeHandle.HasValue)
 			{
-				CubiquityDLL.GetVoxelMC(volumeHandle.Value, x, y, z, out materialSet);
+                return CubiquityDLL.GetMaterialSetVoxel(volumeHandle.Value, x, y, z);
 			}
 			else
 			{
-				materialSet  = new MaterialSet();
+				return new MaterialSet();
 			}
-
-			return materialSet;
 		}
 		
 		/// Sets the material weights of the specified position.
@@ -60,7 +57,7 @@ namespace Cubiquity
 				if(x >= enclosingRegion.lowerCorner.x && y >= enclosingRegion.lowerCorner.y && z >= enclosingRegion.lowerCorner.z
 					&& x <= enclosingRegion.upperCorner.x && y <= enclosingRegion.upperCorner.y && z <= enclosingRegion.upperCorner.z)
 				{						
-					CubiquityDLL.SetVoxelMC(volumeHandle.Value, x, y, z, materialSet);
+					CubiquityDLL.SetVoxel(volumeHandle.Value, x, y, z, materialSet);
 				}
 			}
 		}
@@ -74,9 +71,9 @@ namespace Cubiquity
 					throw new InvalidOperationException("Cannot commit changes to read-only voxel database (" + fullPathToVoxelDatabase +")");
 				}
 
-				CubiquityDLL.AcceptOverrideChunksMC(volumeHandle.Value);
+				CubiquityDLL.AcceptOverrideChunks(volumeHandle.Value);
 				//We can discard the chunks now that they have been accepted.
-				CubiquityDLL.DiscardOverrideChunksMC(volumeHandle.Value);
+				CubiquityDLL.DiscardOverrideChunks(volumeHandle.Value);
 			}
 		}
 		
@@ -84,7 +81,7 @@ namespace Cubiquity
 		{
 			if(!IsVolumeHandleNull())
 			{
-				CubiquityDLL.DiscardOverrideChunksMC(volumeHandle.Value);
+				CubiquityDLL.DiscardOverrideChunks(volumeHandle.Value);
 			}
 		}
 		
@@ -155,7 +152,7 @@ namespace Cubiquity
 					DiscardChanges();
 				}
 				
-				CubiquityDLL.DeleteTerrainVolume(volumeHandle.Value);
+				CubiquityDLL.DeleteVolume(volumeHandle.Value);
 				volumeHandle = null;
 			}
 		}

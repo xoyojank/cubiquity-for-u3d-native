@@ -14,14 +14,15 @@ namespace Cubiquity
             unsafe public static Mesh BuildMeshFromNodeHandleForColoredCubesVolume(uint nodeHandle, bool onlyPositions)
             {
                 // Get the data from Cubiquity.
-                uint noOfVertices; ColoredCubesVertex* vertices; uint noOfIndices; ushort* indices;
-                CubiquityDLL.GetMesh(nodeHandle, &noOfVertices, &vertices, &noOfIndices, &indices);
+                ushort noOfVertices; ColoredCubesVertex* vertices; uint noOfIndices; ushort* indices;
+                CubiquityDLL.GetColoredCubesMesh(nodeHandle, &noOfVertices, &vertices, &noOfIndices, &indices);
 #else
             public static Mesh BuildMeshFromNodeHandleForColoredCubesVolume(uint nodeHandle, bool onlyPositions)
             {
                 // Get the data from Cubiquity.
-                ushort[] indices = CubiquityDLL.GetIndices(nodeHandle);
-                ColoredCubesVertex[] vertices = CubiquityDLL.GetVertices(nodeHandle);
+                ColoredCubesVertex[] vertices;
+                ushort[] indices;
+                CubiquityDLL.GetMesh<ColoredCubesVertex>(nodeHandle, out vertices, out indices);
                 int noOfVertices = vertices.Length;
                 int noOfIndices = indices.Length;
 #endif
@@ -78,14 +79,15 @@ namespace Cubiquity
             unsafe public static Mesh BuildMeshFromNodeHandleForTerrainVolume(uint nodeHandle, bool onlyPositions)
             {
                 // Get the data from Cubiquity.
-                uint noOfVertices; TerrainVertex* vertices; uint noOfIndices; ushort* indices;
-                CubiquityDLL.GetMeshMC(nodeHandle, &noOfVertices, &vertices, &noOfIndices, &indices);
+                ushort noOfVertices; TerrainVertex* vertices; uint noOfIndices; ushort* indices;
+                CubiquityDLL.GetTerrainMesh(nodeHandle, &noOfVertices, &vertices, &noOfIndices, &indices);
 #else
             public static Mesh BuildMeshFromNodeHandleForTerrainVolume(uint nodeHandle, bool onlyPositions)
             {
                 // Get the data from Cubiquity.
-                ushort[] indices = CubiquityDLL.GetIndicesMC(nodeHandle);
-                TerrainVertex[] vertices = CubiquityDLL.GetVerticesMC(nodeHandle);
+                TerrainVertex[] vertices;
+                ushort[] indices;
+                CubiquityDLL.GetMesh<TerrainVertex>(nodeHandle, out vertices, out indices);
                 int noOfVertices = vertices.Length;
                 int noOfIndices = indices.Length;
 #endif
