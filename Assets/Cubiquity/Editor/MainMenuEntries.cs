@@ -39,6 +39,14 @@ namespace Cubiquity
 		{	
 			// Resulting path already contains UNIX-style seperators (even on Wondows).
 			string pathToVoxelDatabase = EditorUtility.OpenFilePanel("Choose a Voxel Database (.vdb) file to load", Paths.voxelDatabases, "vdb");
+
+            // Check the user didn't navigate outside of the required folder.
+            string folderContainingSelectedVDB = Path.GetDirectoryName(pathToVoxelDatabase);
+            if (PathUtils.IsSubfolder(folderContainingSelectedVDB, Paths.voxelDatabases) == false)
+            {
+                Debug.LogError("The chosen .vdb file must be inside the '" + Paths.voxelDatabases + "' folder");
+                return;
+            }
 			
 			if(pathToVoxelDatabase.Length != 0)
 			{
@@ -89,6 +97,14 @@ namespace Cubiquity
 		{	
 			// Resulting path already contains UNIX-style seperators (even on Wondows).
 			string pathToVoxelDatabase = EditorUtility.OpenFilePanel("Choose a Voxel Database (.vdb) file to load", Paths.voxelDatabases, "vdb");
+
+            // Check the user didn't navigate outside of the required folder.
+            string folderContainingSelectedVDB = Path.GetDirectoryName(pathToVoxelDatabase);
+            if(PathUtils.IsSubfolder(folderContainingSelectedVDB, Paths.voxelDatabases) == false)
+            {
+                Debug.LogError("The chosen .vdb file must be inside the '" + Paths.voxelDatabases + "' folder");
+                return;
+            }
 			
 			if(pathToVoxelDatabase.Length != 0)
 			{
