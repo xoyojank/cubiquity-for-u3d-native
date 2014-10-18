@@ -32,7 +32,7 @@
  * You can call the converter in the same way as before, but providing a path to a folder containing image slices rather than to a Magica Voxel .vox file:
  *
  * \par
- * `ConvertToVDB.exe -i input.vox -o output.vdb`
+ * `ConvertToVDB.exe -i /path/to/image/folder -o output.vdb`
  *
  * Note that both Magica Voxel and image slices are only appropriate for importing colored cubes volumes. Currently there are no methods for creating terrain volumes *outside* of %Cubiquity for Unity3D, but you can still create them procedurally as discussed later.
  *
