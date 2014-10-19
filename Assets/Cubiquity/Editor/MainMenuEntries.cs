@@ -42,7 +42,7 @@ namespace Cubiquity
 
             // Check the user didn't navigate outside of the required folder.
             string folderContainingSelectedVDB = Path.GetDirectoryName(pathToVoxelDatabase);
-            if (PathUtils.IsSubfolder(folderContainingSelectedVDB, Paths.voxelDatabases) == false)
+            if (PathUtils.IsSameFolderOrSubfolder(folderContainingSelectedVDB, Paths.voxelDatabases) == false)
             {
                 Debug.LogError("The chosen .vdb file must be inside the '" + Paths.voxelDatabases + "' folder");
                 return;
@@ -100,7 +100,7 @@ namespace Cubiquity
 
             // Check the user didn't navigate outside of the required folder.
             string folderContainingSelectedVDB = Path.GetDirectoryName(pathToVoxelDatabase);
-            if(PathUtils.IsSubfolder(folderContainingSelectedVDB, Paths.voxelDatabases) == false)
+            if (PathUtils.IsSameFolderOrSubfolder(folderContainingSelectedVDB, Paths.voxelDatabases) == false)
             {
                 Debug.LogError("The chosen .vdb file must be inside the '" + Paths.voxelDatabases + "' folder");
                 return;

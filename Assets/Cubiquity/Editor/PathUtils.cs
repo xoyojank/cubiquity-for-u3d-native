@@ -51,7 +51,7 @@ namespace Cubiquity
 			return relativePath;
 		}
 
-        /// Test whether 'child' is indeed a subfolder of 'parent'
+        /// Test whether 'child' is a subfolder of 'parent'
         // Based on http://stackoverflow.com/a/5617346
         public static bool IsSubfolder(String child, String parent)
         {
@@ -70,6 +70,21 @@ namespace Cubiquity
             }
 
             return isParent;
+        }
+
+        public static bool IsSameFolderOrSubfolder(String child, String parent)
+        {
+            DirectoryInfo parentDir = new DirectoryInfo(parent);
+            DirectoryInfo childDir = new DirectoryInfo(child);
+
+            if (parentDir.FullName == childDir.FullName)
+            {
+                return true;
+            }
+            else
+            {
+                return IsSubfolder(child, parent);
+            }
         }
 	}
 }
