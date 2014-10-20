@@ -75,7 +75,7 @@ namespace Cubiquity
 				return newGameObject;
 			}
 			
-			public int syncNode(int availableNodeSyncs, GameObject voxelTerrainGameObject)
+			public int syncNodeStructure(int availableNodeSyncs, GameObject voxelTerrainGameObject)
 			{
 				int nodeSyncsPerformed = 0;
 				
@@ -156,52 +156,6 @@ namespace Cubiquity
 					
 				}
 				
-				VolumeRenderer vr = voxelTerrainGameObject.GetComponent<VolumeRenderer>();
-				MeshRenderer mr = gameObject.GetComponent<MeshRenderer>();
-				if(vr != null && mr != null)
-				{
-					uint renderThisNode = 0;
-					// Horrible hack to choose correct funtion!
-					if(voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(TerrainVolume))
-					{
-						renderThisNode = CubiquityDLL.RenderThisNode(nodeHandle);
-					}
-					else if(voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(ColoredCubesVolume))
-					{
-						renderThisNode = CubiquityDLL.RenderThisNode(nodeHandle);
-					}
-
-					mr.enabled = vr.enabled && (renderThisNode != 0);
-					
-					if(lastSyncronisedWithVolumeRenderer < vr.lastModified)
-					{
-						mr.receiveShadows = vr.receiveShadows;
-						mr.castShadows = vr.castShadows;
-
-						#if UNITY_EDITOR
-						EditorUtility.SetSelectedWireframeHidden(mr, !vr.showWireframe);
-						#endif
-
-						lastSyncronisedWithVolumeRenderer = Clock.timestamp;
-					}
-				}
-				
-				VolumeCollider vc = voxelTerrainGameObject.GetComponent<VolumeCollider>();
-				MeshCollider mc = gameObject.GetComponent<MeshCollider>();
-				if(vc != null && mc != null)
-				{
-					if(mc.enabled != vc.enabled) // Not sure we really need this check?
-					{
-						mc.enabled = vc.enabled;
-					}
-					
-					if(lastSyncronisedWithVolumeCollider < vc.lastModified)
-					{
-						// Actual syncronization to be filled in in the future when we have something to syncronize.
-						lastSyncronisedWithVolumeCollider = Clock.timestamp;
-					}
-				}
-				
 				//Now syncronise any children
 				for(uint z = 0; z < 2; z++)
 				{
@@ -222,11 +176,11 @@ namespace Cubiquity
 									
 									SetChild(x, y, z, childGameObject);
 								}
-								
-								//syncNode(childNodeHandle, childGameObject);
+
+                                //syncNodeStructure(childNodeHandle, childGameObject);
 								
 								OctreeNode childOctreeNode = childGameObject.GetComponent<OctreeNode>();
-								int syncs = childOctreeNode.syncNode(availableNodeSyncs, voxelTerrainGameObject);
+                                int syncs = childOctreeNode.syncNodeStructure(availableNodeSyncs, voxelTerrainGameObject);
 								availableNodeSyncs -= syncs;
 								nodeSyncsPerformed += syncs;
 							}
@@ -244,6 +198,62 @@ namespace Cubiquity
 				
 				return nodeSyncsPerformed;
 			}
+
+            public void syncNodeProperties(GameObject voxelTerrainGameObject)
+            {
+                VolumeRenderer vr = voxelTerrainGameObject.GetComponent<VolumeRenderer>();
+                MeshRenderer mr = gameObject.GetComponent<MeshRenderer>();
+                if (vr != null && mr != null)
+                {
+                    uint renderThisNode = 0;
+                    renderThisNode = CubiquityDLL.RenderThisNode(nodeHandle);
+
+                    mr.enabled = vr.enabled && (renderThisNode != 0);
+
+                    if (lastSyncronisedWithVolumeRenderer < vr.lastModified)
+                    {
+                        mr.receiveShadows = vr.receiveShadows;
+                        mr.castShadows = vr.castShadows;
+#if UNITY_EDITOR
+                        EditorUtility.SetSelectedWireframeHidden(mr, !vr.showWireframe);
+#endif
+                        lastSyncronisedWithVolumeRenderer = Clock.timestamp;
+                    }
+                }
+
+                VolumeCollider vc = voxelTerrainGameObject.GetComponent<VolumeCollider>();
+                MeshCollider mc = gameObject.GetComponent<MeshCollider>();
+                if (vc != null && mc != null)
+                {
+                    if (mc.enabled != vc.enabled) // Not sure we really need this check?
+                    {
+                        mc.enabled = vc.enabled;
+                    }
+
+                    if (lastSyncronisedWithVolumeCollider < vc.lastModified)
+                    {
+                        // Actual syncronization to be filled in in the future when we have something to syncronize.
+                        lastSyncronisedWithVolumeCollider = Clock.timestamp;
+                    }
+                }
+
+                //Now syncronise any children
+                for (uint z = 0; z < 2; z++)
+                {
+                    for (uint y = 0; y < 2; y++)
+                    {
+                        for (uint x = 0; x < 2; x++)
+                        {
+                            GameObject childGameObject = GetChild(x, y, z);
+                            if(childGameObject != null)
+                            {
+                                OctreeNode childOctreeNode = childGameObject.GetComponent<OctreeNode>();
+                                childOctreeNode.syncNodeProperties(voxelTerrainGameObject);
+                            }
+                        }
+                    }
+                }
+            }
 			
 			public GameObject GetChild(uint x, uint y, uint z)
 			{
