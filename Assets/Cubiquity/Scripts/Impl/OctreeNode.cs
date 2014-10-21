@@ -76,15 +76,13 @@ namespace Cubiquity
 			
 			public int syncNodeStructure(int availableNodeSyncs, GameObject voxelTerrainGameObject)
 			{
-				int nodeSyncsPerformed = 0;
-				
+				int nodeSyncsPerformed = 0;				
 				if(availableNodeSyncs <= 0)
 				{
 					return nodeSyncsPerformed;
 				}
 				
-				uint meshLastUpdated = CubiquityDLL.GetMeshLastUpdated(nodeHandle);		
-				
+				uint meshLastUpdated = CubiquityDLL.GetMeshLastUpdated(nodeHandle);						
 				if(meshLastSyncronised < meshLastUpdated)
 				{			
 					if(CubiquityDLL.NodeHasMesh(nodeHandle) == 1)
@@ -148,11 +146,10 @@ namespace Cubiquity
 							DestroyImmediate(meshFilter);
 						}
 					}
-					
-					meshLastSyncronised = CubiquityDLL.GetCurrentTime();
+
+                    meshLastSyncronised = CubiquityDLL.GetCurrentTime(); // Could perhaps just use the meshLastUpdated time here?
 					availableNodeSyncs--;
-					nodeSyncsPerformed++;
-					
+					nodeSyncsPerformed++;					
 				}
 				
 				//Now syncronise any children
@@ -162,33 +159,27 @@ namespace Cubiquity
 					{
 						for(uint x = 0; x < 2; x++)
 						{
-                            GameObject childGameObject = GetChild(x,y,z);
-
 							if(CubiquityDLL.HasChildNode(nodeHandle, x, y, z) == 1)
 							{					
 							
-								uint childNodeHandle = CubiquityDLL.GetChildNode(nodeHandle, x, y, z);	
-								
-								if(childGameObject == null)
-								{							
-									childGameObject = OctreeNode.CreateOctreeNode(childNodeHandle, gameObject);
-									
-									SetChild(x, y, z, childGameObject);
+								uint childNodeHandle = CubiquityDLL.GetChildNode(nodeHandle, x, y, z);
+
+                                if (GetChild(x, y, z) == null)
+								{														
+									SetChild(x, y, z, OctreeNode.CreateOctreeNode(childNodeHandle, gameObject));
 								}
 
-                                //syncNodeStructure(childNodeHandle, childGameObject);
-								
-								OctreeNode childOctreeNode = childGameObject.GetComponent<OctreeNode>();
+                                OctreeNode childOctreeNode = GetChild(x, y, z).GetComponent<OctreeNode>();
                                 int syncs = childOctreeNode.syncNodeStructure(availableNodeSyncs, voxelTerrainGameObject);
 								availableNodeSyncs -= syncs;
 								nodeSyncsPerformed += syncs;
 							}
                             else
                             {
-                                if(childGameObject)
+                                if (GetChild(x, y, z))
                                 {
-                                    Utility.DestroyImmediateWithChildren(childGameObject);
-                                    childGameObject = null;
+                                    Utility.DestroyImmediateWithChildren(GetChild(x, y, z));
+                                    SetChild(x, y, z, null);
                                 }
                             }
 						}
