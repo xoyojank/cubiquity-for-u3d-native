@@ -37,6 +37,8 @@ namespace Cubiquity
                 // Build a corresponding game object
 				StringBuilder name = new StringBuilder("OctreeNode (" + xPos + ", " + yPos + ", " + zPos + ")");				
 				GameObject newGameObject = new GameObject(name.ToString ());
+                //newGameObject.hideFlags = HideFlags.HideInHierarchy;
+                newGameObject.hideFlags = HideFlags.DontSave;
 
                 // Use parent properties as appropriate
                 newGameObject.transform.parent = parentGameObject.transform;
@@ -54,20 +56,20 @@ namespace Cubiquity
                 octreeNode.lowerCorner = new Vector3(xPos, yPos, zPos);
                 octreeNode.nodeHandle = nodeHandle;
 					
-				OctreeNode parentOctreeNode = parentGameObject.GetComponent<OctreeNode>();
-					
-				if(parentOctreeNode != null)
+                // Does the parent game object have an octree node attached?
+				OctreeNode parentOctreeNode = parentGameObject.GetComponent<OctreeNode>();					
+				if(parentOctreeNode)
 				{
-					Vector3 parentLowerCorner = parentOctreeNode.lowerCorner;
-					newGameObject.transform.localPosition = octreeNode.lowerCorner - parentLowerCorner;
+                    // Cubiquity gives us absolute positions for the Octree nodes, but for a hierarchy of
+                    // GameObjects we need relative positions. Obtain these by subtracting parent position.
+                    newGameObject.transform.localPosition = octreeNode.lowerCorner - parentOctreeNode.lowerCorner;
 				}
 				else
 				{
+                    // If not then the parent must be the Volume GameObject and the one we are creating
+                    // must be the root of the Octree. In this case we can use the position directly.
 					newGameObject.transform.localPosition = octreeNode.lowerCorner;
 				}
-				
-				//newGameObject.hideFlags = HideFlags.HideInHierarchy;
-                newGameObject.hideFlags = HideFlags.DontSave;
 				
 				return newGameObject;
 			}
