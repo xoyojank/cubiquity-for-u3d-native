@@ -29,25 +29,18 @@ namespace Cubiquity
 			public uint nodeHandle;
 
 			public static GameObject CreateOctreeNode(uint nodeHandle, GameObject parentGameObject)
-			{			
+			{
+                // Get node position from Cubiquity
 				int xPos, yPos, zPos;
-				//Debug.Log("Getting position for node handle = " + nodeHandle);
 				CubiquityDLL.GetNodePosition(nodeHandle, out xPos, out yPos, out zPos);
 				
-				StringBuilder name = new StringBuilder("OctreeNode (" + xPos + ", " + yPos + ", " + zPos + ")");
-				
+                // Build a corresponding game object
+				StringBuilder name = new StringBuilder("OctreeNode (" + xPos + ", " + yPos + ", " + zPos + ")");				
 				GameObject newGameObject = new GameObject(name.ToString ());
-				newGameObject.AddComponent<OctreeNode>();
-				
-				OctreeNode octreeNode = newGameObject.GetComponent<OctreeNode>();
-				octreeNode.lowerCorner = new Vector3(xPos, yPos, zPos);
-				octreeNode.nodeHandle = nodeHandle;
-				
 
-				newGameObject.layer = parentGameObject.layer;
-				
-
-				newGameObject.transform.parent = parentGameObject.transform;
+                // Use parent properties as appropriate
+                newGameObject.transform.parent = parentGameObject.transform;
+                newGameObject.layer = parentGameObject.layer;
 
                 // It seems that setting the parent does not cause the object to move as Unity adjusts 
                 // the child transform to compensate (this can be seen when moving objects between parents 
@@ -55,6 +48,11 @@ namespace Cubiquity
                 newGameObject.transform.localRotation = Quaternion.identity;
                 newGameObject.transform.localPosition = Vector3.zero;                
                 newGameObject.transform.localScale = Vector3.one;
+
+                // Attach an OctreeNode component
+                OctreeNode octreeNode = newGameObject.AddComponent<OctreeNode>();
+                octreeNode.lowerCorner = new Vector3(xPos, yPos, zPos);
+                octreeNode.nodeHandle = nodeHandle;
 					
 				OctreeNode parentOctreeNode = parentGameObject.GetComponent<OctreeNode>();
 					
