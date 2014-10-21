@@ -43,26 +43,25 @@ namespace Cubiquity
 				octreeNode.lowerCorner = new Vector3(xPos, yPos, zPos);
 				octreeNode.nodeHandle = nodeHandle;
 				
-				if(parentGameObject)
+
+				newGameObject.layer = parentGameObject.layer;
+				
+
+				newGameObject.transform.parent = parentGameObject.transform;
+
+                // It seems that setting the parent does not cause the object to move as Unity adjusts 
+                // the child transform to compensate (this can be seen when moving objects between parents 
+                // in the hierarchy view). Reset the local transform as shown here: http://goo.gl/k5n7M7
+                newGameObject.transform.localRotation = Quaternion.identity;
+                newGameObject.transform.localPosition = Vector3.zero;                
+                newGameObject.transform.localScale = Vector3.one;
+					
+				OctreeNode parentOctreeNode = parentGameObject.GetComponent<OctreeNode>();
+					
+				if(parentOctreeNode != null)
 				{
-					newGameObject.layer = parentGameObject.layer;
-						
-					newGameObject.transform.parent = parentGameObject.transform;
-					newGameObject.transform.localPosition = new Vector3();
-					newGameObject.transform.localRotation = new Quaternion();
-					newGameObject.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
-					
-					OctreeNode parentOctreeNode = parentGameObject.GetComponent<OctreeNode>();
-					
-					if(parentOctreeNode != null)
-					{
-						Vector3 parentLowerCorner = parentOctreeNode.lowerCorner;
-						newGameObject.transform.localPosition = octreeNode.lowerCorner - parentLowerCorner;
-					}
-					else
-					{
-						newGameObject.transform.localPosition = octreeNode.lowerCorner;
-					}
+					Vector3 parentLowerCorner = parentOctreeNode.lowerCorner;
+					newGameObject.transform.localPosition = octreeNode.lowerCorner - parentLowerCorner;
 				}
 				else
 				{
