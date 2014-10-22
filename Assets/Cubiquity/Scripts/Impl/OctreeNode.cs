@@ -14,6 +14,8 @@ namespace Cubiquity
 	{
 		public class OctreeNode : MonoBehaviour
 		{
+            [System.NonSerialized]
+            public uint nodeLastChanged;
 			[System.NonSerialized]
 			public uint meshLastSyncronised;
 			[System.NonSerialized]
@@ -73,118 +75,125 @@ namespace Cubiquity
 				
 				return newGameObject;
 			}
-			
-			public int syncNodeStructure(int availableNodeSyncs, GameObject voxelTerrainGameObject)
+
+            public static int syncNodeStructure(int availableNodeSyncs, GameObject nodeGameObject, GameObject voxelTerrainGameObject)
 			{
 				int nodeSyncsPerformed = 0;				
 				if(availableNodeSyncs <= 0)
 				{
 					return nodeSyncsPerformed;
 				}
-				
-				uint meshLastUpdated = CubiquityDLL.GetMeshLastUpdated(nodeHandle);						
-				if(meshLastSyncronised < meshLastUpdated)
-				{			
-					if(CubiquityDLL.NodeHasMesh(nodeHandle) == 1)
-					{					
-						// Set up the rendering mesh											
-						VolumeRenderer volumeRenderer = voxelTerrainGameObject.GetComponent<VolumeRenderer>();
-						if(volumeRenderer != null)
-						{						
-							//Mesh renderingMesh = volumeRenderer.BuildMeshFromNodeHandle(nodeHandle);
-							
-							Mesh renderingMesh = null;
-							if(voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(TerrainVolume))
-							{
-                                renderingMesh = MeshConversion.BuildMeshFromNodeHandleForTerrainVolume(nodeHandle, false);
-							}
-							else if(voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(ColoredCubesVolume))
-							{
-								renderingMesh = MeshConversion.BuildMeshFromNodeHandleForColoredCubesVolume(nodeHandle, false);
-							}
-					
-					        MeshFilter meshFilter = gameObject.GetOrAddComponent<MeshFilter>() as MeshFilter;
-						    MeshRenderer meshRenderer = gameObject.GetOrAddComponent<MeshRenderer>() as MeshRenderer;
-							
-							if(meshFilter.sharedMesh != null)
-							{
-								DestroyImmediate(meshFilter.sharedMesh);
-							}
-							
-					        meshFilter.sharedMesh = renderingMesh;
-						
-							meshRenderer.sharedMaterial = volumeRenderer.material;
-						}
-						
-						// Set up the collision mesh
-						VolumeCollider volumeCollider = voxelTerrainGameObject.GetComponent<VolumeCollider>();					
-						if((volumeCollider != null) && (Application.isPlaying))
-						{
-							Mesh collisionMesh = volumeCollider.BuildMeshFromNodeHandle(nodeHandle);
-							MeshCollider meshCollider = gameObject.GetOrAddComponent<MeshCollider>() as MeshCollider;
-							meshCollider.sharedMesh = collisionMesh;
-						}
-					}
-					// If there is no mesh in Cubiquity then we make sure there isn't on in Unity.
-					else
-					{
-						MeshCollider meshCollider = gameObject.GetComponent<MeshCollider>() as MeshCollider;
-						if(meshCollider)
-						{
-							DestroyImmediate(meshCollider);
-						}
-						
-						MeshRenderer meshRenderer = gameObject.GetComponent<MeshRenderer>() as MeshRenderer;
-						if(meshRenderer)
-						{
-							DestroyImmediate(meshRenderer);
-						}
-						
-						MeshFilter meshFilter = gameObject.GetComponent<MeshFilter>() as MeshFilter;
-						if(meshFilter)
-						{
-							DestroyImmediate(meshFilter);
-						}
-					}
 
-                    meshLastSyncronised = CubiquityDLL.GetCurrentTime(); // Could perhaps just use the meshLastUpdated time here?
-					availableNodeSyncs--;
-					nodeSyncsPerformed++;					
-				}
-				
-				//Now syncronise any children
-				for(uint z = 0; z < 2; z++)
-				{
-					for(uint y = 0; y < 2; y++)
-					{
-						for(uint x = 0; x < 2; x++)
-						{
-							if(CubiquityDLL.HasChildNode(nodeHandle, x, y, z) == 1)
-							{					
-							
-								uint childNodeHandle = CubiquityDLL.GetChildNode(nodeHandle, x, y, z);
+                OctreeNode octreeNode = nodeGameObject.GetComponent<OctreeNode>();
 
-                                if (GetChild(x, y, z) == null)
-								{														
-									SetChild(x, y, z, OctreeNode.CreateOctreeNode(childNodeHandle, gameObject));
-								}
-
-                                OctreeNode childOctreeNode = GetChild(x, y, z).GetComponent<OctreeNode>();
-                                int syncs = childOctreeNode.syncNodeStructure(availableNodeSyncs, voxelTerrainGameObject);
-								availableNodeSyncs -= syncs;
-								nodeSyncsPerformed += syncs;
-							}
-                            else
+                uint lastChanged = CubiquityDLL.GetLastChanged(octreeNode.nodeHandle);
+                if (octreeNode.nodeLastChanged < lastChanged)
+                {
+                    uint meshLastUpdated = CubiquityDLL.GetMeshLastUpdated(octreeNode.nodeHandle);
+                    if (octreeNode.meshLastSyncronised < meshLastUpdated)
+                    {
+                        if (CubiquityDLL.NodeHasMesh(octreeNode.nodeHandle) == 1)
+                        {
+                            // Set up the rendering mesh											
+                            VolumeRenderer volumeRenderer = voxelTerrainGameObject.GetComponent<VolumeRenderer>();
+                            if (volumeRenderer != null)
                             {
-                                if (GetChild(x, y, z))
+                                //Mesh renderingMesh = volumeRenderer.BuildMeshFromNodeHandle(nodeHandle);
+
+                                Mesh renderingMesh = null;
+                                if (voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(TerrainVolume))
                                 {
-                                    Utility.DestroyImmediateWithChildren(GetChild(x, y, z));
-                                    SetChild(x, y, z, null);
+                                    renderingMesh = MeshConversion.BuildMeshFromNodeHandleForTerrainVolume(octreeNode.nodeHandle, false);
+                                }
+                                else if (voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(ColoredCubesVolume))
+                                {
+                                    renderingMesh = MeshConversion.BuildMeshFromNodeHandleForColoredCubesVolume(octreeNode.nodeHandle, false);
+                                }
+
+                                MeshFilter meshFilter = nodeGameObject.GetOrAddComponent<MeshFilter>() as MeshFilter;
+                                MeshRenderer meshRenderer = nodeGameObject.GetOrAddComponent<MeshRenderer>() as MeshRenderer;
+
+                                if (meshFilter.sharedMesh != null)
+                                {
+                                    DestroyImmediate(meshFilter.sharedMesh);
+                                }
+
+                                meshFilter.sharedMesh = renderingMesh;
+
+                                meshRenderer.sharedMaterial = volumeRenderer.material;
+                            }
+
+                            // Set up the collision mesh
+                            VolumeCollider volumeCollider = voxelTerrainGameObject.GetComponent<VolumeCollider>();
+                            if ((volumeCollider != null) && (Application.isPlaying))
+                            {
+                                Mesh collisionMesh = volumeCollider.BuildMeshFromNodeHandle(octreeNode.nodeHandle);
+                                MeshCollider meshCollider = nodeGameObject.GetOrAddComponent<MeshCollider>() as MeshCollider;
+                                meshCollider.sharedMesh = collisionMesh;
+                            }
+                        }
+                        // If there is no mesh in Cubiquity then we make sure there isn't on in Unity.
+                        else
+                        {
+                            MeshCollider meshCollider = nodeGameObject.GetComponent<MeshCollider>() as MeshCollider;
+                            if (meshCollider)
+                            {
+                                DestroyImmediate(meshCollider);
+                            }
+
+                            MeshRenderer meshRenderer = nodeGameObject.GetComponent<MeshRenderer>() as MeshRenderer;
+                            if (meshRenderer)
+                            {
+                                DestroyImmediate(meshRenderer);
+                            }
+
+                            MeshFilter meshFilter = nodeGameObject.GetComponent<MeshFilter>() as MeshFilter;
+                            if (meshFilter)
+                            {
+                                DestroyImmediate(meshFilter);
+                            }
+                        }
+
+                        octreeNode.meshLastSyncronised = CubiquityDLL.GetCurrentTime(); // Could perhaps just use the meshLastUpdated time here?
+                        availableNodeSyncs--;
+                        nodeSyncsPerformed++;
+                    }
+
+                    //Now syncronise any children
+                    for (uint z = 0; z < 2; z++)
+                    {
+                        for (uint y = 0; y < 2; y++)
+                        {
+                            for (uint x = 0; x < 2; x++)
+                            {
+                                if (CubiquityDLL.HasChildNode(octreeNode.nodeHandle, x, y, z) == 1)
+                                {
+                                    uint childNodeHandle = CubiquityDLL.GetChildNode(octreeNode.nodeHandle, x, y, z);
+
+                                    if (octreeNode.GetChild(x, y, z) == null)
+                                    {
+                                        octreeNode.SetChild(x, y, z, OctreeNode.CreateOctreeNode(childNodeHandle, nodeGameObject));
+                                    }
+
+                                    //OctreeNode childOctreeNode = octreeNode.GetChild(x, y, z).GetComponent<OctreeNode>();
+                                    int syncs = OctreeNode.syncNodeStructure(availableNodeSyncs, octreeNode.GetChild(x, y, z), voxelTerrainGameObject);
+                                    availableNodeSyncs -= syncs;
+                                    nodeSyncsPerformed += syncs;
+                                }
+                                else
+                                {
+                                    if (octreeNode.GetChild(x, y, z))
+                                    {
+                                        Utility.DestroyImmediateWithChildren(octreeNode.GetChild(x, y, z));
+                                        octreeNode.SetChild(x, y, z, null);
+                                    }
                                 }
                             }
-						}
-					}
-				}
+                        }
+                    }
+
+                    octreeNode.nodeLastChanged = CubiquityDLL.GetCurrentTime();
+                }
 				
 				return nodeSyncsPerformed;
 			}
