@@ -159,6 +159,9 @@ namespace Cubiquity
                         nodeSyncsPerformed++;
                     }
 
+                    uint renderThisNode = 0;
+                    renderThisNode = CubiquityDLL.RenderThisNode(octreeNode.nodeHandle);
+
                     //Now syncronise any children
                     for (uint z = 0; z < 2; z++)
                     {
@@ -166,7 +169,7 @@ namespace Cubiquity
                         {
                             for (uint x = 0; x < 2; x++)
                             {
-                                if (CubiquityDLL.HasChildNode(octreeNode.nodeHandle, x, y, z) == 1)
+                                if (CubiquityDLL.HasChildNode(octreeNode.nodeHandle, x, y, z) == 1 && renderThisNode == 0)
                                 {
                                     uint childNodeHandle = CubiquityDLL.GetChildNode(octreeNode.nodeHandle, x, y, z);
 
