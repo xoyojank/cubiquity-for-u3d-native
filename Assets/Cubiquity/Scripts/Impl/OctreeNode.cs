@@ -19,7 +19,7 @@ namespace Cubiquity
 			[System.NonSerialized]
 			public uint meshLastSyncronised;
             [System.NonSerialized]
-            public uint oldestMeshSync;
+            public uint meshAndChildMeshesLastSyncronised;
 			[System.NonSerialized]
 			public uint lastSyncronisedWithVolumeRenderer;
 			[System.NonSerialized]
@@ -134,7 +134,7 @@ namespace Cubiquity
                 OctreeNode octreeNode = nodeGameObject.GetComponent<OctreeNode>();
                 uint meshOrChildMeshLastUpdated = CubiquityDLL.GetMeshOrChildMeshLastUpdated(octreeNode.nodeHandle);
 
-                //if (octreeNode.oldestMeshSync < meshOrChildMeshLastUpdated)
+                if (octreeNode.meshAndChildMeshesLastSyncronised < meshOrChildMeshLastUpdated)
                 {
                     uint meshLastUpdated = CubiquityDLL.GetMeshLastUpdated(octreeNode.nodeHandle);
                     if (octreeNode.meshLastSyncronised < meshLastUpdated)
@@ -205,8 +205,6 @@ namespace Cubiquity
                         availableNodeSyncs--;
                         nodeSyncsPerformed++;
                     }
-                    
-                    octreeNode.oldestMeshSync = octreeNode.meshLastSyncronised;
 
                     //Now syncronise any children
                     for (uint z = 0; z < 2; z++)
@@ -220,11 +218,14 @@ namespace Cubiquity
                                     int syncs = OctreeNode.syncNodeMeshes(availableNodeSyncs, octreeNode.GetChild(x, y, z), voxelTerrainGameObject);
                                     availableNodeSyncs -= syncs;
                                     nodeSyncsPerformed += syncs;
-
-                                    octreeNode.oldestMeshSync = Math.Min(octreeNode.oldestMeshSync, octreeNode.GetChild(x, y, z).GetComponent<OctreeNode>().oldestMeshSync);
                                 }
                             }
                         }
+                    }
+
+                    if(nodeSyncsPerformed == 0)
+                    {
+                        octreeNode.meshAndChildMeshesLastSyncronised = CubiquityDLL.GetCurrentTime();
                     }
                 }
 				
