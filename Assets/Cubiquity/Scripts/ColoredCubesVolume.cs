@@ -127,7 +127,8 @@ namespace Cubiquity
 				}
 						
 				OctreeNode rootOctreeNode = rootOctreeNodeGameObject.GetComponent<OctreeNode>();
-                int nodeSyncsPerformed = OctreeNode.syncNodeStructure(maxSyncs, rootOctreeNodeGameObject, gameObject);
+                OctreeNode.syncNodeStructure(rootOctreeNodeGameObject, gameObject);
+                int nodeSyncsPerformed = OctreeNode.syncNodeMeshes(maxSyncs, rootOctreeNodeGameObject, gameObject);
                 rootOctreeNode.syncNodeProperties(gameObject);
 						
 				// If no node were syncronized then the mesh data is up to
