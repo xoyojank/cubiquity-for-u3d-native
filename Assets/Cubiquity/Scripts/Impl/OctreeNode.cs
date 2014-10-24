@@ -86,6 +86,14 @@ namespace Cubiquity
 
                 if (octreeNode.nodeLastChanged < lastChanged)
                 {
+                    // If the octree structure changes then the set of meshes to render can change (e.g. different LOD levels) even
+                    // though the meshes themselves haven't changed. This means we can no longer trust our recursive 'last synced' flag,
+                    // so we clear it and allow it to naturally be rebuilt from the non-recursive version on each node.
+                    //
+                    // Actually this seems a bit aggressive at the moment - if a subtree changes then this property is cleared for the whole tree?
+                    // Perhaps we need a flag to check (non-recursivly) whether a given node's structure has changed, but we don't have one yet.
+                    octreeNode.meshAndChildMeshesLastSyncronised = 0;
+
                     uint renderThisNode = 0;
                     renderThisNode = CubiquityDLL.RenderThisNode(octreeNode.nodeHandle);
 
