@@ -18,6 +18,8 @@ namespace Cubiquity
             public uint nodeLastChanged;
 			[System.NonSerialized]
 			public uint meshLastSyncronised;
+            [System.NonSerialized]
+            public uint oldestMeshSync = 0;
 			[System.NonSerialized]
 			public uint lastSyncronisedWithVolumeRenderer;
 			[System.NonSerialized]
@@ -87,7 +89,9 @@ namespace Cubiquity
                 OctreeNode octreeNode = nodeGameObject.GetComponent<OctreeNode>();
 
                 uint lastChanged = CubiquityDLL.GetLastChanged(octreeNode.nodeHandle);
-                if (octreeNode.nodeLastChanged < lastChanged)
+                uint meshOrChildMeshLastUpdated = CubiquityDLL.GetMeshOrChildMeshLastUpdated(octreeNode.nodeHandle);
+
+                if ((octreeNode.nodeLastChanged < lastChanged) || (octreeNode.oldestMeshSync < meshOrChildMeshLastUpdated))
                 {
                     uint meshLastUpdated = CubiquityDLL.GetMeshLastUpdated(octreeNode.nodeHandle);
                     if (octreeNode.meshLastSyncronised < meshLastUpdated)
@@ -162,6 +166,8 @@ namespace Cubiquity
                     uint renderThisNode = 0;
                     renderThisNode = CubiquityDLL.RenderThisNode(octreeNode.nodeHandle);
 
+                    octreeNode.oldestMeshSync = octreeNode.meshLastSyncronised;
+
                     //Now syncronise any children
                     for (uint z = 0; z < 2; z++)
                     {
@@ -182,6 +188,8 @@ namespace Cubiquity
                                     int syncs = OctreeNode.syncNodeStructure(availableNodeSyncs, octreeNode.GetChild(x, y, z), voxelTerrainGameObject);
                                     availableNodeSyncs -= syncs;
                                     nodeSyncsPerformed += syncs;
+
+                                    octreeNode.oldestMeshSync = Math.Min(octreeNode.oldestMeshSync, octreeNode.GetChild(x, y, z).GetComponent<OctreeNode>().oldestMeshSync);
                                 }
                                 else
                                 {

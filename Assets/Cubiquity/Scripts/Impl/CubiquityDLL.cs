@@ -333,6 +333,15 @@ namespace Cubiquity
 				return result;
 			}
 
+            [DllImport(dllToImport)]
+            private static extern int cuGetMeshOrChildMeshLastUpdated(uint nodeHandle, out uint result);
+            public static uint GetMeshOrChildMeshLastUpdated(uint nodeHandle)
+            {
+                uint result;
+                Validate(cuGetMeshOrChildMeshLastUpdated(nodeHandle, out result));
+                return result;
+            }
+
 			[DllImport (dllToImport)]
 			private static extern int cuRenderThisNode(uint nodeHandle, out uint result);
 			public static uint RenderThisNode(uint nodeHandle)
