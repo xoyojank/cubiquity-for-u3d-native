@@ -290,7 +290,7 @@ namespace Cubiquity
 				return result;
 			}
 			
-			[DllImport (dllToImport)]
+			/*[DllImport (dllToImport)]
 			private static extern int cuHasChildNode(uint nodeHandle, uint childX, uint childY, uint childZ, out uint result);
 			public static uint HasChildNode(uint nodeHandle, uint childX, uint childY, uint childZ)
 			{
@@ -306,59 +306,59 @@ namespace Cubiquity
 				uint result;
 				Validate(cuGetChildNode(nodeHandle, childX, childY, childZ, out result));
 				return result;
-			}
+			}*/
 			
-			[DllImport (dllToImport)]
+			/*[DllImport (dllToImport)]
 			private static extern int cuNodeHasMesh(uint nodeHandle, out uint result);
 			public static uint NodeHasMesh(uint nodeHandle)
 			{
 				uint result;
 				Validate(cuNodeHasMesh(nodeHandle, out result));
 				return result;
-			}
+			}*/
 			
-			[DllImport (dllToImport)]
+			/*[DllImport (dllToImport)]
 			private static extern int cuGetNodePosition(uint nodeHandle, out int x, out int y, out int z);
 			public static void GetNodePosition(uint nodeHandle, out int x, out int y, out int z)
 			{
 				Validate(cuGetNodePosition(nodeHandle, out x, out y, out z));
-			}
+			}*/
 			
-			[DllImport (dllToImport)]
+			/*[DllImport (dllToImport)]
 			private static extern int cuGetMeshLastUpdated(uint nodeHandle, out uint result);
 			public static uint GetMeshLastUpdated(uint nodeHandle)
 			{
 				uint result;
 				Validate(cuGetMeshLastUpdated(nodeHandle, out result));
 				return result;
-			}
+			}*/
 
-            [DllImport(dllToImport)]
+            /*[DllImport(dllToImport)]
             private static extern int cuGetMeshOrChildMeshLastUpdated(uint nodeHandle, out uint result);
             public static uint GetMeshOrChildMeshLastUpdated(uint nodeHandle)
             {
                 uint result;
                 Validate(cuGetMeshOrChildMeshLastUpdated(nodeHandle, out result));
                 return result;
-            }
+            }*/
 
-			[DllImport (dllToImport)]
+			/*[DllImport (dllToImport)]
 			private static extern int cuRenderThisNode(uint nodeHandle, out uint result);
 			public static uint RenderThisNode(uint nodeHandle)
 			{
 				uint result;
 				Validate(cuRenderThisNode(nodeHandle, out result));
 				return result;
-			}
+			}*/
 
-            [DllImport(dllToImport)]
+            /*[DllImport(dllToImport)]
             private static extern int cuGetLastChanged(uint nodeHandle, out uint result);
             public static uint GetLastChanged(uint nodeHandle)
             {
                 uint result;
                 Validate(cuGetLastChanged(nodeHandle, out result));
                 return result;
-            }
+            }*/
 
             [DllImport(dllToImport)]
             private static extern int cuGetOctreeNode(uint nodeHandle, out CuOctreeNode result);

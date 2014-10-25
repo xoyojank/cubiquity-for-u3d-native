@@ -35,8 +35,8 @@ namespace Cubiquity
 			public static GameObject CreateOctreeNode(uint nodeHandle, GameObject parentGameObject)
 			{
                 // Get node position from Cubiquity
-				int xPos, yPos, zPos;
-				CubiquityDLL.GetNodePosition(nodeHandle, out xPos, out yPos, out zPos);
+                CuOctreeNode cuOctreeNode = CubiquityDLL.GetOctreeNode(nodeHandle);
+                int xPos = cuOctreeNode.posX, yPos = cuOctreeNode.posY, zPos = cuOctreeNode.posZ;
 				
                 // Build a corresponding game object
 				StringBuilder name = new StringBuilder("OctreeNode (" + xPos + ", " + yPos + ", " + zPos + ")");				
@@ -84,8 +84,6 @@ namespace Cubiquity
 
                 CuOctreeNode cuOctreeNode = CubiquityDLL.GetOctreeNode(octreeNode.nodeHandle);
 
-                //uint lastChanged = CubiquityDLL.GetLastChanged(octreeNode.nodeHandle);
-
                 if (octreeNode.nodeLastChanged < cuOctreeNode.lastChanged)
                 {
                     // If the octree structure changes then the set of meshes to render can change (e.g. different LOD levels) even
@@ -96,8 +94,15 @@ namespace Cubiquity
                     // Perhaps we need a flag to check (non-recursivly) whether a given node's structure has changed, but we don't have one yet.
                     octreeNode.meshAndChildMeshesLastSyncronised = 0;
 
-                    //uint renderThisNode = 0;
-                    //renderThisNode = CubiquityDLL.RenderThisNode(octreeNode.nodeHandle);
+                    uint[,,] childHandleArray = new uint[2,2,2];
+                    childHandleArray[0, 0, 0] = cuOctreeNode.childHandle000;
+                    childHandleArray[0, 0, 1] = cuOctreeNode.childHandle001;
+                    childHandleArray[0, 1, 0] = cuOctreeNode.childHandle010;
+                    childHandleArray[0, 1, 1] = cuOctreeNode.childHandle011;
+                    childHandleArray[1, 0, 0] = cuOctreeNode.childHandle100;
+                    childHandleArray[1, 0, 1] = cuOctreeNode.childHandle101;
+                    childHandleArray[1, 1, 0] = cuOctreeNode.childHandle110;
+                    childHandleArray[1, 1, 1] = cuOctreeNode.childHandle111;
 
                     //Now syncronise any children
                     for (uint z = 0; z < 2; z++)
@@ -106,9 +111,9 @@ namespace Cubiquity
                         {
                             for (uint x = 0; x < 2; x++)
                             {
-                                if (CubiquityDLL.HasChildNode(octreeNode.nodeHandle, x, y, z) == 1 && cuOctreeNode.renderThisNode == 0)
+                                if (childHandleArray[x, y, z] != 0xFFFFFFFF && cuOctreeNode.renderThisNode == 0)
                                 {
-                                    uint childNodeHandle = CubiquityDLL.GetChildNode(octreeNode.nodeHandle, x, y, z);
+                                    uint childNodeHandle = childHandleArray[x, y, z];
 
                                     if (octreeNode.GetChild(x, y, z) == null)
                                     {
@@ -157,8 +162,6 @@ namespace Cubiquity
                             VolumeRenderer volumeRenderer = voxelTerrainGameObject.GetComponent<VolumeRenderer>();
                             if (volumeRenderer != null)
                             {
-                                //Mesh renderingMesh = volumeRenderer.BuildMeshFromNodeHandle(nodeHandle);
-
                                 Mesh renderingMesh = null;
                                 if (voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(TerrainVolume))
                                 {
@@ -250,9 +253,6 @@ namespace Cubiquity
                 MeshRenderer mr = gameObject.GetComponent<MeshRenderer>();
                 if (vr != null && mr != null)
                 {
-                    //uint renderThisNode = 0;
-                    //renderThisNode = CubiquityDLL.RenderThisNode(nodeHandle);
-
                     CuOctreeNode cuOctreeNode = CubiquityDLL.GetOctreeNode(nodeHandle);
 
                     mr.enabled = vr.enabled && (cuOctreeNode.renderThisNode != 0);
