@@ -82,9 +82,11 @@ namespace Cubiquity
             {
                 OctreeNode octreeNode = nodeGameObject.GetComponent<OctreeNode>();
 
-                uint lastChanged = CubiquityDLL.GetLastChanged(octreeNode.nodeHandle);
+                CuOctreeNode cuOctreeNode = CubiquityDLL.GetOctreeNode(octreeNode.nodeHandle);
 
-                if (octreeNode.nodeLastChanged < lastChanged)
+                //uint lastChanged = CubiquityDLL.GetLastChanged(octreeNode.nodeHandle);
+
+                if (octreeNode.nodeLastChanged < cuOctreeNode.lastChanged)
                 {
                     // If the octree structure changes then the set of meshes to render can change (e.g. different LOD levels) even
                     // though the meshes themselves haven't changed. This means we can no longer trust our recursive 'last synced' flag,
@@ -94,8 +96,8 @@ namespace Cubiquity
                     // Perhaps we need a flag to check (non-recursivly) whether a given node's structure has changed, but we don't have one yet.
                     octreeNode.meshAndChildMeshesLastSyncronised = 0;
 
-                    uint renderThisNode = 0;
-                    renderThisNode = CubiquityDLL.RenderThisNode(octreeNode.nodeHandle);
+                    //uint renderThisNode = 0;
+                    //renderThisNode = CubiquityDLL.RenderThisNode(octreeNode.nodeHandle);
 
                     //Now syncronise any children
                     for (uint z = 0; z < 2; z++)
@@ -104,7 +106,7 @@ namespace Cubiquity
                         {
                             for (uint x = 0; x < 2; x++)
                             {
-                                if (CubiquityDLL.HasChildNode(octreeNode.nodeHandle, x, y, z) == 1 && renderThisNode == 0)
+                                if (CubiquityDLL.HasChildNode(octreeNode.nodeHandle, x, y, z) == 1 && cuOctreeNode.renderThisNode == 0)
                                 {
                                     uint childNodeHandle = CubiquityDLL.GetChildNode(octreeNode.nodeHandle, x, y, z);
 
@@ -140,14 +142,16 @@ namespace Cubiquity
 				}
 
                 OctreeNode octreeNode = nodeGameObject.GetComponent<OctreeNode>();
-                uint meshOrChildMeshLastUpdated = CubiquityDLL.GetMeshOrChildMeshLastUpdated(octreeNode.nodeHandle);
+                //uint meshOrChildMeshLastUpdated = CubiquityDLL.GetMeshOrChildMeshLastUpdated(octreeNode.nodeHandle);
 
-                if (octreeNode.meshAndChildMeshesLastSyncronised < meshOrChildMeshLastUpdated)
+                CuOctreeNode cuOctreeNode = CubiquityDLL.GetOctreeNode(octreeNode.nodeHandle);
+
+                if (octreeNode.meshAndChildMeshesLastSyncronised < cuOctreeNode.meshOrChildMeshLastUpdated)
                 {
-                    uint meshLastUpdated = CubiquityDLL.GetMeshLastUpdated(octreeNode.nodeHandle);
-                    if (octreeNode.meshLastSyncronised < meshLastUpdated)
+                    //uint meshLastUpdated = CubiquityDLL.GetMeshLastUpdated(octreeNode.nodeHandle);
+                    if (octreeNode.meshLastSyncronised < cuOctreeNode.meshLastUpdated)
                     {
-                        if (CubiquityDLL.NodeHasMesh(octreeNode.nodeHandle) == 1)
+                        if (cuOctreeNode.hasMesh == 1)
                         {
                             // Set up the rendering mesh											
                             VolumeRenderer volumeRenderer = voxelTerrainGameObject.GetComponent<VolumeRenderer>();
@@ -246,10 +250,12 @@ namespace Cubiquity
                 MeshRenderer mr = gameObject.GetComponent<MeshRenderer>();
                 if (vr != null && mr != null)
                 {
-                    uint renderThisNode = 0;
-                    renderThisNode = CubiquityDLL.RenderThisNode(nodeHandle);
+                    //uint renderThisNode = 0;
+                    //renderThisNode = CubiquityDLL.RenderThisNode(nodeHandle);
 
-                    mr.enabled = vr.enabled && (renderThisNode != 0);
+                    CuOctreeNode cuOctreeNode = CubiquityDLL.GetOctreeNode(nodeHandle);
+
+                    mr.enabled = vr.enabled && (cuOctreeNode.renderThisNode != 0);
 
                     if (lastSyncronisedWithVolumeRenderer < vr.lastModified)
                     {

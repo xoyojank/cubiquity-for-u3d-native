@@ -359,6 +359,15 @@ namespace Cubiquity
                 Validate(cuGetLastChanged(nodeHandle, out result));
                 return result;
             }
+
+            [DllImport(dllToImport)]
+            private static extern int cuGetOctreeNode(uint nodeHandle, out CuOctreeNode result);
+            public static CuOctreeNode GetOctreeNode(uint nodeHandle)
+            {
+                CuOctreeNode result;
+                Validate(cuGetOctreeNode(nodeHandle, out result));
+                return result;
+            }
 			
 			////////////////////////////////////////////////////////////////////////////////
 			// Mesh functions
