@@ -84,7 +84,7 @@ namespace Cubiquity
 
                 CuOctreeNode cuOctreeNode = CubiquityDLL.GetOctreeNode(octreeNode.nodeHandle);
 
-                if (octreeNode.nodeLastChanged < cuOctreeNode.lastChanged)
+                if (octreeNode.nodeLastChanged < cuOctreeNode.structureLastChangedRecursive)
                 {
                     // If the octree structure changes then the set of meshes to render can change (e.g. different LOD levels) even
                     // though the meshes themselves haven't changed. This means we can no longer trust our recursive 'last synced' flag,
@@ -151,10 +151,10 @@ namespace Cubiquity
 
                 CuOctreeNode cuOctreeNode = CubiquityDLL.GetOctreeNode(octreeNode.nodeHandle);
 
-                if (octreeNode.meshAndChildMeshesLastSyncronised < cuOctreeNode.meshOrChildMeshLastUpdated)
+                if (octreeNode.meshAndChildMeshesLastSyncronised < cuOctreeNode.meshLastChangedRecursive)
                 {
                     //uint meshLastUpdated = CubiquityDLL.GetMeshLastUpdated(octreeNode.nodeHandle);
-                    if (octreeNode.meshLastSyncronised < cuOctreeNode.meshLastUpdated)
+                    if (octreeNode.meshLastSyncronised < cuOctreeNode.meshLastChanged)
                     {
                         if (cuOctreeNode.hasMesh == 1)
                         {
