@@ -50,7 +50,8 @@ namespace Cubiquity
                     Impl.Utility.DestroyImmediateWithChildren(rootOctreeNodeGameObject);
                     rootOctreeNodeGameObject = null;
 
-                    // When in the editor we need to restart the updates so that the mesh for the new volume data can start syncing in the background.
+                    // When in the editor we need to restart the updates so that the
+                    // mesh for the new volume data can start syncing in the background.
 #if UNITY_EDITOR
                     StartEditModeUpdateIfInEditMode();
 #endif
