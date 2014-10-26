@@ -139,9 +139,6 @@ namespace Cubiquity
         protected int maxNodesPerSyncInEditMode = 16; // Can be higher than in play mode as we have no collision mehses
 		/// \endcond
 
-        [System.NonSerialized]
-        protected GameObject ghostGameObject;
-
 		// The root node of our octree. It is protected so that derived classes can use it, but users
 		// are not supposed to create derived classes themselves so we hide this property from the docs.
 		/// \cond
@@ -149,7 +146,7 @@ namespace Cubiquity
 		protected GameObject rootOctreeNodeGameObject;
 		/// \endcond
 		
-        // Used to check when the game object changes layer, so we can move the ghost object to match.
+        // Used to check when the game object changes layer, so we can move the children to match.
 		private int previousLayer = -1;
 
 		// Used to catch the user using the same volume data for multiple volumes (which they should not do).
@@ -203,10 +200,6 @@ namespace Cubiquity
 		
 		void OnEnable()
 		{
-            // Calling the ghost node the 'octree' makes more sense to the user if they see it.
-            ghostGameObject = new GameObject("Octree for \'" + name + "\'");
-            ghostGameObject.hideFlags = HideFlags.HideAndDontSave;
-
 #if UNITY_EDITOR
             StartEditModeUpdateIfInEditMode();
 #endif
@@ -219,9 +212,6 @@ namespace Cubiquity
 #if UNITY_EDITOR
             StopEditModeUpdate();
 #endif
-
-            Impl.Utility.DestroyImmediateWithChildren(ghostGameObject);
-            ghostGameObject = null;
 			
 			// Ideally the VolumeData would handle it's own initialization and shutdown, but it's OnEnable()/OnDisable() methods don't seems to be
 			// called when switching between edit/play mode if it has been turned into an asset. Therefore we do it here as well just to be sure.
@@ -236,6 +226,12 @@ namespace Cubiquity
 			UnregisterVolumeData();
 		}
 
+        private void FlushInternalData()
+        {
+            Impl.Utility.DestroyImmediateWithChildren(rootOctreeNodeGameObject);
+            rootOctreeNodeGameObject = null;
+        }
+
         protected abstract bool SynchronizeMesh(int maxSyncs);
 		
 		// Public so that we can manually drive it from the editor as required,
@@ -249,16 +245,7 @@ namespace Cubiquity
 				// If so we update the children to match and then clear the flag.
 				gameObject.SetLayerRecursively(gameObject.layer);
 				previousLayer = gameObject.layer;
-			}            
-
-            // Use of the 'hasChanged' flag seems ok even when volumes are in a hierarchy. Moving a parent sets the 'hasChanged' flag of it's children.
-            if (transform.hasChanged)
-            {
-                ghostGameObject.transform.localPosition = transform.position;
-                ghostGameObject.transform.localRotation = transform.rotation;
-                ghostGameObject.transform.localScale = transform.lossyScale;
-                transform.hasChanged = false;
-            }
+			}
 			
 			// NOTE - The following line passes transform.worldToLocalMatrix as a shader parameter. This is explicitly
 			// forbidden by the Unity docs which say:
@@ -365,5 +352,72 @@ namespace Cubiquity
 				volumeDataAndVolumes.Remove(mData.GetInstanceID());
 			}
 		}
+
+#if UNITY_EDITOR
+        // Because our hierarchy of Octree nodes is generated at runtime (and is depenant on the camera position) we do not 
+        // want to serialize it with the scene. Setting the 'DontSave' flag on the root would seem like an intiative solution 
+        // but actually results in errors which, while harmless, will be disconcerting to the users. See this Unity Answers thread  
+        // for more details: http://answers.unity3d.com/questions/609621/hideflagsdontsave-causes-checkconsistency-transfor.html
+        //
+        // We have found two posible solutions to this problem. The first solution is to make use of a 'ghost object' which sits
+        // at the root of our scene and has it's transformation updated every frame to match out current volume's transformation.
+        // The octree can then be attached to this ghost object rather than the real volume. This get's rid of the harmless error
+        // message because the ghost is at the root of the scene, and so there is no parent object to complain when it is not
+        // found on scene load. However, this solution has some known problems:
+        //
+        //     - The bounding box of the real volume is no longer correct, as it has no tree/mesh data of it's own. You can't
+        //       manually set the bounding box, so we'd probably have to create a fake degenerate mesh and attach it to the
+        //       volume. The coresponding MeshFilter/MeshRenderer then show up in the volume inspector, I believe even with the
+        //       'HideInHierarchy' flag set (they are then greyed out).
+        //
+        //     - The 'Show Wireframe' feature doesn't work, as you can only see the wireframe of a selected object and you can't
+        //       select the hidden ghost object.
+        //
+        //     - I also have concerns about how well selection/gizmos will work with a ghost object. For example, clicking the
+        //       ghost in the scene view should select the ral object. But this isn't really tested yet.
+        //
+        // The second solution is to attach the octree to the real volume game object, and then attempt to delete it before
+        // serialization is performed. Unity won't allow us to modify the object hierarchy in the OnDisable() method, so we have
+        // to resort to using the slightly 'hacky' functions below. The only know drawback of this approach is that it means
+        // the scene is flagged as 'unsaved' immediatly after saving it (probably because the octree is then rebuilt). But
+        // thinking about it now, this probably affects the 'ghost object' solution as well. This second solution is what we
+        // have implemented below.
+        private class OnSaveHandler : UnityEditor.AssetModificationProcessor
+        {
+            public static void OnWillSaveAssets(string[] assets)
+            {
+                Object[] volumes = Object.FindObjectsOfType(typeof(Volume));
+                foreach (Object volume in volumes)
+                {
+                    ((Volume)volume).FlushInternalData();
+                }
+            }
+        }
+
+        [InitializeOnLoad]
+        private class OnPlayHandler
+        {
+            static OnPlayHandler()
+            {
+                // Catch the event which occurs when switching modes.
+                EditorApplication.playmodeStateChanged += OnPlaymodeStateChanged;
+            }
+
+            static void OnPlaymodeStateChanged()
+            {
+                // We only need to discard the octree in edit mode, beacause when leaving play mode serialization is not
+                // performed. This event occurs both when leaving the old mode and again when entering the new mode, but 
+                // when entering edit mode the root null should already be null and discarding it again is harmless.
+                if (!EditorApplication.isPlaying)
+                {
+                    Object[] volumes = Object.FindObjectsOfType(typeof(Volume));
+                    foreach (Object volume in volumes)
+                    {
+                        ((Volume)volume).FlushInternalData();
+                    }
+                }
+            }
+        }
+#endif
 	}
 }
