@@ -31,7 +31,7 @@ namespace Cubiquity
 
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("LOD Threshold:", GUILayout.Width(labelWidth));
-            renderer.lodThreshold = EditorGUILayout.Slider(renderer.lodThreshold, 0.0f, 10.0f);
+            renderer.lodThreshold = EditorGUILayout.Slider(renderer.lodThreshold, 0.5f, 2.0f);
             EditorGUILayout.EndHorizontal();
 			
 			EditorGUILayout.BeginHorizontal();

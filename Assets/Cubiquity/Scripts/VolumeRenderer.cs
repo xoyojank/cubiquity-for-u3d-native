@@ -90,7 +90,7 @@ namespace Cubiquity
             }
         }
         [SerializeField]
-        private float mLodThreshold = 0.0f;
+        private float mLodThreshold = 1.0f;
 		
 		/// \cond
 		public uint lastModified = Clock.timestamp;
