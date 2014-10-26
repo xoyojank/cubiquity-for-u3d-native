@@ -42,7 +42,7 @@ namespace Cubiquity
 				StringBuilder name = new StringBuilder("OctreeNode (" + xPos + ", " + yPos + ", " + zPos + ")");				
 				GameObject newGameObject = new GameObject(name.ToString ());
                 //newGameObject.hideFlags = HideFlags.HideInHierarchy;
-                newGameObject.hideFlags = HideFlags.DontSave;
+                //newGameObject.hideFlags = HideFlags.DontSave;
 
                 // Use parent properties as appropriate
                 newGameObject.transform.parent = parentGameObject.transform;

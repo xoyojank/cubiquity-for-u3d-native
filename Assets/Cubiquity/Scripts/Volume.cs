@@ -153,6 +153,8 @@ namespace Cubiquity
 		// It's not a really robust approach but it works well enough and only serves to issue a warning anyway.
 		private static Dictionary<int, int> volumeDataAndVolumes = new Dictionary<int, int>();
 
+        private bool flushRequested;
+
         // ------------------------------------------------------------------------------
         // These editor-only functions are used to emulate repeated calls to Update() in edit mode. Setting the '[ExecuteInEditMode]' attribute does cause
         // Update() to be called automatically in edit mode, but it only happens in response to user-driven events such as moving the mouse in the editor
@@ -200,6 +202,12 @@ namespace Cubiquity
 		
 		void OnEnable()
 		{
+            // We have taken steps to make sure that our octree does not get saved to disk or persisted between edit/play mode,
+            // but it will still survive if we just disable and then enable the volume. This is because the OnDisable() and
+            // OnEnable() methods do now allow us to modify our game object hierarchy. Note that this disable/enable process
+            // may also happen automatically such as during a script reload? Requesting a flush of the octree is the safest option.
+            RequestFlushInternalData();
+
 #if UNITY_EDITOR
             StartEditModeUpdateIfInEditMode();
 #endif
@@ -226,9 +234,30 @@ namespace Cubiquity
 			UnregisterVolumeData();
 		}
 
+        private void RequestFlushInternalData()
+        {
+            flushRequested = true;
+        }
+
         private void FlushInternalData()
         {
-            Impl.Utility.DestroyImmediateWithChildren(rootOctreeNodeGameObject);
+            // It should be enough to delete the root octree node in this function but we're seeing cases 
+            // of octree nodes surviving the transition between edit and play modes. I'm not quite sure 
+            // why, but the approach below of deleting all child objects seems to solve the problem.
+
+            // Find all the child objects 
+            List<GameObject> childObjects = new List<GameObject>();
+            foreach (Transform childTransform in gameObject.transform)
+            {
+                childObjects.Add(childTransform.gameObject);
+            }
+
+            // Destroy all children
+            foreach (GameObject childObject in childObjects)
+            {
+                Impl.Utility.DestroyImmediateWithChildren(childObject);
+            }
+
             rootOctreeNodeGameObject = null;
         }
 
@@ -239,6 +268,12 @@ namespace Cubiquity
 		/// \cond
 		private void Update()
 		{
+            if (flushRequested)
+            {
+                FlushInternalData();
+                flushRequested = false;
+            }
+
 			// Check whether the gameObject has been moved to a new layer.
 			if(gameObject.layer != previousLayer)
 			{
@@ -394,6 +429,15 @@ namespace Cubiquity
             }
         }
 
+        // I'm not sure this code is really needed. Any internal data is discarded in the OnEnable() function and this ensures
+        // correct functionality. We are also using 'OnWillSaveAssets()' to ensure the octree doesn't get saved when writing to
+        // disk. However, we can still have a situation where the octree is serialized (internal serialization, not saving the
+        // scene) when switching between edit and play mode, and although the resulting behaviour is correct (because OnEnable()
+        // will later discard the old octree) it could be wasteful.
+        //
+        // The following code attempts to resolve this by flushing the octree when switching between modes. But it's not clear
+        // if this flushing actually happens in time, or if it really helps performance. But there's no reason to think it hurts
+        // so it's left here pending further investigation.
         [InitializeOnLoad]
         private class OnPlayHandler
         {
@@ -408,7 +452,6 @@ namespace Cubiquity
                 // We only need to discard the octree in edit mode, beacause when leaving play mode serialization is not
                 // performed. This event occurs both when leaving the old mode and again when entering the new mode, but 
                 // when entering edit mode the root null should already be null and discarding it again is harmless.
-                if (!EditorApplication.isPlaying)
                 {
                     Object[] volumes = Object.FindObjectsOfType(typeof(Volume));
                     foreach (Object volume in volumes)
