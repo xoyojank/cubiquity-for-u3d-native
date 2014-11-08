@@ -87,7 +87,7 @@ namespace Cubiquity
 	    }
 		
 		/// \cond
-        protected override bool SynchronizeOctree(uint maxNodeSyncs)
+        protected override bool SynchronizeOctree(uint maxSyncOperations)
 		{
             // FIXME - This doesn't really belong in Synchronize()
 			ColoredCubesVolumeRenderer volumeRenderer = gameObject.GetComponent<ColoredCubesVolumeRenderer>();
@@ -126,11 +126,11 @@ namespace Cubiquity
                     rootOctreeNodeGameObject = OctreeNode.CreateOctreeNode(rootNodeHandle, gameObject);	
 				}
 
-                uint nodeSyncsPerformed = OctreeNode.syncNode(maxNodeSyncs, rootOctreeNodeGameObject, gameObject);
+                uint syncOperationsPerformed = OctreeNode.syncNode(maxSyncOperations, rootOctreeNodeGameObject, gameObject);
 						
 				// If no node were syncronized then the mesh data is up to
 				// date and we can set the flag to convey this to the user.
-                if (nodeSyncsPerformed > 0) allNodesSynced = false;
+                if (syncOperationsPerformed > 0) allNodesSynced = false;
 			}
 
             return allNodesSynced;
