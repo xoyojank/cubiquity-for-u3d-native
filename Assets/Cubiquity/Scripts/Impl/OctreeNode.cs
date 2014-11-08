@@ -82,20 +82,14 @@ namespace Cubiquity
 				return newGameObject;
 			}
 
-            public static uint syncNode(uint availableSyncOperations, GameObject nodeGameObject, GameObject voxelTerrainGameObject)
+            public static void syncNode(ref uint availableSyncOperations, GameObject nodeGameObject, GameObject voxelTerrainGameObject)
 			{
-                uint syncOperationsPerformed = 0;
-                if (availableSyncOperations == 0)
-				{
-                    return syncOperationsPerformed;
-				}
-
                 OctreeNode octreeNode = nodeGameObject.GetComponent<OctreeNode>();
                 CuOctreeNode cuOctreeNode = CubiquityDLL.GetOctreeNode(octreeNode.nodeHandle);
 
                 if (cuOctreeNode.nodeOrChildrenLastChanged > octreeNode.nodeAndChildrenLastSynced)
                 {
-                    if (cuOctreeNode.meshLastChanged > octreeNode.meshLastSynced)
+                    if ((cuOctreeNode.meshLastChanged > octreeNode.meshLastSynced) && (availableSyncOperations > 0))
                     {
                         if (cuOctreeNode.hasMesh == 1)
                         {
@@ -161,7 +155,6 @@ namespace Cubiquity
 
                         octreeNode.meshLastSynced = CubiquityDLL.GetCurrentTime(); // Could perhaps just use the meshLastUpdated time here?
                         availableSyncOperations--;
-                        syncOperationsPerformed++;
                     }
 
                     if (cuOctreeNode.structureLastChanged > octreeNode.structureLastSynced)
@@ -252,21 +245,17 @@ namespace Cubiquity
                             {
                                 if (octreeNode.GetChild(x, y, z) != null)
                                 {
-                                    uint syncs = OctreeNode.syncNode(availableSyncOperations, octreeNode.GetChild(x, y, z), voxelTerrainGameObject);
-                                    availableSyncOperations -= syncs;
-                                    syncOperationsPerformed += syncs;
+                                    OctreeNode.syncNode(ref availableSyncOperations, octreeNode.GetChild(x, y, z), voxelTerrainGameObject);
                                 }
                             }
                         }
                     }
 
-                    /*if(syncOperationsPerformed == 0)
+                    /*if (availableSyncOperations > 0)
                     {
-                        octreeNode.meshAndChildMeshesLastSyncronised = CubiquityDLL.GetCurrentTime();
+                        octreeNode.nodeAndChildrenLastSynced = CubiquityDLL.GetCurrentTime();
                     }*/
                 }
-
-                return syncOperationsPerformed;
 			}
 
 			public GameObject GetChild(uint x, uint y, uint z)

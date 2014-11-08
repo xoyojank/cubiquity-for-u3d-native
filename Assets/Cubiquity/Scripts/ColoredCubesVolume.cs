@@ -126,11 +126,12 @@ namespace Cubiquity
                     rootOctreeNodeGameObject = OctreeNode.CreateOctreeNode(rootNodeHandle, gameObject);	
 				}
 
-                uint syncOperationsPerformed = OctreeNode.syncNode(maxSyncOperations, rootOctreeNodeGameObject, gameObject);
+                uint availableSyncOperations = maxSyncOperations;
+                OctreeNode.syncNode(ref availableSyncOperations, rootOctreeNodeGameObject, gameObject);
 						
 				// If no node were syncronized then the mesh data is up to
 				// date and we can set the flag to convey this to the user.
-                if (syncOperationsPerformed > 0) allNodesSynced = false;
+                if (availableSyncOperations == 0) allNodesSynced = false;
 			}
 
             return allNodesSynced;
