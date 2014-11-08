@@ -11,10 +11,10 @@
 		    public int posY;
 		    public int posZ;
 
-            public uint structureLastChangedRecursive;
-
+            public uint structureLastChanged;
+            public uint propertiesLastChanged;
             public uint meshLastChanged;
-            public uint meshLastChangedRecursive;
+            public uint nodeOrChildrenLastChanged;
 
 		    public uint childHandle000;
             public uint childHandle001;
@@ -27,6 +27,8 @@
 
 		    public byte hasMesh;
 		    public byte renderThisNode;
+
+            public byte height;
     #pragma warning restore 0649
         }
     }

@@ -21,6 +21,8 @@ namespace Cubiquity
             [System.NonSerialized]
             public uint meshAndChildMeshesLastSyncronised;
 			[System.NonSerialized]
+            public uint propertiesLastSyncronised;
+			[System.NonSerialized]
 			public uint lastSyncronisedWithVolumeRenderer;
 			[System.NonSerialized]
 			public uint lastSyncronisedWithVolumeCollider;
@@ -83,7 +85,7 @@ namespace Cubiquity
 
                 CuOctreeNode cuOctreeNode = CubiquityDLL.GetOctreeNode(octreeNode.nodeHandle);
 
-                if (octreeNode.nodeLastChanged < cuOctreeNode.structureLastChangedRecursive)
+                //if (octreeNode.nodeLastChanged < cuOctreeNode.structureLastChangedRecursive)
                 {
                     // If the octree structure changes then the set of meshes to render can change (e.g. different LOD levels) even
                     // though the meshes themselves haven't changed. This means we can no longer trust our recursive 'last synced' flag,
@@ -110,7 +112,7 @@ namespace Cubiquity
                         {
                             for (uint x = 0; x < 2; x++)
                             {
-                                if (childHandleArray[x, y, z] != 0xFFFFFFFF && cuOctreeNode.renderThisNode == 0)
+                                if (childHandleArray[x, y, z] != 0xFFFFFFFF)
                                 {
                                     uint childNodeHandle = childHandleArray[x, y, z];
 
@@ -150,7 +152,7 @@ namespace Cubiquity
 
                 CuOctreeNode cuOctreeNode = CubiquityDLL.GetOctreeNode(octreeNode.nodeHandle);
 
-                if (octreeNode.meshAndChildMeshesLastSyncronised < cuOctreeNode.meshLastChangedRecursive)
+                //if ((octreeNode.meshAndChildMeshesLastSyncronised < cuOctreeNode.meshLastChangedRecursive) || (octreeNode.propertiesLastSyncronised < cuOctreeNode.propertiesLastChangedRecursive))
                 {
                     //uint meshLastUpdated = CubiquityDLL.GetMeshLastUpdated(octreeNode.nodeHandle);
                     if (octreeNode.meshLastSyncronised < cuOctreeNode.meshLastChanged)
