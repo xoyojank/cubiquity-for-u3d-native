@@ -121,11 +121,8 @@ namespace Cubiquity
 				{
                     rootOctreeNodeGameObject = OctreeNode.CreateOctreeNode(rootNodeHandle, gameObject);	
 				}
-						
-				OctreeNode rootOctreeNode = rootOctreeNodeGameObject.GetComponent<OctreeNode>();
-                OctreeNode.syncNodeStructure(rootOctreeNodeGameObject, gameObject);
+				
                 int nodeSyncsPerformed = OctreeNode.syncNodeMeshes(maxSyncs, rootOctreeNodeGameObject, gameObject);
-                rootOctreeNode.syncNodeProperties(gameObject);
 						
 				// If no node were syncronized then the mesh data is up to
 				// date and we can set the flag to convey this to the user.
