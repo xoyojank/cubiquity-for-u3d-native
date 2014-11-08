@@ -136,8 +136,8 @@ namespace Cubiquity
 		 * updates rather than 'x' times per update?
 		 */
 		/// \cond
-		protected uint maxSyncOperationsInPlayMode = 2;
-        protected uint maxSyncOperationsInEditMode = 2; // Can be higher than in play mode as we have no collision mehses
+		protected uint maxSyncOperationsInPlayMode = 4;
+        protected uint maxSyncOperationsInEditMode = 16; // Can be higher than in play mode as we have no collision mehses
 		/// \endcond
 
 		// The root node of our octree. It is protected so that derived classes can use it, but users

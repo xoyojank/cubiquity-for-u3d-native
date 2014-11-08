@@ -87,7 +87,7 @@ namespace Cubiquity
 	    }
 		
 		/// \cond
-        protected override bool SynchronizeOctree(uint maxSyncOperations)
+        protected override bool SynchronizeOctree(uint availableSyncOperations)
 		{
             // FIXME - This doesn't really belong in Synchronize()
 			ColoredCubesVolumeRenderer volumeRenderer = gameObject.GetComponent<ColoredCubesVolumeRenderer>();
@@ -106,8 +106,6 @@ namespace Cubiquity
 				}
 			}
 
-            bool allNodesSynced = true;
-
 			Vector3 camPos = CameraUtils.getCurrentCameraPosition();
 
             // This is messy - perhaps the LOD thresold shold not be a parameter to update. Instead it could be passed
@@ -115,8 +113,8 @@ namespace Cubiquity
             // want a single 'renderThisNode' member of Cubiquity nodes, but instead some threshold we could compare to.
             float lodThreshold = GetComponent<VolumeRenderer>() ? GetComponent<VolumeRenderer>().lodThreshold : 0.0f;
 
-            CubiquityDLL.UpdateVolume(data.volumeHandle.Value, camPos.x, camPos.y, camPos.z, lodThreshold);
-					
+            bool cubiquityUpToDate = CubiquityDLL.UpdateVolume(data.volumeHandle.Value, camPos.x, camPos.y, camPos.z, lodThreshold);
+
 			if(CubiquityDLL.HasRootOctreeNode(data.volumeHandle.Value) == 1)
 			{                        
 				uint rootNodeHandle = CubiquityDLL.GetRootOctreeNode(data.volumeHandle.Value);
@@ -125,16 +123,13 @@ namespace Cubiquity
 				{
                     rootOctreeNodeGameObject = OctreeNode.CreateOctreeNode(rootNodeHandle, gameObject);	
 				}
-
-                uint availableSyncOperations = maxSyncOperations;
+                
                 OctreeNode.syncNode(ref availableSyncOperations, rootOctreeNodeGameObject, gameObject);
-						
-				// If no node were syncronized then the mesh data is up to
-				// date and we can set the flag to convey this to the user.
-                if (availableSyncOperations == 0) allNodesSynced = false;
 			}
 
-            return allNodesSynced;
+            // If there were still sync operations available then there was no more syncing to be done with the
+            // Cubiquity octree. So if the Cubiquity octree was also up to date then we have synced everything.
+            return cubiquityUpToDate && availableSyncOperations > 0;
 		}
 		/// \endcond
 	}
