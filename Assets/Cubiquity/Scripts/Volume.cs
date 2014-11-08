@@ -136,8 +136,8 @@ namespace Cubiquity
 		 * updates rather than 'x' times per update?
 		 */
 		/// \cond
-		protected int maxNodesPerSyncInPlayMode = 4;
-        protected int maxNodesPerSyncInEditMode = 16; // Can be higher than in play mode as we have no collision mehses
+		protected uint maxNodesPerSyncInPlayMode = 4;
+        protected uint maxNodesPerSyncInEditMode = 16; // Can be higher than in play mode as we have no collision mehses
 		/// \endcond
 
 		// The root node of our octree. It is protected so that derived classes can use it, but users
@@ -262,7 +262,7 @@ namespace Cubiquity
             rootOctreeNodeGameObject = null;
         }
 
-        protected abstract bool SynchronizeMesh(int maxSyncs);
+        protected abstract bool SynchronizeOctree(uint maxNodeSyncs);
 		
 		// Public so that we can manually drive it from the editor as required,
         // but user code should not so this so it's hidden from the docs.
@@ -311,11 +311,11 @@ namespace Cubiquity
                 // framerate The Update() method is called repeatedly and so over time the whole mesh gets syncronized. 
                 if (Application.isPlaying)
                 {
-                    isMeshSyncronized = SynchronizeMesh(maxNodesPerSyncInPlayMode);
+                    isMeshSyncronized = SynchronizeOctree(maxNodesPerSyncInPlayMode);
                 }
                 else
                 {
-                    bool allNodesSynced = SynchronizeMesh(maxNodesPerSyncInEditMode);
+                    bool allNodesSynced = SynchronizeOctree(maxNodesPerSyncInEditMode);
 
                     // Once the mesh is synced we can disconnect this event. Further changes to the volume will only happen due to
                     // the user changing something and in this case we can drive updates from the code which caused the changes.

@@ -100,7 +100,7 @@ namespace Cubiquity
 	    }
 		
 		/// \cond
-        protected override bool SynchronizeMesh(int maxSyncs)
+        protected override bool SynchronizeOctree(uint maxNodeSyncs)
 		{
             bool allNodesSynced = true;
 
@@ -121,8 +121,8 @@ namespace Cubiquity
 				{
                     rootOctreeNodeGameObject = OctreeNode.CreateOctreeNode(rootNodeHandle, gameObject);	
 				}
-				
-                int nodeSyncsPerformed = OctreeNode.syncNodeMeshes(maxSyncs, rootOctreeNodeGameObject, gameObject);
+
+                uint nodeSyncsPerformed = OctreeNode.syncNode(maxNodeSyncs, rootOctreeNodeGameObject, gameObject);
 						
 				// If no node were syncronized then the mesh data is up to
 				// date and we can set the flag to convey this to the user.
