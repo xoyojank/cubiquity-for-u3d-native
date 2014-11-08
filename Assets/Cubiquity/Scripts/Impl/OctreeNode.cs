@@ -243,7 +243,7 @@ namespace Cubiquity
                         {
                             for (uint x = 0; x < 2; x++)
                             {
-                                if (octreeNode.GetChild(x, y, z) != null)
+                                if (octreeNode.GetChild(x, y, z) != null && availableSyncOperations > 0)
                                 {
                                     OctreeNode.syncNode(ref availableSyncOperations, octreeNode.GetChild(x, y, z), voxelTerrainGameObject);
                                 }
@@ -251,10 +251,10 @@ namespace Cubiquity
                         }
                     }
 
-                    /*if (availableSyncOperations > 0)
+                    if (availableSyncOperations > 0)
                     {
                         octreeNode.nodeAndChildrenLastSynced = CubiquityDLL.GetCurrentTime();
-                    }*/
+                    }
                 }
 			}
 
