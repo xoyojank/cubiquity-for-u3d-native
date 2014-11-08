@@ -93,7 +93,7 @@ namespace Cubiquity
                 CuOctreeNode cuOctreeNode = CubiquityDLL.GetOctreeNode(octreeNode.nodeHandle);
 
                 //if ((octreeNode.meshAndChildMeshesLastSyncronised < cuOctreeNode.meshLastChangedRecursive) || (octreeNode.propertiesLastSyncronised < cuOctreeNode.propertiesLastChangedRecursive))
-                //if (cuOctreeNode.nodeOrChildrenLastChanged > octreeNode.nodeAndChildrenLastSynced)
+                if (cuOctreeNode.nodeOrChildrenLastChanged > octreeNode.nodeAndChildrenLastSynced)
                 {
                     //uint meshLastUpdated = CubiquityDLL.GetMeshLastUpdated(octreeNode.nodeHandle);
                     if (cuOctreeNode.meshLastChanged > octreeNode.meshLastSynced)
