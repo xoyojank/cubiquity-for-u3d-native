@@ -117,9 +117,21 @@ namespace Cubiquity
 
                                 meshFilter.sharedMesh = renderingMesh;
 
-                                meshRenderer.sharedMaterial = volumeRenderer.material;
-
-                                meshRenderer.material.SetFloat("_height", cuOctreeNode.height);
+                                switch(cuOctreeNode.height)
+                                {
+                                    case 0:
+                                        meshRenderer.sharedMaterial = volumeRenderer.material;
+                                        break;
+                                    case 1:
+                                        meshRenderer.sharedMaterial = volumeRenderer.materialLod1;
+                                        break;
+                                    case 2:
+                                        meshRenderer.sharedMaterial = volumeRenderer.materialLod2;
+                                        break;
+                                    default:
+                                        meshRenderer.sharedMaterial = volumeRenderer.material;
+                                        break;
+                                }
                             }
 
                             // Set up the collision mesh

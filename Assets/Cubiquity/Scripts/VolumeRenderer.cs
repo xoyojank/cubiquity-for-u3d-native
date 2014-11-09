@@ -18,7 +18,43 @@ namespace Cubiquity
 	 */
 	public abstract class VolumeRenderer : MonoBehaviour
 	{
-		public Material material;
+        /// Material for this volume.
+        public Material material
+        {
+            get
+            {
+                return mMaterial;
+            }
+            set
+            {                
+                mMaterial = value;
+                mMaterialLod1 = new Material(value);
+                mMaterialLod1.SetFloat("_height", 1.0f);
+                mMaterialLod2 = new Material(value);
+                mMaterialLod2.SetFloat("_height", 2.0f);
+                lastModified = Clock.timestamp;
+            }
+        }
+        [SerializeField]
+		private Material mMaterial;
+
+        public Material materialLod1
+        {
+            get
+            {
+                return mMaterialLod1;
+            }
+        }
+        private Material mMaterialLod1;
+
+        public Material materialLod2
+        {
+            get
+            {
+                return mMaterialLod2;
+            }
+        }
+        private Material mMaterialLod2;
 		
 		/// Controls whether this volume casts shadows.
 		public bool castShadows
