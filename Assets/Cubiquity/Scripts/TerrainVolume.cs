@@ -121,6 +121,8 @@ namespace Cubiquity
 				}
 
                 OctreeNode.syncNode(ref availableSyncOperations, rootOctreeNodeGameObject, gameObject);
+
+                OctreeNode.syncNodeProperties(rootOctreeNodeGameObject, gameObject);
 			}
 
             // If there were still sync operations available then there was no more syncing to be done with the

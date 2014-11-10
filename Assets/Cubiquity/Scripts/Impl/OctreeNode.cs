@@ -22,6 +22,8 @@ namespace Cubiquity
             public uint meshLastSynced;
             [System.NonSerialized]
             public uint nodeAndChildrenLastSynced;
+            [System.NonSerialized]
+            public bool renderThisNode;
 			[System.NonSerialized]
 			public uint lastSyncronisedWithVolumeRenderer;
 			[System.NonSerialized]
@@ -87,8 +89,27 @@ namespace Cubiquity
                 OctreeNode octreeNode = nodeGameObject.GetComponent<OctreeNode>();
                 CuOctreeNode cuOctreeNode = CubiquityDLL.GetOctreeNode(octreeNode.nodeHandle);
 
+                ////////////////////////////////////////////////////////////////////////////////
+                // Has anything in this node or its children changed? If so, we may need to syncronise the node's properties, mesh and
+                // structure. Each of these can be teste against a timestamp. We may also need to do this recursively on child nodes.
+                ////////////////////////////////////////////////////////////////////////////////
                 if (cuOctreeNode.nodeOrChildrenLastChanged > octreeNode.nodeAndChildrenLastSynced)
                 {
+                    bool resyncedProperties = false; // See comments where this is tested - it's a bit of a hack
+
+                    ////////////////////////////////////////////////////////////////////////////////
+                    // 1st test - Have the properties of the node changed?
+                    ////////////////////////////////////////////////////////////////////////////////
+                    if (cuOctreeNode.propertiesLastChanged > octreeNode.propertiesLastSynced)
+                    {
+                        octreeNode.renderThisNode = cuOctreeNode.renderThisNode != 0;
+                        octreeNode.propertiesLastSynced = CubiquityDLL.GetCurrentTime();
+                        resyncedProperties = true;
+                    }
+
+                    ////////////////////////////////////////////////////////////////////////////////
+                    // 2nd test - Has the mesh changed and do we have time to syncronise it?
+                    ////////////////////////////////////////////////////////////////////////////////
                     if ((cuOctreeNode.meshLastChanged > octreeNode.meshLastSynced) && (availableSyncOperations > 0))
                     {
                         if (cuOctreeNode.hasMesh == 1)
@@ -132,6 +153,8 @@ namespace Cubiquity
                                         meshRenderer.sharedMaterial = volumeRenderer.material;
                                         break;
                                 }
+
+                                meshRenderer.enabled = volumeRenderer.enabled && octreeNode.renderThisNode;
                             }
 
                             // Set up the collision mesh
@@ -165,10 +188,27 @@ namespace Cubiquity
                             }
                         }
 
-                        octreeNode.meshLastSynced = CubiquityDLL.GetCurrentTime(); // Could perhaps just use the meshLastUpdated time here?
+                        octreeNode.meshLastSynced = CubiquityDLL.GetCurrentTime();
                         availableSyncOperations--;
                     }
 
+                    // We want to syncronize the properties before the mesh, so that the enabled flag can be set correctly when the mesh
+                    // is created. But we also want to syncronize properties after the mesh, so we can apply the correct enabled flag to
+                    // existing meshes when the node's 'renderThisNode' flag has changed. Therefore we set the 'resyncedProperties' flag
+                    // previously to let ourseves know that we should come back an finish the propertiy syncing here. It's a bit of a hack.
+                    if (resyncedProperties)
+                    {
+                        VolumeRenderer volumeRenderer = voxelTerrainGameObject.GetComponent<VolumeRenderer>();
+                        MeshRenderer meshRenderer = nodeGameObject.GetComponent<MeshRenderer>();
+                        if (volumeRenderer != null && meshRenderer != null)
+                        {
+                            meshRenderer.enabled = volumeRenderer.enabled && octreeNode.renderThisNode;
+                        }
+                    }
+
+                    ////////////////////////////////////////////////////////////////////////////////
+                    // 3rd test - Has the structure of the octree node changed (gained or lost children)?
+                    ////////////////////////////////////////////////////////////////////////////////
                     if (cuOctreeNode.structureLastChanged > octreeNode.structureLastSynced)
                     {
                         uint[, ,] childHandleArray = new uint[2, 2, 2];
@@ -212,43 +252,9 @@ namespace Cubiquity
                         octreeNode.structureLastSynced = CubiquityDLL.GetCurrentTime();
                     }
 
-                    if (cuOctreeNode.propertiesLastChanged > octreeNode.propertiesLastSynced)
-                    {
-                        VolumeRenderer vr = voxelTerrainGameObject.GetComponent<VolumeRenderer>();
-                        MeshRenderer mr = nodeGameObject.GetComponent<MeshRenderer>();
-                        if (vr != null && mr != null)
-                        {
-                            mr.enabled = vr.enabled && (cuOctreeNode.renderThisNode != 0);
-
-                            if (octreeNode.lastSyncronisedWithVolumeRenderer < vr.lastModified)
-                            {
-                                mr.receiveShadows = vr.receiveShadows;
-                                mr.castShadows = vr.castShadows;
-#if UNITY_EDITOR
-                                EditorUtility.SetSelectedWireframeHidden(mr, !vr.showWireframe);
-#endif
-                                octreeNode.lastSyncronisedWithVolumeRenderer = Clock.timestamp;
-                            }
-                        }
-
-                        VolumeCollider vc = voxelTerrainGameObject.GetComponent<VolumeCollider>();
-                        MeshCollider mc = nodeGameObject.GetComponent<MeshCollider>();
-                        if (vc != null && mc != null)
-                        {
-                            if (mc.enabled != vc.enabled) // Not sure we really need this check?
-                            {
-                                mc.enabled = vc.enabled;
-                            }
-
-                            if (octreeNode.lastSyncronisedWithVolumeCollider < vc.lastModified)
-                            {
-                                // Actual syncronization to be filled in in the future when we have something to syncronize.
-                                octreeNode.lastSyncronisedWithVolumeCollider = Clock.timestamp;
-                            }
-                        }
-                    }
-
-                    //Now syncronise any children
+                    ////////////////////////////////////////////////////////////////////////////////
+                    // The last step of syncronization is to apply it recursively to our children.
+                    ////////////////////////////////////////////////////////////////////////////////
                     for (uint z = 0; z < 2; z++)
                     {
                         for (uint y = 0; y < 2; y++)
@@ -269,6 +275,51 @@ namespace Cubiquity
                     }
                 }
 			}
+
+            public static void syncNodeProperties(GameObject nodeGameObject, GameObject voxelTerrainGameObject)
+            {
+                OctreeNode octreeNode = nodeGameObject.GetComponent<OctreeNode>();
+
+                VolumeRenderer vr = voxelTerrainGameObject.GetComponent<VolumeRenderer>();
+                MeshRenderer mr = nodeGameObject.GetComponent<MeshRenderer>();
+                if (vr != null && mr != null)
+                {
+                    mr.enabled = vr.enabled && octreeNode.renderThisNode;
+
+                    mr.receiveShadows = vr.receiveShadows;
+                    mr.castShadows = vr.castShadows;
+#if UNITY_EDITOR
+                    EditorUtility.SetSelectedWireframeHidden(mr, !vr.showWireframe);
+#endif
+                }
+
+                VolumeCollider vc = voxelTerrainGameObject.GetComponent<VolumeCollider>();
+                MeshCollider mc = nodeGameObject.GetComponent<MeshCollider>();
+                if (vc != null && mc != null)
+                {
+                    mc.enabled = vc.enabled;
+                }
+
+                foreach (Transform child in nodeGameObject.transform)
+                {
+                    OctreeNode.syncNodeProperties(child.gameObject, voxelTerrainGameObject);
+                }
+
+                //Now syncronise any children
+                /*for (uint z = 0; z < 2; z++)
+                {
+                    for (uint y = 0; y < 2; y++)
+                    {
+                        for (uint x = 0; x < 2; x++)
+                        {
+                            if (nodeGameObject.GetChild(x, y, z) != null)
+                            {
+                                OctreeNode.syncNodeProperties(nodeGameObject.GetChild(x, y, z), voxelTerrainGameObject);
+                            }
+                        }
+                    }
+                }*/
+            }
 
 			public GameObject GetChild(uint x, uint y, uint z)
 			{
