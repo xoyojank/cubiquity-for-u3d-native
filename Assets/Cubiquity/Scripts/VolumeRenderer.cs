@@ -18,6 +18,16 @@ namespace Cubiquity
 	 */
 	public abstract class VolumeRenderer : MonoBehaviour
 	{
+        void OnEnable()
+        {
+            hasChanged = true;
+        }
+
+        void OnDisable()
+        {
+            hasChanged = true;
+        }
+
         /// Material for this volume.
         public Material material
         {
@@ -32,7 +42,7 @@ namespace Cubiquity
                 mMaterialLod1.SetFloat("_height", 1.0f);
                 mMaterialLod2 = new Material(value);
                 mMaterialLod2.SetFloat("_height", 2.0f);
-                lastModified = Clock.timestamp;
+                hasChanged = true;
             }
         }
         [SerializeField]
@@ -68,7 +78,7 @@ namespace Cubiquity
 				if(mCastShadows != value)
 				{
 					mCastShadows = value;
-					lastModified = Clock.timestamp;
+                    hasChanged = true;
 				}
 			}
 		}
@@ -87,7 +97,7 @@ namespace Cubiquity
 				if(mReceiveShadows != value)
 				{
 					mReceiveShadows = value;
-					lastModified = Clock.timestamp;
+                    hasChanged = true;
 				}
 			}
 		}
@@ -106,14 +116,14 @@ namespace Cubiquity
 				if(mShowWireframe != value)
 				{
 					mShowWireframe = value;
-					lastModified = Clock.timestamp;
+                    hasChanged = true;
 				}
 			}
 		}
 		[SerializeField]
 		private bool mShowWireframe = false;
 
-        /// Controls whether the wireframe overlay is displayed when this volume is selected in the editor.
+        /// Controls the point at which Cubiquity switches to a differnt level of detail.
         public float lodThreshold
         {
             get
@@ -123,13 +133,14 @@ namespace Cubiquity
             set
             {
                 mLodThreshold = value;
+                hasChanged = true;
             }
         }
         [SerializeField]
         private float mLodThreshold = 1.0f;
 		
 		/// \cond
-		public uint lastModified = Clock.timestamp;
+        public bool hasChanged = true;
 		/// \endcond
 		
 		// Dummy start method rqured for the 'enabled' checkbox to show up in the inspector.

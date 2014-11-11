@@ -126,7 +126,18 @@ namespace Cubiquity
                 
                 OctreeNode.syncNode(ref availableSyncOperations, rootOctreeNodeGameObject, gameObject);
 
-                OctreeNode.syncNodeProperties(rootOctreeNodeGameObject, gameObject);
+                if (volumeRenderer != null && volumeRenderer.hasChanged)
+                {
+                    OctreeNode.syncNodeWithVolumeRenderer(rootOctreeNodeGameObject, volumeRenderer, true);
+                    volumeRenderer.hasChanged = false;
+                }
+
+                VolumeCollider volumeCollider = gameObject.GetComponent<VolumeCollider>();
+                if (volumeCollider != null && volumeCollider.hasChanged)
+                {
+                    OctreeNode.syncNodeWithVolumeCollider(rootOctreeNodeGameObject, volumeCollider, true);
+                    volumeCollider.hasChanged = false;
+                }
 			}
 
             // If there were still sync operations available then there was no more syncing to be done with the

@@ -25,10 +25,6 @@ namespace Cubiquity
             [System.NonSerialized]
             public bool renderThisNode;
 			[System.NonSerialized]
-			public uint lastSyncronisedWithVolumeRenderer;
-			[System.NonSerialized]
-			public uint lastSyncronisedWithVolumeCollider;
-			[System.NonSerialized]
 			public Vector3 lowerCorner;
 			[System.NonSerialized]
 			public GameObject[,,] children;
@@ -199,10 +195,15 @@ namespace Cubiquity
                     if (resyncedProperties)
                     {
                         VolumeRenderer volumeRenderer = voxelTerrainGameObject.GetComponent<VolumeRenderer>();
-                        MeshRenderer meshRenderer = nodeGameObject.GetComponent<MeshRenderer>();
-                        if (volumeRenderer != null && meshRenderer != null)
+                        if(volumeRenderer != null)
                         {
-                            meshRenderer.enabled = volumeRenderer.enabled && octreeNode.renderThisNode;
+                            syncNodeWithVolumeRenderer(nodeGameObject, volumeRenderer, false);
+                        }
+
+                        VolumeCollider volumeCollider = voxelTerrainGameObject.GetComponent<VolumeCollider>();
+                        if (volumeCollider != null)
+                        {
+                            syncNodeWithVolumeCollider(nodeGameObject, volumeCollider, false);
                         }
                     }
 
@@ -269,6 +270,8 @@ namespace Cubiquity
                         }
                     }
 
+                    // We've reached the end of our syncronization process. If there are still sync operations available then
+                    // we did less work then we could have, which implies we finished. Therefore mark the whole tree as synced.
                     if (availableSyncOperations > 0)
                     {
                         octreeNode.nodeAndChildrenLastSynced = CubiquityDLL.GetCurrentTime();
@@ -276,49 +279,46 @@ namespace Cubiquity
                 }
 			}
 
-            public static void syncNodeProperties(GameObject nodeGameObject, GameObject voxelTerrainGameObject)
+            public static void syncNodeWithVolumeRenderer(GameObject nodeGameObject, VolumeRenderer volumeRenderer, bool processChildren)
             {
                 OctreeNode octreeNode = nodeGameObject.GetComponent<OctreeNode>();
 
-                VolumeRenderer vr = voxelTerrainGameObject.GetComponent<VolumeRenderer>();
-                MeshRenderer mr = nodeGameObject.GetComponent<MeshRenderer>();
-                if (vr != null && mr != null)
+                MeshRenderer meshRenderer = nodeGameObject.GetComponent<MeshRenderer>();
+                if (meshRenderer != null)
                 {
-                    mr.enabled = vr.enabled && octreeNode.renderThisNode;
+                    meshRenderer.enabled = volumeRenderer.enabled && octreeNode.renderThisNode;
 
-                    mr.receiveShadows = vr.receiveShadows;
-                    mr.castShadows = vr.castShadows;
+                    meshRenderer.receiveShadows = volumeRenderer.receiveShadows;
+                    meshRenderer.castShadows = volumeRenderer.castShadows;
 #if UNITY_EDITOR
-                    EditorUtility.SetSelectedWireframeHidden(mr, !vr.showWireframe);
+                    EditorUtility.SetSelectedWireframeHidden(meshRenderer, !volumeRenderer.showWireframe);
 #endif
                 }
 
-                VolumeCollider vc = voxelTerrainGameObject.GetComponent<VolumeCollider>();
-                MeshCollider mc = nodeGameObject.GetComponent<MeshCollider>();
-                if (vc != null && mc != null)
+                if (processChildren)
                 {
-                    mc.enabled = vc.enabled;
-                }
-
-                foreach (Transform child in nodeGameObject.transform)
-                {
-                    OctreeNode.syncNodeProperties(child.gameObject, voxelTerrainGameObject);
-                }
-
-                //Now syncronise any children
-                /*for (uint z = 0; z < 2; z++)
-                {
-                    for (uint y = 0; y < 2; y++)
+                    foreach (Transform child in nodeGameObject.transform)
                     {
-                        for (uint x = 0; x < 2; x++)
-                        {
-                            if (nodeGameObject.GetChild(x, y, z) != null)
-                            {
-                                OctreeNode.syncNodeProperties(nodeGameObject.GetChild(x, y, z), voxelTerrainGameObject);
-                            }
-                        }
+                        OctreeNode.syncNodeWithVolumeRenderer(child.gameObject, volumeRenderer, processChildren);
                     }
-                }*/
+                }
+            }
+
+            public static void syncNodeWithVolumeCollider(GameObject nodeGameObject, VolumeCollider volumeCollider, bool processChildren)
+            {
+                MeshCollider meshCollider = nodeGameObject.GetComponent<MeshCollider>();
+                if (meshCollider != null)
+                {
+                    meshCollider.enabled = volumeCollider.enabled;
+                }
+
+                if (processChildren)
+                {
+                    foreach (Transform child in nodeGameObject.transform)
+                    {
+                        OctreeNode.syncNodeWithVolumeCollider(child.gameObject, volumeCollider, processChildren);
+                    }
+                }
             }
 
 			public GameObject GetChild(uint x, uint y, uint z)
