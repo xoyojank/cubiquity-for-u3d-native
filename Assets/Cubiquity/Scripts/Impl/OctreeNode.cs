@@ -31,9 +31,6 @@ namespace Cubiquity
 
             [System.NonSerialized]
             public uint height;
-			
-			[System.NonSerialized]
-			public uint nodeHandle;
 
 			public static GameObject CreateOctreeNode(uint nodeHandle, GameObject parentGameObject)
 			{
@@ -60,7 +57,6 @@ namespace Cubiquity
                 // Attach an OctreeNode component
                 OctreeNode octreeNode = newGameObject.AddComponent<OctreeNode>();
                 octreeNode.lowerCorner = new Vector3(xPos, yPos, zPos);
-                octreeNode.nodeHandle = nodeHandle;
 					
                 // Does the parent game object have an octree node attached?
 				OctreeNode parentOctreeNode = parentGameObject.GetComponent<OctreeNode>();					
@@ -80,10 +76,10 @@ namespace Cubiquity
 				return newGameObject;
 			}
 
-            public static void syncNode(ref uint availableSyncOperations, GameObject nodeGameObject, GameObject voxelTerrainGameObject)
+            public static void syncNode(ref uint availableSyncOperations, GameObject nodeGameObject, uint nodeHandle, GameObject voxelTerrainGameObject)
 			{
                 OctreeNode octreeNode = nodeGameObject.GetComponent<OctreeNode>();
-                CuOctreeNode cuOctreeNode = CubiquityDLL.GetOctreeNode(octreeNode.nodeHandle);
+                CuOctreeNode cuOctreeNode = CubiquityDLL.GetOctreeNode(nodeHandle);
 
                 ////////////////////////////////////////////////////////////////////////////////
                 // Has anything in this node or its children changed? If so, we may need to syncronise the node's properties, mesh and
@@ -117,11 +113,11 @@ namespace Cubiquity
                                 Mesh renderingMesh = null;
                                 if (voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(TerrainVolume))
                                 {
-                                    renderingMesh = MeshConversion.BuildMeshFromNodeHandleForTerrainVolume(octreeNode.nodeHandle, false);
+                                    renderingMesh = MeshConversion.BuildMeshFromNodeHandleForTerrainVolume(nodeHandle, false);
                                 }
                                 else if (voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(ColoredCubesVolume))
                                 {
-                                    renderingMesh = MeshConversion.BuildMeshFromNodeHandleForColoredCubesVolume(octreeNode.nodeHandle, false);
+                                    renderingMesh = MeshConversion.BuildMeshFromNodeHandleForColoredCubesVolume(nodeHandle, false);
                                 }
 
                                 MeshFilter meshFilter = nodeGameObject.GetOrAddComponent<MeshFilter>() as MeshFilter;
@@ -157,7 +153,7 @@ namespace Cubiquity
                             VolumeCollider volumeCollider = voxelTerrainGameObject.GetComponent<VolumeCollider>();
                             if ((volumeCollider != null) && (Application.isPlaying))
                             {
-                                Mesh collisionMesh = volumeCollider.BuildMeshFromNodeHandle(octreeNode.nodeHandle);
+                                Mesh collisionMesh = volumeCollider.BuildMeshFromNodeHandle(nodeHandle);
                                 MeshCollider meshCollider = nodeGameObject.GetOrAddComponent<MeshCollider>() as MeshCollider;
                                 meshCollider.sharedMesh = collisionMesh;
                             }
@@ -207,21 +203,21 @@ namespace Cubiquity
                         }
                     }
 
+                    uint[, ,] childHandleArray = new uint[2, 2, 2];
+                    childHandleArray[0, 0, 0] = cuOctreeNode.childHandle000;
+                    childHandleArray[0, 0, 1] = cuOctreeNode.childHandle001;
+                    childHandleArray[0, 1, 0] = cuOctreeNode.childHandle010;
+                    childHandleArray[0, 1, 1] = cuOctreeNode.childHandle011;
+                    childHandleArray[1, 0, 0] = cuOctreeNode.childHandle100;
+                    childHandleArray[1, 0, 1] = cuOctreeNode.childHandle101;
+                    childHandleArray[1, 1, 0] = cuOctreeNode.childHandle110;
+                    childHandleArray[1, 1, 1] = cuOctreeNode.childHandle111;
+
                     ////////////////////////////////////////////////////////////////////////////////
                     // 3rd test - Has the structure of the octree node changed (gained or lost children)?
                     ////////////////////////////////////////////////////////////////////////////////
                     if (cuOctreeNode.structureLastChanged > octreeNode.structureLastSynced)
                     {
-                        uint[, ,] childHandleArray = new uint[2, 2, 2];
-                        childHandleArray[0, 0, 0] = cuOctreeNode.childHandle000;
-                        childHandleArray[0, 0, 1] = cuOctreeNode.childHandle001;
-                        childHandleArray[0, 1, 0] = cuOctreeNode.childHandle010;
-                        childHandleArray[0, 1, 1] = cuOctreeNode.childHandle011;
-                        childHandleArray[1, 0, 0] = cuOctreeNode.childHandle100;
-                        childHandleArray[1, 0, 1] = cuOctreeNode.childHandle101;
-                        childHandleArray[1, 1, 0] = cuOctreeNode.childHandle110;
-                        childHandleArray[1, 1, 1] = cuOctreeNode.childHandle111;
-
                         //Now syncronise any children
                         for (uint z = 0; z < 2; z++)
                         {
@@ -264,7 +260,7 @@ namespace Cubiquity
                             {
                                 if (octreeNode.GetChild(x, y, z) != null && availableSyncOperations > 0)
                                 {
-                                    OctreeNode.syncNode(ref availableSyncOperations, octreeNode.GetChild(x, y, z), voxelTerrainGameObject);
+                                    OctreeNode.syncNode(ref availableSyncOperations, octreeNode.GetChild(x, y, z), childHandleArray[x, y, z], voxelTerrainGameObject);
                                 }
                             }
                         }
@@ -311,7 +307,7 @@ namespace Cubiquity
                 {
                     meshCollider.enabled = volumeCollider.enabled;
                 }
-
+                
                 if (processChildren)
                 {
                     foreach (Transform child in nodeGameObject.transform)

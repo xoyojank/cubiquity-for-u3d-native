@@ -124,7 +124,7 @@ namespace Cubiquity
                     rootOctreeNodeGameObject = OctreeNode.CreateOctreeNode(rootNodeHandle, gameObject);	
 				}
                 
-                OctreeNode.syncNode(ref availableSyncOperations, rootOctreeNodeGameObject, gameObject);
+                OctreeNode.syncNode(ref availableSyncOperations, rootOctreeNodeGameObject, rootNodeHandle, gameObject);
 
                 if (volumeRenderer != null && volumeRenderer.hasChanged)
                 {
