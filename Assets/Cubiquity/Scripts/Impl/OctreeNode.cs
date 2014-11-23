@@ -83,7 +83,7 @@ namespace Cubiquity
 
                 ////////////////////////////////////////////////////////////////////////////////
                 // Has anything in this node or its children changed? If so, we may need to syncronise the node's properties, mesh and
-                // structure. Each of these can be teste against a timestamp. We may also need to do this recursively on child nodes.
+                // structure. Each of these can be tested against a timestamp. We may also need to do this recursively on child nodes.
                 ////////////////////////////////////////////////////////////////////////////////
                 if (cuOctreeNode.nodeOrChildrenLastChanged > octreeNode.nodeAndChildrenLastSynced)
                 {
@@ -128,25 +128,12 @@ namespace Cubiquity
                                     DestroyImmediate(meshFilter.sharedMesh);
                                 }
 
-                                meshFilter.sharedMesh = renderingMesh;
-
-                                switch(cuOctreeNode.height)
-                                {
-                                    case 0:
-                                        meshRenderer.sharedMaterial = volumeRenderer.material;
-                                        break;
-                                    case 1:
-                                        meshRenderer.sharedMaterial = volumeRenderer.materialLod1;
-                                        break;
-                                    case 2:
-                                        meshRenderer.sharedMaterial = volumeRenderer.materialLod2;
-                                        break;
-                                    default:
-                                        meshRenderer.sharedMaterial = volumeRenderer.material;
-                                        break;
-                                }
+                                meshFilter.sharedMesh = renderingMesh;                                
 
                                 meshRenderer.enabled = volumeRenderer.enabled && octreeNode.renderThisNode;
+
+                                // For syncing materials, shadow properties, etc.
+                                syncNodeWithVolumeRenderer(nodeGameObject, volumeRenderer, false);
                             }
 
                             // Set up the collision mesh
@@ -158,7 +145,7 @@ namespace Cubiquity
                                 meshCollider.sharedMesh = collisionMesh;
                             }
                         }
-                        // If there is no mesh in Cubiquity then we make sure there isn't on in Unity.
+                        // If there is no mesh in Cubiquity then we make sure there isn't one in Unity.
                         else
                         {
                             MeshCollider meshCollider = nodeGameObject.GetComponent<MeshCollider>() as MeshCollider;
@@ -286,6 +273,22 @@ namespace Cubiquity
 
                     meshRenderer.receiveShadows = volumeRenderer.receiveShadows;
                     meshRenderer.castShadows = volumeRenderer.castShadows;
+
+                    switch (octreeNode.height)
+                    {
+                        case 0:
+                            meshRenderer.sharedMaterial = volumeRenderer.material;
+                            break;
+                        case 1:
+                            meshRenderer.sharedMaterial = volumeRenderer.materialLod1;
+                            break;
+                        case 2:
+                            meshRenderer.sharedMaterial = volumeRenderer.materialLod2;
+                            break;
+                        default:
+                            meshRenderer.sharedMaterial = volumeRenderer.material;
+                            break;
+                    }
 #if UNITY_EDITOR
                     EditorUtility.SetSelectedWireframeHidden(meshRenderer, !volumeRenderer.showWireframe);
 #endif
