@@ -35,6 +35,13 @@ namespace Cubiquity.Impl
                 DestroyImmediateWithChildren(childObject);
             }
 
+            MeshFilter meshFilter = gameObject.GetComponent<MeshFilter>() as MeshFilter;
+            if (meshFilter)
+            {
+                Object.DestroyImmediate(meshFilter.sharedMesh);
+                Object.DestroyImmediate(meshFilter);
+            }
+
             // Destroy all components. Not sure if this is useful, or if it happens anyway?
             Component[] components = gameObject.GetComponents<Component>();
             foreach(Component component in components)

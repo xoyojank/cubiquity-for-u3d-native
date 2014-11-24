@@ -151,6 +151,7 @@ namespace Cubiquity
                             MeshCollider meshCollider = nodeGameObject.GetComponent<MeshCollider>() as MeshCollider;
                             if (meshCollider)
                             {
+                                DestroyImmediate(meshCollider.sharedMesh);
                                 DestroyImmediate(meshCollider);
                             }
 
@@ -163,6 +164,7 @@ namespace Cubiquity
                             MeshFilter meshFilter = nodeGameObject.GetComponent<MeshFilter>() as MeshFilter;
                             if (meshFilter)
                             {
+                                DestroyImmediate(meshFilter.sharedMesh);
                                 DestroyImmediate(meshFilter);
                             }
                         }
@@ -226,6 +228,7 @@ namespace Cubiquity
                                         if (octreeNode.GetChild(x, y, z))
                                         {
                                             Utility.DestroyImmediateWithChildren(octreeNode.GetChild(x, y, z));
+                                            System.GC.Collect();
                                             octreeNode.SetChild(x, y, z, null);
                                         }
                                     }

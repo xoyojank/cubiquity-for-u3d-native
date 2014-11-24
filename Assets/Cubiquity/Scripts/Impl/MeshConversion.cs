@@ -39,7 +39,7 @@ namespace Cubiquity
 
                 // Create the mesh
                 Mesh mesh = new Mesh();
-                mesh.hideFlags = HideFlags.DontSave;
+                //mesh.hideFlags = HideFlags.DontSave;
 
                 // Required for the CubicVertex decoding process.
                 Vector3 offset = new Vector3(0.5f, 0.5f, 0.5f);
@@ -104,7 +104,7 @@ namespace Cubiquity
 
                 // Create the mesh
                 Mesh mesh = new Mesh();
-                mesh.hideFlags = HideFlags.DontSave;
+                //mesh.hideFlags = HideFlags.DontSave;
 
                 // Create the arrays which we'll copy the data to.
                 Vector3[] positions = new Vector3[noOfVertices];
