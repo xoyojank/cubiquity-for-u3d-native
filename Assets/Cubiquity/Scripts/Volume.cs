@@ -47,7 +47,7 @@ namespace Cubiquity
 					RegisterVolumeData();
 
                     // Delete the octree, so that next time Update() is called a new octree is constructed to match the new volume data.
-                    Impl.Utility.DestroyImmediateWithChildren(rootOctreeNodeGameObject);
+                    Impl.Utility.DestroyOrDestroyImmediate(rootOctreeNodeGameObject);
                     rootOctreeNodeGameObject = null;
 
                     // When in the editor we need to restart the updates so that the
@@ -159,7 +159,7 @@ namespace Cubiquity
         // ------------------------------------------------------------------------------
         // These editor-only functions are used to emulate repeated calls to Update() in edit mode. Setting the '[ExecuteInEditMode]' attribute does cause
         // Update() to be called automatically in edit mode, but it only happens in response to user-driven events such as moving the mouse in the editor
-        // window. We want to support background loading of our terrain and so we hook into the 'EditorApplication.update' even for this purpose.
+        // window. We want to support background loading of our terrain and so we hook into the 'EditorApplication.update' event for this purpose.
         // ------------------------------------------------------------------------------
 #if UNITY_EDITOR
         private bool mEditModeUpdateRunning = false;
@@ -256,7 +256,7 @@ namespace Cubiquity
             // Destroy all children
             foreach (GameObject childObject in childObjects)
             {
-                Impl.Utility.DestroyImmediateWithChildren(childObject);
+                Impl.Utility.DestroyOrDestroyImmediate(childObject);
             }
 
             rootOctreeNodeGameObject = null;
