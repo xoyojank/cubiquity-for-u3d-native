@@ -95,6 +95,7 @@ namespace Cubiquity
                     if (cuOctreeNode.propertiesLastChanged > octreeNode.propertiesLastSynced)
                     {
                         octreeNode.renderThisNode = cuOctreeNode.renderThisNode != 0;
+                        octreeNode.height = cuOctreeNode.height;
                         octreeNode.propertiesLastSynced = CubiquityDLL.GetCurrentTime();
                         resyncedProperties = true;
                     }
