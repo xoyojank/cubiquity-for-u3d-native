@@ -16,6 +16,7 @@ namespace Cubiquity
 	 * 
 	 * \sa VolumeCollider
 	 */
+    [ExecuteInEditMode]
 	public abstract class VolumeRenderer : MonoBehaviour
 	{
         void OnEnable()
@@ -28,6 +29,13 @@ namespace Cubiquity
             hasChanged = true;
         }
 
+        /*void OnDestroy()
+        {
+            Utility.DestroyOrDestroyImmediate(mMaterial);
+            Utility.DestroyOrDestroyImmediate(mMaterialLod1);
+            Utility.DestroyOrDestroyImmediate(mMaterialLod2);
+        }*/
+
         /// Material for this volume.
         public Material material
         {
@@ -36,13 +44,18 @@ namespace Cubiquity
                 return mMaterial;
             }
             set
-            {                
-                mMaterial = value;
-                mMaterialLod1 = new Material(value);
-                mMaterialLod1.SetFloat("_height", 1.0f);
-                mMaterialLod2 = new Material(value);
-                mMaterialLod2.SetFloat("_height", 2.0f);
-                hasChanged = true;
+            {
+                if (mMaterial != value)
+                {
+                    mMaterial = value;
+                    mMaterialLod1 = null;
+                    mMaterialLod2 = null;
+                    /*mMaterialLod1 = new Material(value);
+                    mMaterialLod1.SetFloat("_height", 1.0f);
+                    mMaterialLod2 = new Material(value);
+                    mMaterialLod2.SetFloat("_height", 2.0f);*/
+                    hasChanged = true;
+                }
             }
         }
         [SerializeField]
@@ -52,6 +65,11 @@ namespace Cubiquity
         {
             get
             {
+                if (mMaterialLod1 == null)
+                {
+                    mMaterialLod1 = new Material(mMaterial);
+                    mMaterialLod1.SetFloat("_height", 1.0f);
+                }
                 return mMaterialLod1;
             }
         }
@@ -61,6 +79,11 @@ namespace Cubiquity
         {
             get
             {
+                if (mMaterialLod2 == null)
+                {
+                    mMaterialLod2 = new Material(mMaterial);
+                    mMaterialLod2.SetFloat("_height", 2.0f);
+                }
                 return mMaterialLod2;
             }
         }
@@ -132,14 +155,22 @@ namespace Cubiquity
             }
             set
             {
-                mLodThreshold = value;
-                hasChanged = true;
+                float difference = Mathf.Abs(mLodThreshold - value);
+                if(difference > 0.000001)
+                {
+                    hasChanged = true;
+                }
+
+                // We set this even if the movement is tiny, otherwise
+                // I'm concerned the slider in the editor could get stuck.
+                mLodThreshold = value;                
             }
         }
         [SerializeField]
         private float mLodThreshold = 1.0f;
 		
 		/// \cond
+        [System.NonSerialized]
         public bool hasChanged = true;
 		/// \endcond
 		

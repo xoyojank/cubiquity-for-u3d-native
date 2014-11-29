@@ -265,9 +265,9 @@ namespace Cubiquity
         protected abstract bool SynchronizeOctree(uint maxSyncOperations);
 		
 		// Public so that we can manually drive it from the editor as required,
-        // but user code should not so this so it's hidden from the docs.
+        // but user code should not do this so it's hidden from the docs.
 		/// \cond
-		private void Update()
+		public void Update()
 		{
             if (flushRequested)
             {
