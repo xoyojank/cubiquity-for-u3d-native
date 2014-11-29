@@ -16,8 +16,25 @@ namespace Cubiquity.Impl
 			return randomIntGenerator.Next().ToString("X8") + ".vdb";
 		}
 
+        // Unity requires us to use the 'Destroy' function in play mode but 'DestroyImmediate' in edit mode. Thhi function
+        // wraps these and calls the appropriate one depending on the current mode. The documentation also clearly states
+        // that Destroy() 'will destroy the GameObject, all its components and all transform children of the GameObject',
+        // but does not say whether this is also true for 'DestroyImmediate'. We assume it does until we find otherwise...
+        public static void DestroyOrDestroyImmediate(Object objectToDestroy)
+        {
+            if (Application.isPlaying)
+            {
+                Object.Destroy(objectToDestroy);
+            }
+            else
+            {
+                Object.DestroyImmediate(objectToDestroy);
+            }
+        }
+
         public static void DestroyImmediateWithChildren(GameObject gameObject)
         {
+            Debug.LogWarning("This function will be removed!");
             // Nothing to do is the object is null
             if (gameObject == null)
                 return;
