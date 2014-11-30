@@ -12,9 +12,5 @@ namespace Cubiquity
 	 */
 	public class ColoredCubesVolumeCollider : VolumeCollider
 	{
-        public override Mesh BuildMeshFromNodeHandle(uint nodeHandle)
-        {
-            return MeshConversion.BuildMeshFromNodeHandleForColoredCubesVolume(nodeHandle, true);
-        }
 	}
 }

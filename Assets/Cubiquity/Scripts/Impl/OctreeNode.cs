@@ -12,7 +12,6 @@ namespace Cubiquity
 {
 	namespace Impl
 	{
-        [ExecuteInEditMode]
 		public class OctreeNode : MonoBehaviour
 		{
             [System.NonSerialized]
@@ -32,9 +31,6 @@ namespace Cubiquity
 
             [System.NonSerialized]
             public uint height;
-
-            private Mesh collisionMesh;
-            private Mesh renderingMesh;
 
 			public static GameObject CreateOctreeNode(uint nodeHandle, GameObject parentGameObject)
 			{
@@ -80,32 +76,6 @@ namespace Cubiquity
 				return newGameObject;
 			}
 
-            void OnDestroy()
-            {
-                //Debug.Log("Destroying mesh");
-
-                Utility.DestroyOrDestroyImmediate(collisionMesh);
-                Utility.DestroyOrDestroyImmediate(renderingMesh);
-
-                /*MeshCollider meshCollider = GetComponent<MeshCollider>() as MeshCollider;
-                if (meshCollider)
-                {
-                    DestroyImmediate(meshCollider);
-                }
-
-                MeshRenderer meshRenderer = GetComponent<MeshRenderer>() as MeshRenderer;
-                if (meshRenderer)
-                {
-                    DestroyImmediate(meshRenderer);
-                }
-
-                MeshFilter meshFilter = GetComponent<MeshFilter>() as MeshFilter;
-                if (meshFilter)
-                {
-                    DestroyImmediate(meshFilter);
-                }*/
-            }
-
             public static void syncNode(ref uint availableSyncOperations, GameObject nodeGameObject, uint nodeHandle, GameObject voxelTerrainGameObject)
 			{
                 OctreeNode octreeNode = nodeGameObject.GetComponent<OctreeNode>();
@@ -141,29 +111,21 @@ namespace Cubiquity
                             VolumeRenderer volumeRenderer = voxelTerrainGameObject.GetComponent<VolumeRenderer>();
                             if (volumeRenderer != null)
                             {
-                                if (octreeNode.renderingMesh != null)
+                                MeshFilter meshFilter = nodeGameObject.GetOrAddComponent<MeshFilter>() as MeshFilter;
+                                if(meshFilter.sharedMesh == null)
                                 {
-                                    DestroyImmediate(octreeNode.renderingMesh);
-                                    octreeNode.renderingMesh = null;
+                                    meshFilter.sharedMesh = new Mesh();
                                 }
+                                MeshRenderer meshRenderer = nodeGameObject.GetOrAddComponent<MeshRenderer>() as MeshRenderer;
+
                                 if (voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(TerrainVolume))
                                 {
-                                    octreeNode.renderingMesh = MeshConversion.BuildMeshFromNodeHandleForTerrainVolume(nodeHandle, false);
+                                    MeshConversion.BuildMeshFromNodeHandleForTerrainVolume(meshFilter.sharedMesh, nodeHandle, false);
                                 }
                                 else if (voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(ColoredCubesVolume))
                                 {
-                                    octreeNode.renderingMesh = MeshConversion.BuildMeshFromNodeHandleForColoredCubesVolume(nodeHandle, false);
+                                    MeshConversion.BuildMeshFromNodeHandleForColoredCubesVolume(meshFilter.sharedMesh, nodeHandle, false);
                                 }
-
-                                MeshFilter meshFilter = nodeGameObject.GetOrAddComponent<MeshFilter>() as MeshFilter;
-                                MeshRenderer meshRenderer = nodeGameObject.GetOrAddComponent<MeshRenderer>() as MeshRenderer;
-
-                                /*if (meshFilter.sharedMesh != null)
-                                {
-                                    DestroyImmediate(meshFilter.sharedMesh);
-                                }*/
-
-                                meshFilter.sharedMesh = octreeNode.renderingMesh;                                
 
                                 meshRenderer.enabled = volumeRenderer.enabled && octreeNode.renderThisNode;
 
@@ -175,21 +137,26 @@ namespace Cubiquity
                             VolumeCollider volumeCollider = voxelTerrainGameObject.GetComponent<VolumeCollider>();
                             if ((volumeCollider != null) && (Application.isPlaying))
                             {
-                                if (octreeNode.collisionMesh != null)
-                                {
-                                    DestroyImmediate(octreeNode.collisionMesh);
-                                }
-                                octreeNode.collisionMesh = volumeCollider.BuildMeshFromNodeHandle(nodeHandle);
                                 MeshCollider meshCollider = nodeGameObject.GetOrAddComponent<MeshCollider>() as MeshCollider;
-                                meshCollider.sharedMesh = octreeNode.collisionMesh;
+
+                                if (meshCollider.sharedMesh == null)
+                                {
+                                    meshCollider.sharedMesh = new Mesh();
+                                }
+
+                                if (voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(TerrainVolume))
+                                {
+                                    MeshConversion.BuildMeshFromNodeHandleForTerrainVolume(meshCollider.sharedMesh, nodeHandle, true);
+                                }
+                                else if (voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(ColoredCubesVolume))
+                                {
+                                    MeshConversion.BuildMeshFromNodeHandleForColoredCubesVolume(meshCollider.sharedMesh, nodeHandle, true);
+                                }
                             }
                         }
                         // If there is no mesh in Cubiquity then we make sure there isn't one in Unity.
                         else
                         {
-                            Utility.DestroyOrDestroyImmediate(octreeNode.collisionMesh);
-                            Utility.DestroyOrDestroyImmediate(octreeNode.renderingMesh);
-
                             MeshCollider meshCollider = nodeGameObject.GetComponent<MeshCollider>() as MeshCollider;
                             if (meshCollider)
                             {

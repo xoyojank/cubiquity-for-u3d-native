@@ -12,9 +12,5 @@ namespace Cubiquity
 	 */
 	public class TerrainVolumeCollider : VolumeCollider
 	{
-        public override Mesh BuildMeshFromNodeHandle(uint nodeHandle)
-        {
-            return MeshConversion.BuildMeshFromNodeHandleForTerrainVolume(nodeHandle, true);
-        }
 	}
 }

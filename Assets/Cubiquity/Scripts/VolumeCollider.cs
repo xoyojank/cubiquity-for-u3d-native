@@ -28,8 +28,6 @@ namespace Cubiquity
             hasChanged = true;
         }
 
-		public abstract Mesh BuildMeshFromNodeHandle(uint nodeHandle);
-
         /// \cond
         public bool hasChanged = true;
         /// \endcond
