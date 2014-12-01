@@ -137,21 +137,22 @@ namespace Cubiquity
                             VolumeCollider volumeCollider = voxelTerrainGameObject.GetComponent<VolumeCollider>();
                             if ((volumeCollider != null) && (Application.isPlaying))
                             {
-                                MeshCollider meshCollider = nodeGameObject.GetOrAddComponent<MeshCollider>() as MeshCollider;
-
-                                if (meshCollider.sharedMesh == null)
+                                /*if (octreeNode.collisionMesh != null)
                                 {
-                                    meshCollider.sharedMesh = new Mesh();
-                                }
-
+                                    DestroyImmediate(octreeNode.collisionMesh);
+                                }*/
+                                Mesh collisionMesh = new Mesh();
                                 if (voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(TerrainVolume))
                                 {
-                                    MeshConversion.BuildMeshFromNodeHandleForTerrainVolume(meshCollider.sharedMesh, nodeHandle, true);
+                                    MeshConversion.BuildMeshFromNodeHandleForTerrainVolume(collisionMesh, nodeHandle, true);
                                 }
                                 else if (voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(ColoredCubesVolume))
                                 {
-                                    MeshConversion.BuildMeshFromNodeHandleForColoredCubesVolume(meshCollider.sharedMesh, nodeHandle, true);
+                                    MeshConversion.BuildMeshFromNodeHandleForColoredCubesVolume(collisionMesh, nodeHandle, true);
                                 }
+
+                                MeshCollider meshCollider = nodeGameObject.GetOrAddComponent<MeshCollider>() as MeshCollider;
+                                meshCollider.sharedMesh = collisionMesh;
                             }
                         }
                         // If there is no mesh in Cubiquity then we make sure there isn't one in Unity.
