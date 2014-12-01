@@ -273,6 +273,11 @@ namespace Cubiquity
             {
                 FlushInternalData();
                 flushRequested = false;
+
+                // It seems prudent to return at this point, and leave the actual updating to the next call of this function.
+                // This is because we've just destroyed a bunch of stuff by flushing and Unity actually defers Destroy() until
+                // later in the frame. It actually seems t work ok without the return, but it makes me feel a little safer.
+                return;
             }
 
 			// Check whether the gameObject has been moved to a new layer.
