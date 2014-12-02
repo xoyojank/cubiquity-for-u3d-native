@@ -137,10 +137,12 @@ namespace Cubiquity
                             VolumeCollider volumeCollider = voxelTerrainGameObject.GetComponent<VolumeCollider>();
                             if ((volumeCollider != null) && (Application.isPlaying))
                             {
-                                /*if (octreeNode.collisionMesh != null)
-                                {
-                                    DestroyImmediate(octreeNode.collisionMesh);
-                                }*/
+                                // I'm not quite comfortable with this. For some reason we have to create this new mesh, fill it,
+                                // and set it as the collider's shared mesh, whereas I would rather just pass the collider's sharedMesh
+                                // straight to the functon that fills it. For some reason that doesn't work properly, and we see
+                                // issues with objects falling through terrain or not updating when part of the terrain is deleted.
+                                // It's to be investigated further... perhaps we could try deleting and recreating the MeshCollider?
+                                // Still, the approach below seems to work properly.
                                 Mesh collisionMesh = new Mesh();
                                 if (voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(TerrainVolume))
                                 {
