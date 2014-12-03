@@ -47,14 +47,7 @@ namespace Cubiquity
 					RegisterVolumeData();
 
                     // Delete the octree, so that next time Update() is called a new octree is constructed to match the new volume data.
-                    Impl.Utility.DestroyOrDestroyImmediate(rootOctreeNodeGameObject);
-                    rootOctreeNodeGameObject = null;
-
-                    // When in the editor we need to restart the updates so that the
-                    // mesh for the new volume data can start syncing in the background.
-#if UNITY_EDITOR
-                    StartEditModeUpdateIfInEditMode();
-#endif
+                    RequestFlushInternalData();
 				}
 			}
 	    }
@@ -210,10 +203,6 @@ namespace Cubiquity
             // OnEnable() methods do now allow us to modify our game object hierarchy. Note that this disable/enable process
             // may also happen automatically such as during a script reload? Requesting a flush of the octree is the safest option.
             RequestFlushInternalData();
-
-#if UNITY_EDITOR
-            StartEditModeUpdateIfInEditMode();
-#endif
 		}
 		
 		void OnDisable()
@@ -262,6 +251,12 @@ namespace Cubiquity
             }
 
             rootOctreeNodeGameObject = null;
+
+            // We've deleted all our data and it will be rebuilt when we run Update(). This means
+            // we need to start our background EditModeUpdate() function if we are in edit mode.
+#if UNITY_EDITOR
+            StartEditModeUpdateIfInEditMode();
+#endif
         }
 
         protected abstract bool SynchronizeOctree(uint maxSyncOperations);
