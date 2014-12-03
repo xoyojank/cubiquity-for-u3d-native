@@ -166,23 +166,21 @@ namespace Cubiquity
         // window. We want to support background loading of our terrain and so we hook into the 'EditorApplication.update' event for this purpose.
         // ------------------------------------------------------------------------------
 #if UNITY_EDITOR
-        private bool mEditModeUpdateRunning = false;
-
         void StartEditModeUpdateIfInEditMode()
         {
-            if (Application.isPlaying == false && mEditModeUpdateRunning == false)
+            if (Application.isPlaying == false)
             {
+                // Handle the case where the delegate is already running added
+                // by removing it before adding it. This should stop it being
+                // multiple times. See http://stackoverflow.com/a/4094637
+                EditorApplication.update -= EditModeUpdate;
                 EditorApplication.update += EditModeUpdate;
-                mEditModeUpdateRunning = true;
             }
         }
 
         void StopEditModeUpdate()
         {
-            // We allow multiple stop attempts... these should be harmless and may even
-            // help if we somehow end up adding the EditModeUpdate() method multiple times.
             EditorApplication.update -= EditModeUpdate;
-            mEditModeUpdateRunning = false;
         }
 
         /// \cond
