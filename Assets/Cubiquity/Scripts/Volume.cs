@@ -76,16 +76,20 @@ namespace Cubiquity
 				{
 					// If so update it.
 					mIsMeshSyncronized = value;
-					
-					// And fire the appropriate event.
-					if(mIsMeshSyncronized)
-					{
-						if(OnMeshSyncComplete != null) { OnMeshSyncComplete(); }
-					}
-					else
-					{
-						if(OnMeshSyncLost != null) { OnMeshSyncLost(); }
-					}
+
+                    // And fire the appropriate event. The isMeshSyncronized flag works in edit mode,
+                    // but we only fire the events in play mode (unless we find an edit-mode use too?)
+                    if (Application.isPlaying)
+                    {
+                        if (mIsMeshSyncronized)
+                        {
+                            if (OnMeshSyncComplete != null) { OnMeshSyncComplete(); }
+                        }
+                        else
+                        {
+                            if (OnMeshSyncLost != null) { OnMeshSyncLost(); }
+                        }
+                    }
 				}
 			}
 		} private bool mIsMeshSyncronized = false;
@@ -320,13 +324,13 @@ namespace Cubiquity
                 }
                 else
                 {
-                    bool allNodesSynced = SynchronizeOctree(maxSyncOperationsInEditMode);
+                    isMeshSyncronized = SynchronizeOctree(maxSyncOperationsInEditMode);
 
                     // Once the mesh is synced we can disconnect this event. Further changes to the volume will only happen due to
                     // the user changing something and in this case we can drive updates from the code which caused the changes.
                     // Note that we try to stop EditModeUpdate() even if it's not running (which most of the time it won't be),
                     // but this shouldn't matter and could even have benefits if somehow we start it multiple times.
-                    if (allNodesSynced)
+                    if (isMeshSyncronized)
                     {
                         // If we reach this point at runtime then UNITY_EDITOR must be defined as we are in edit mode, but we don't know
                         // this at compile time so the #if is still needed to check that the StopEditModeUpdate() method is defined.
@@ -338,6 +342,27 @@ namespace Cubiquity
             }
 		}
 		/// \endcond
+
+        // Public so that we can manually drive it from the editor as required,
+        // but user code should not do this so it's hidden from the docs.
+        /// \cond
+        public void OnGUI()
+        {            
+            GUILayout.BeginArea(new Rect(10, 10, 300, 300));
+            GUI.skin.label.alignment = TextAnchor.MiddleLeft;
+            string debugPanelMessage = "Cubiquity Debug Panel\n";
+            if(isMeshSyncronized)
+            {
+                debugPanelMessage += "Mesh sync: Completed";
+            }
+            else
+            {
+                debugPanelMessage += "Mesh sync: In progress...";
+            }
+            GUILayout.Box(debugPanelMessage);
+            GUILayout.EndArea();
+        }
+        /// \endcond
 
 		private void RegisterVolumeData()
 		{
