@@ -146,7 +146,7 @@ namespace Cubiquity
 		[SerializeField]
 		private bool mShowWireframe = false;
 
-        /// Controls the point at which Cubiquity switches to a differnt level of detail.
+        /// Controls the point at which Cubiquity switches to a different level of detail.
         public float lodThreshold
         {
             get
@@ -168,6 +168,25 @@ namespace Cubiquity
         }
         [SerializeField]
         private float mLodThreshold = 1.0f;
+
+        /// Specifies the lowest (least detailed) LOD which Cubiquity will render for this volume.
+        public int minimumLOD
+        {
+            get
+            {
+                return mMinimumLOD;
+            }
+            set
+            {
+                if (mMinimumLOD != value)
+				{
+                    mMinimumLOD = value;
+                    hasChanged = true;
+				}
+            }
+        }
+        [SerializeField]
+        private int mMinimumLOD = 0;
 		
 		/// \cond
         [System.NonSerialized]

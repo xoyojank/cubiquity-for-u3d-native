@@ -374,6 +374,14 @@ namespace Cubiquity
 			////////////////////////////////////////////////////////////////////////////////
 			// Mesh functions
 			////////////////////////////////////////////////////////////////////////////////
+
+            [DllImport(dllToImport)]
+            private static extern int cuSetLodRange(uint volumeHandle, int minimumLOD, int maximumLOD);
+            public static void SetLodRange(uint volumeHandle, int minimumLOD, int maximumLOD)
+            {
+                Validate(cuSetLodRange(volumeHandle, minimumLOD, maximumLOD));
+            }
+
 #if CUBIQUITY_USE_UNSAFE
             // It seems we can't make a generic version of this functions as it gives error CS0208.
             // Apparently that is not easily fixed in our situation, see here: http://goo.gl/blN834

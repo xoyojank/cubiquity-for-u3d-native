@@ -89,6 +89,8 @@ namespace Cubiquity
 		/// \cond
         protected override bool SynchronizeOctree(uint availableSyncOperations)
 		{
+            VolumeCollider volumeCollider = gameObject.GetComponent<VolumeCollider>();
+
             // FIXME - This doesn't really belong in Synchronize()
 			ColoredCubesVolumeRenderer volumeRenderer = gameObject.GetComponent<ColoredCubesVolumeRenderer>();
 			if(volumeRenderer != null)
@@ -113,6 +115,13 @@ namespace Cubiquity
             // want a single 'renderThisNode' member of Cubiquity nodes, but instead some threshold we could compare to.
             float lodThreshold = GetComponent<VolumeRenderer>() ? GetComponent<VolumeRenderer>().lodThreshold : 0.0f;
 
+            int minimumLOD = GetComponent<VolumeRenderer>() ? GetComponent<VolumeRenderer>().minimumLOD : 0;
+
+            if (volumeRenderer.hasChanged)
+            {
+                CubiquityDLL.SetLodRange(data.volumeHandle.Value, minimumLOD, 0);
+            }
+
             bool cubiquityUpToDate = CubiquityDLL.UpdateVolume(data.volumeHandle.Value, camPos.x, camPos.y, camPos.z, lodThreshold);
 
 			if(CubiquityDLL.HasRootOctreeNode(data.volumeHandle.Value) == 1)
@@ -128,17 +137,19 @@ namespace Cubiquity
 
                 if (volumeRenderer != null && volumeRenderer.hasChanged)
                 {
-                    OctreeNode.syncNodeWithVolumeRenderer(rootOctreeNodeGameObject, volumeRenderer, true);
-                    volumeRenderer.hasChanged = false;
+                    OctreeNode.syncNodeWithVolumeRenderer(rootOctreeNodeGameObject, volumeRenderer, true);                    
                 }
-
-                VolumeCollider volumeCollider = gameObject.GetComponent<VolumeCollider>();
+                
                 if (volumeCollider != null && volumeCollider.hasChanged)
                 {
                     OctreeNode.syncNodeWithVolumeCollider(rootOctreeNodeGameObject, volumeCollider, true);
-                    volumeCollider.hasChanged = false;
                 }
 			}
+
+            // These properties might have to be synced with the volume (e.g. LOD settings) or with components
+            // (e.g. shadow/material settings). Therefore we don't clear the flags until all syncing is completed.
+            volumeRenderer.hasChanged = false;
+            volumeCollider.hasChanged = false;
 
             // If there were still sync operations available then there was no more syncing to be done with the
             // Cubiquity octree. So if the Cubiquity octree was also up to date then we have synced everything.
