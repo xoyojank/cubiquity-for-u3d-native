@@ -96,16 +96,16 @@ public class ProceduralTerrainVolume : MonoBehaviour
 					// And then to 0 to 255, ready to convert into a byte.
 					simplexNoiseValue *= 255;
 					
-					// Write the final value value into the first material channel (the one with the rock texture).
+					// Write the final value value into the third material channel (the one with the rock texture).
 					// The value being written is usually 0 (empty) or 255 (solid) except around the transition.
-					materialSet.weights[0] = (byte)simplexNoiseValue;
+					materialSet.weights[2] = (byte)simplexNoiseValue;
 					
 					
 					// Lastly we write soil or grass voxels into the volume to create a level floor between the rocks.
 					// This means we want to set the sum of the materials to 255 if the voxel is below the floor height.
 					// We don't want to interfere with the rocks on the transition between the material so we work out
-					// how much extra we have to add to get to 255 and then add that to eith soil or grass.
-					byte excess = (byte)(255 - materialSet.weights[0]);					
+					// how much extra we have to add to get to 255 and then add that to either soil or grass.
+					byte excess = (byte)(255 - materialSet.weights[2]);					
 					if(y < 11)
 					{
 						// Add to soil material channel.
@@ -114,7 +114,7 @@ public class ProceduralTerrainVolume : MonoBehaviour
 					else if(y < 12)
 					{
 						// Add to grass material channel.
-						materialSet.weights[2] = excess;
+						materialSet.weights[0] = excess;
 					}
 					
 					// We can now write our computed voxel value into the volume.
