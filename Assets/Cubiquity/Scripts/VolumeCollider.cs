@@ -29,6 +29,7 @@ namespace Cubiquity
         }
 
         /// \cond
+        [System.NonSerialized]
         public bool hasChanged = true;
         /// \endcond
 		
