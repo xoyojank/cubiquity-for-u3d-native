@@ -8,20 +8,20 @@
  *
  * \subsection secMagica Importing From Magica Voxel
  *
- * You may wish to model your voxel geometry in an external application such as Magica Voxel, Voxel Shop, or Qubicle Constructor. Such applications will typically allow more comprehensive editing options than we will ever provide in %Cubiquity, and %Cubiquity already provides the option to import Magica Voxel files (others will follow in the future). This is done by the use of the command-line `ConvertToVDB` tool.
+ * You may wish to model your voxel geometry in an external application such as Magica Voxel, Voxel Shop, or Qubicle Constructor. Such applications will typically allow more comprehensive editing options than we will ever provide in %Cubiquity, and %Cubiquity already provides the option to import Magica Voxel files (others will follow in the future). This is done by the use of the command-line `ProcessVDB` tool.
  *
  * To use this tool you should open a command prompt and change to the `StreamingAssets\%Cubiquity\SDK` directory. From here you can run:
  *
  * \par
- * `ConvertToVDB.exe -i input.vox -o output.vdb`
+ * `ProcessVDB.exe -import -magicavoxel input.vox -coloredcubes output.vdb`
  *
  * You can then copy the resulting .vdb into the `StreamingAssets\%Cubiquity\VoxelDatabases` folder before following the instruction in \ref secFromVoxelDatabase to import it into Unity.
  *
  * \subsection secVoxlap Importing From Voxlap
  *
- * You can also use the 'ConvertToVDB' tool to import maps in the Voxlap '.vxl' format as used by games such as <a href="http://buildandshoot.com/">Build and Shoot</a>. This allows you to use editors designed for this game to build maps for Cubiquity.
+ * You can also use the 'ProcessVDB' tool to import maps in the Voxlap '.vxl' format as used by games such as <a href="http://buildandshoot.com/">Build and Shoot</a>. This allows you to use editors designed for this game to build maps for Cubiquity.
  * \par
- * `ConvertToVDB.exe -i input.vxl -o output.vdb`
+ * `ProcessVDB.exe -import -vxl input.vxl -coloredcubes output.vdb`
  *
  * Note that these maps are expected to have dimensions of 512x512x64 voxels.
  *
@@ -32,7 +32,7 @@
  * You can call the converter in the same way as before, but providing a path to a folder containing image slices rather than to a Magica Voxel .vox file:
  *
  * \par
- * `ConvertToVDB.exe -i /path/to/image/folder -o output.vdb`
+ * `ProcessVDB.exe -import -imageslices /path/to/image/folder -coloredcubes output.vdb`
  *
  * Note that both Magica Voxel and image slices are only appropriate for importing colored cubes volumes. Currently there are no methods for creating terrain volumes *outside* of %Cubiquity for Unity3D, but you can still create them procedurally as discussed later.
  *
