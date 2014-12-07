@@ -178,11 +178,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba582b797ce3ad14e9569c9dade105c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  material: {fileID: 1315562466}
+  mMaterial: {fileID: 1308605196}
   mCastShadows: 1
   mReceiveShadows: 1
   mShowWireframe: 0
-  mLodThreshold: 0
+  mLodThreshold: 1.0
+  mMinimumLOD: 2
 --- !u!114 &690550940
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -228,7 +229,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bfc1839ae5e58e743a487271c6168708, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!21 &1315562466
+--- !u!21 &1308605196
 Material:
   serializedVersion: 3
   m_ObjectHideFlags: 0
