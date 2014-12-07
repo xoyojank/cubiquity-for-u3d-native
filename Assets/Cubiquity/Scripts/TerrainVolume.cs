@@ -100,18 +100,26 @@ namespace Cubiquity
 	    }
 		
 		/// \cond
-        protected override bool SynchronizeMesh(int maxSyncs)
+        protected override bool SynchronizeOctree(uint availableSyncOperations)
 		{
-            bool allNodesSynced = true;
+            VolumeRenderer volumeRenderer = gameObject.GetComponent<VolumeRenderer>();
+            VolumeCollider volumeCollider = gameObject.GetComponent<VolumeCollider>();
 
 			Vector3 camPos = CameraUtils.getCurrentCameraPosition();
 
             // This is messy - perhaps the LOD thresold shold not be a parameter to update. Instead it could be passed
             // as a parameter during traversal, so different traversal could retrieve differnt LODs. We then wouldn't
             // want a single 'renderThisNode' member of Cubiquity nodes, but instead some threshold we could compare to.
-            float lodThreshold = GetComponent<VolumeRenderer>() ? GetComponent<VolumeRenderer>().lodThreshold : 0.0f;
+            float lodThreshold = GetComponent<VolumeRenderer>() ? GetComponent<VolumeRenderer>().lodThreshold : 1.0f;
 
-			CubiquityDLL.UpdateVolume(data.volumeHandle.Value, camPos.x, camPos.y, camPos.z, lodThreshold);
+            int minimumLOD = GetComponent<VolumeRenderer>() ? GetComponent<VolumeRenderer>().minimumLOD : 0;
+
+            if (volumeRenderer.hasChanged)
+            {
+                CubiquityDLL.SetLodRange(data.volumeHandle.Value, minimumLOD, 0);
+            }
+
+            bool cubiquityUpToDate = CubiquityDLL.UpdateVolume(data.volumeHandle.Value, camPos.x, camPos.y, camPos.z, lodThreshold);
 					
 			if(CubiquityDLL.HasRootOctreeNode(data.volumeHandle.Value) == 1)
 			{		
@@ -119,18 +127,36 @@ namespace Cubiquity
 						
 				if(rootOctreeNodeGameObject == null)
 				{
-                    rootOctreeNodeGameObject = OctreeNode.CreateOctreeNode(rootNodeHandle, ghostGameObject);	
+                    rootOctreeNodeGameObject = OctreeNode.CreateOctreeNode(rootNodeHandle, gameObject);	
 				}
-						
-				OctreeNode rootOctreeNode = rootOctreeNodeGameObject.GetComponent<OctreeNode>();
-				int nodeSyncsPerformed = rootOctreeNode.syncNode(maxSyncs, gameObject);
-						
-				// If no node were syncronized then the mesh data is up to
-				// date and we can set the flag to convey this to the user.
-                if (nodeSyncsPerformed > 0) allNodesSynced = false;
+
+                OctreeNode.syncNode(ref availableSyncOperations, rootOctreeNodeGameObject, rootNodeHandle, gameObject);
+                                
+                if (volumeRenderer != null && volumeRenderer.hasChanged)
+                {
+                    OctreeNode.syncNodeWithVolumeRenderer(rootOctreeNodeGameObject, volumeRenderer, true);
+                }
+
+                if (volumeCollider != null && volumeCollider.hasChanged)
+                {
+                    OctreeNode.syncNodeWithVolumeCollider(rootOctreeNodeGameObject, volumeCollider, true);
+                }
 			}
 
-            return allNodesSynced;
+            // These properties might have to be synced with the volume (e.g. LOD settings) or with components
+            // (e.g. shadow/material settings). Therefore we don't clear the flags until all syncing is completed.
+            if (volumeRenderer != null)
+            {
+                volumeRenderer.hasChanged = false;
+            }
+            if (volumeCollider != null)
+            {
+                volumeCollider.hasChanged = false;
+            }
+
+            // If there were still sync operations available then there was no more syncing to be done with the
+            // Cubiquity octree. So if the Cubiquity octree was also up to date then we have synced everything.
+            return cubiquityUpToDate && availableSyncOperations > 0;
 		}
 		/// \endcond
 	}

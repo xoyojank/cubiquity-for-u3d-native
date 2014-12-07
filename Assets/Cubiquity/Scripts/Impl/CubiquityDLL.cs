@@ -148,10 +148,12 @@ namespace Cubiquity
 			}
 			
 			[DllImport (dllToImport)]
-			private static extern int cuUpdateVolume(uint volumeHandle, float eyePosX, float eyePosY, float eyePosZ, float lodThreshold);
-			public static void UpdateVolume(uint volumeHandle, float eyePosX, float eyePosY, float eyePosZ, float lodThreshold)
+			private static extern int cuUpdateVolume(uint volumeHandle, float eyePosX, float eyePosY, float eyePosZ, float lodThreshold, out uint isUpToDate);
+			public static bool UpdateVolume(uint volumeHandle, float eyePosX, float eyePosY, float eyePosZ, float lodThreshold)
 			{
-				Validate(cuUpdateVolume(volumeHandle, eyePosX, eyePosY, eyePosZ, lodThreshold));
+                uint isUpToDate;
+                Validate(cuUpdateVolume(volumeHandle, eyePosX, eyePosY, eyePosZ, lodThreshold, out isUpToDate));
+                return isUpToDate != 0;
 			}
 			
 			[DllImport (dllToImport)]
@@ -290,7 +292,7 @@ namespace Cubiquity
 				return result;
 			}
 			
-			[DllImport (dllToImport)]
+			/*[DllImport (dllToImport)]
 			private static extern int cuHasChildNode(uint nodeHandle, uint childX, uint childY, uint childZ, out uint result);
 			public static uint HasChildNode(uint nodeHandle, uint childX, uint childY, uint childZ)
 			{
@@ -306,45 +308,80 @@ namespace Cubiquity
 				uint result;
 				Validate(cuGetChildNode(nodeHandle, childX, childY, childZ, out result));
 				return result;
-			}
+			}*/
 			
-			[DllImport (dllToImport)]
+			/*[DllImport (dllToImport)]
 			private static extern int cuNodeHasMesh(uint nodeHandle, out uint result);
 			public static uint NodeHasMesh(uint nodeHandle)
 			{
 				uint result;
 				Validate(cuNodeHasMesh(nodeHandle, out result));
 				return result;
-			}
+			}*/
 			
-			[DllImport (dllToImport)]
+			/*[DllImport (dllToImport)]
 			private static extern int cuGetNodePosition(uint nodeHandle, out int x, out int y, out int z);
 			public static void GetNodePosition(uint nodeHandle, out int x, out int y, out int z)
 			{
 				Validate(cuGetNodePosition(nodeHandle, out x, out y, out z));
-			}
+			}*/
 			
-			[DllImport (dllToImport)]
+			/*[DllImport (dllToImport)]
 			private static extern int cuGetMeshLastUpdated(uint nodeHandle, out uint result);
 			public static uint GetMeshLastUpdated(uint nodeHandle)
 			{
 				uint result;
 				Validate(cuGetMeshLastUpdated(nodeHandle, out result));
 				return result;
-			}
+			}*/
 
-			[DllImport (dllToImport)]
+            /*[DllImport(dllToImport)]
+            private static extern int cuGetMeshOrChildMeshLastUpdated(uint nodeHandle, out uint result);
+            public static uint GetMeshOrChildMeshLastUpdated(uint nodeHandle)
+            {
+                uint result;
+                Validate(cuGetMeshOrChildMeshLastUpdated(nodeHandle, out result));
+                return result;
+            }*/
+
+			/*[DllImport (dllToImport)]
 			private static extern int cuRenderThisNode(uint nodeHandle, out uint result);
 			public static uint RenderThisNode(uint nodeHandle)
 			{
 				uint result;
 				Validate(cuRenderThisNode(nodeHandle, out result));
 				return result;
-			}
+			}*/
+
+            /*[DllImport(dllToImport)]
+            private static extern int cuGetLastChanged(uint nodeHandle, out uint result);
+            public static uint GetLastChanged(uint nodeHandle)
+            {
+                uint result;
+                Validate(cuGetLastChanged(nodeHandle, out result));
+                return result;
+            }*/
+
+            [DllImport(dllToImport)]
+            private static extern int cuGetOctreeNode(uint nodeHandle, out CuOctreeNode result);
+            public static CuOctreeNode GetOctreeNode(uint nodeHandle)
+            {
+                CuOctreeNode result;
+                Validate(cuGetOctreeNode(nodeHandle, out result));
+                return result;
+            }
 			
 			////////////////////////////////////////////////////////////////////////////////
 			// Mesh functions
 			////////////////////////////////////////////////////////////////////////////////
+
+            [DllImport(dllToImport)]
+            private static extern int cuSetLodRange(uint volumeHandle, int minimumLOD, int maximumLOD);
+            public static void SetLodRange(uint volumeHandle, int minimumLOD, int maximumLOD)
+            {
+                Validate(cuSetLodRange(volumeHandle, minimumLOD, maximumLOD));
+            }
+
 #if CUBIQUITY_USE_UNSAFE
             // It seems we can't make a generic version of this functions as it gives error CS0208.
             // Apparently that is not easily fixed in our situation, see here: http://goo.gl/blN834

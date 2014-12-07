@@ -18,11 +18,11 @@ namespace Cubiquity
 			TerrainVolumeData data = VolumeDataAsset.CreateEmptyVolumeData<TerrainVolumeData>(new Region(0, 0, 0, width-1, height-1, depth-1));
 			
 			// Create some ground in the terrain so it shows up in the editor.
-			// Soil as a base (mat 1) and then a couple of layers of grass (mat 2).
-			TerrainVolumeGenerator.GenerateFloor(data, 6, (uint)1, 8, (uint)2);
+			// Soil as a base (mat 1) and then a couple of layers of grass (mat 0).
+			TerrainVolumeGenerator.GenerateFloor(data, 6, (uint)1, 8, (uint)0);
 			
 			// Now create the terrain game object from the data.
-			GameObject terrain = TerrainVolume.CreateGameObject(data, true, true);
+			GameObject terrain = TerrainVolume.CreateGameObject(data, true, false);
 			
 			// And select it, so the user can get straight on with editing.
 			Selection.activeGameObject = terrain;
@@ -66,7 +66,7 @@ namespace Cubiquity
 			
 			ColoredCubesVolumeData data = VolumeDataAsset.CreateEmptyVolumeData<ColoredCubesVolumeData>(new Region(0, 0, 0, width-1, height-1, depth-1));
 			
-			GameObject coloredCubesGameObject = ColoredCubesVolume.CreateGameObject(data, true, true);
+			GameObject coloredCubesGameObject = ColoredCubesVolume.CreateGameObject(data, true, false);
 			
 			// And select it, so the user can get straight on with editing.
 			Selection.activeGameObject = coloredCubesGameObject;

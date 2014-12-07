@@ -11,13 +11,13 @@ namespace Cubiquity
         public class MeshConversion
         {
 #if CUBIQUITY_USE_UNSAFE
-            unsafe public static Mesh BuildMeshFromNodeHandleForColoredCubesVolume(uint nodeHandle, bool onlyPositions)
+            unsafe public static void BuildMeshFromNodeHandleForColoredCubesVolume(Mesh mesh, uint nodeHandle, bool onlyPositions)
             {
                 // Get the data from Cubiquity.
                 ushort noOfVertices; ColoredCubesVertex* vertices; uint noOfIndices; ushort* indices;
                 CubiquityDLL.GetColoredCubesMesh(nodeHandle, &noOfVertices, &vertices, &noOfIndices, &indices);
 #else
-            public static Mesh BuildMeshFromNodeHandleForColoredCubesVolume(uint nodeHandle, bool onlyPositions)
+            public static void BuildMeshFromNodeHandleForColoredCubesVolume(Mesh mesh, uint nodeHandle, bool onlyPositions)
             {
                 // Get the data from Cubiquity.
                 ColoredCubesVertex[] vertices;
@@ -37,9 +37,8 @@ namespace Cubiquity
                     indicesAsInt[ct] = indices[ct];
                 }
 
-                // Create the mesh
-                Mesh mesh = new Mesh();
-                mesh.hideFlags = HideFlags.DontSave;
+                // Clear any previous mesh data.
+                mesh.Clear(true);
 
                 // Required for the CubicVertex decoding process.
                 Vector3 offset = new Vector3(0.5f, 0.5f, 0.5f);
@@ -71,18 +70,16 @@ namespace Cubiquity
 
                 // Assign index data to the mesh.
                 mesh.triangles = indicesAsInt;
-
-                return mesh;
             }
 
 #if CUBIQUITY_USE_UNSAFE
-            unsafe public static Mesh BuildMeshFromNodeHandleForTerrainVolume(uint nodeHandle, bool onlyPositions)
+            unsafe public static void BuildMeshFromNodeHandleForTerrainVolume(Mesh mesh, uint nodeHandle, bool onlyPositions)
             {
                 // Get the data from Cubiquity.
                 ushort noOfVertices; TerrainVertex* vertices; uint noOfIndices; ushort* indices;
                 CubiquityDLL.GetTerrainMesh(nodeHandle, &noOfVertices, &vertices, &noOfIndices, &indices);
 #else
-            public static Mesh BuildMeshFromNodeHandleForTerrainVolume(uint nodeHandle, bool onlyPositions)
+            public static void BuildMeshFromNodeHandleForTerrainVolume(Mesh mesh, uint nodeHandle, bool onlyPositions)
             {
                 // Get the data from Cubiquity.
                 TerrainVertex[] vertices;
@@ -102,9 +99,8 @@ namespace Cubiquity
                     indicesAsInt[ct] = indices[ct];
                 }
 
-                // Create the mesh
-                Mesh mesh = new Mesh();
-                mesh.hideFlags = HideFlags.DontSave;
+                // Clear any previous mesh data.
+                mesh.Clear(true);
 
                 // Create the arrays which we'll copy the data to.
                 Vector3[] positions = new Vector3[noOfVertices];
@@ -171,8 +167,6 @@ namespace Cubiquity
 
                 // Assign index data to the mesh.
                 mesh.triangles = indicesAsInt;
-
-                return mesh;
             }
         }
     }

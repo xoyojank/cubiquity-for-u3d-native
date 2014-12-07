@@ -28,15 +28,33 @@ namespace Cubiquity
 			EditorGUILayout.LabelField("Show Wireframe:", GUILayout.Width(labelWidth));
 			renderer.showWireframe = EditorGUILayout.Toggle(renderer.showWireframe);
 			EditorGUILayout.EndHorizontal();
-
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("LOD Threshold:", GUILayout.Width(labelWidth));
-            renderer.lodThreshold = EditorGUILayout.Slider(renderer.lodThreshold, 0.0f, 10.0f);
-            EditorGUILayout.EndHorizontal();
 			
 			EditorGUILayout.BeginHorizontal();
 				renderer.material = EditorGUILayout.ObjectField("Material: ", renderer.material, typeof(Material), true) as Material;
 			EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.LabelField("*Experimental* LOD support:", EditorStyles.boldLabel);
+
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Minimum LOD level:", GUILayout.Width(labelWidth));
+            renderer.minimumLOD = EditorGUILayout.IntSlider(renderer.minimumLOD, 0, 2);
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("LOD Threshold:", GUILayout.Width(labelWidth));
+            renderer.lodThreshold = EditorGUILayout.Slider(renderer.lodThreshold, 0.5f, 2.0f);
+            EditorGUILayout.EndHorizontal();
+
+            // If any of the above caused a change then we need to update
+            // the volume, so that the new properties can be synced with it.
+            if(renderer.hasChanged)
+            {
+                Volume volume = renderer.gameObject.GetComponent<Volume>();
+                if(volume != null)
+                {
+                    volume.Update();
+                }
+            }
 		}
 	}
 }

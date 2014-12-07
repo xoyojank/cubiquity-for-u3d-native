@@ -256,7 +256,11 @@ namespace Cubiquity
 		
 		public void OnSceneGUI()
 		{
-            
+            // We use these 'Handles' functions to allow us to embed OnGUI() code into OnSceneGUI().
+            // See http://answers.unity3d.com/questions/26669/using-editorguilayout-controls-in-onscenegui.html
+            Handles.BeginGUI();
+            terrainVolume.OnGUI();
+            Handles.EndGUI();
 
 			// If we don't have a renderer then there's no terrain being
 			// displayed, and so not much we can do in this function.

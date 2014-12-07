@@ -10,6 +10,7 @@ Material:
   m_Shader: {fileID: 4800000, guid: 1caca2db8f6a85441b19b319a7fae750, type: 3}
   m_ShaderKeywords:
   - BRUSH_MARKER_OFF
+  m_CustomRenderQueue: -1
   m_SavedProperties:
     serializedVersion: 2
     m_TexEnvs:
@@ -24,7 +25,7 @@ Material:
         first:
           name: _Tex0
         second:
-          m_Texture: {fileID: 2800000, guid: c6c07e201ceca3443af08cff1b1fadb5, type: 3}
+          m_Texture: {fileID: 2800000, guid: bb38bb14b5e175f4ca16975ae08541d0, type: 3}
           m_Scale: {x: .125, y: .125}
           m_Offset: {x: 0, y: 0}
       data:
@@ -38,7 +39,7 @@ Material:
         first:
           name: _Tex2
         second:
-          m_Texture: {fileID: 2800000, guid: bb38bb14b5e175f4ca16975ae08541d0, type: 3}
+          m_Texture: {fileID: 2800000, guid: c6c07e201ceca3443af08cff1b1fadb5, type: 3}
           m_Scale: {x: .125, y: .125}
           m_Offset: {x: 0, y: 0}
       data:

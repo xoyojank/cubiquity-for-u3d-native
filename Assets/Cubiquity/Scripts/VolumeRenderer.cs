@@ -16,9 +16,78 @@ namespace Cubiquity
 	 * 
 	 * \sa VolumeCollider
 	 */
+    [ExecuteInEditMode]
 	public abstract class VolumeRenderer : MonoBehaviour
 	{
-		public Material material;
+        void OnEnable()
+        {
+            hasChanged = true;
+        }
+
+        void OnDisable()
+        {
+            hasChanged = true;
+        }
+
+        /*void OnDestroy()
+        {
+            Utility.DestroyOrDestroyImmediate(mMaterial);
+            Utility.DestroyOrDestroyImmediate(mMaterialLod1);
+            Utility.DestroyOrDestroyImmediate(mMaterialLod2);
+        }*/
+
+        /// Material for this volume.
+        public Material material
+        {
+            get
+            {
+                return mMaterial;
+            }
+            set
+            {
+                if (mMaterial != value)
+                {
+                    mMaterial = value;
+                    mMaterialLod1 = null;
+                    mMaterialLod2 = null;
+                    /*mMaterialLod1 = new Material(value);
+                    mMaterialLod1.SetFloat("_height", 1.0f);
+                    mMaterialLod2 = new Material(value);
+                    mMaterialLod2.SetFloat("_height", 2.0f);*/
+                    hasChanged = true;
+                }
+            }
+        }
+        [SerializeField]
+		private Material mMaterial;
+
+        public Material materialLod1
+        {
+            get
+            {
+                if (mMaterialLod1 == null)
+                {
+                    mMaterialLod1 = new Material(mMaterial);
+                    mMaterialLod1.SetFloat("_height", 1.0f);
+                }
+                return mMaterialLod1;
+            }
+        }
+        private Material mMaterialLod1;
+
+        public Material materialLod2
+        {
+            get
+            {
+                if (mMaterialLod2 == null)
+                {
+                    mMaterialLod2 = new Material(mMaterial);
+                    mMaterialLod2.SetFloat("_height", 2.0f);
+                }
+                return mMaterialLod2;
+            }
+        }
+        private Material mMaterialLod2;
 		
 		/// Controls whether this volume casts shadows.
 		public bool castShadows
@@ -32,7 +101,7 @@ namespace Cubiquity
 				if(mCastShadows != value)
 				{
 					mCastShadows = value;
-					lastModified = Clock.timestamp;
+                    hasChanged = true;
 				}
 			}
 		}
@@ -51,7 +120,7 @@ namespace Cubiquity
 				if(mReceiveShadows != value)
 				{
 					mReceiveShadows = value;
-					lastModified = Clock.timestamp;
+                    hasChanged = true;
 				}
 			}
 		}
@@ -70,14 +139,14 @@ namespace Cubiquity
 				if(mShowWireframe != value)
 				{
 					mShowWireframe = value;
-					lastModified = Clock.timestamp;
+                    hasChanged = true;
 				}
 			}
 		}
 		[SerializeField]
 		private bool mShowWireframe = false;
 
-        /// Controls whether the wireframe overlay is displayed when this volume is selected in the editor.
+        /// Controls the point at which Cubiquity switches to a different level of detail.
         public float lodThreshold
         {
             get
@@ -86,14 +155,42 @@ namespace Cubiquity
             }
             set
             {
-                mLodThreshold = value;
+                float difference = Mathf.Abs(mLodThreshold - value);
+                if(difference > 0.000001)
+                {
+                    hasChanged = true;
+                }
+
+                // We set this even if the movement is tiny, otherwise
+                // I'm concerned the slider in the editor could get stuck.
+                mLodThreshold = value;                
             }
         }
         [SerializeField]
-        private float mLodThreshold = 0.0f;
+        private float mLodThreshold = 1.0f;
+
+        /// Specifies the lowest (least detailed) LOD which Cubiquity will render for this volume.
+        public int minimumLOD
+        {
+            get
+            {
+                return mMinimumLOD;
+            }
+            set
+            {
+                if (mMinimumLOD != value)
+				{
+                    mMinimumLOD = value;
+                    hasChanged = true;
+				}
+            }
+        }
+        [SerializeField]
+        private int mMinimumLOD = 0;
 		
 		/// \cond
-		public uint lastModified = Clock.timestamp;
+        [System.NonSerialized]
+        public bool hasChanged = true;
 		/// \endcond
 		
 		// Dummy start method rqured for the 'enabled' checkbox to show up in the inspector.
