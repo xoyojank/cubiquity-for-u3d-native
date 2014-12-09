@@ -148,8 +148,14 @@ namespace Cubiquity
 
             // These properties might have to be synced with the volume (e.g. LOD settings) or with components
             // (e.g. shadow/material settings). Therefore we don't clear the flags until all syncing is completed.
-            volumeRenderer.hasChanged = false;
-            volumeCollider.hasChanged = false;
+            if (volumeRenderer != null)
+            {
+                volumeRenderer.hasChanged = false;
+            }
+            if (volumeCollider != null)
+            {
+                volumeCollider.hasChanged = false;
+            }
 
             // If there were still sync operations available then there was no more syncing to be done with the
             // Cubiquity octree. So if the Cubiquity octree was also up to date then we have synced everything.
