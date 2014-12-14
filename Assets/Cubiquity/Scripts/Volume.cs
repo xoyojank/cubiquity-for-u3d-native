@@ -448,13 +448,17 @@ namespace Cubiquity
         // have implemented below.
         private class OnSaveHandler : UnityEditor.AssetModificationProcessor
         {
-            public static void OnWillSaveAssets(string[] assets)
+            public static string[] OnWillSaveAssets(string[] assets)
             {
+                // Flush internal data of any volumes in the scene
                 Object[] volumes = Object.FindObjectsOfType(typeof(Volume));
                 foreach (Object volume in volumes)
                 {
                     ((Volume)volume).FlushInternalData();
                 }
+
+                // Return the list of assets to be saved (we haven't changed this).
+                return assets;
             }
         }
 
