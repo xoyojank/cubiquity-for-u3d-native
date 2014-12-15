@@ -34,25 +34,34 @@ namespace Cubiquity
 			// It doesn't seem to work, because in Standalone builds the message below is printed after the exception about the .dll not
 			// being found. We need to look into this further.
 			static CubiquityDLL()
-			{				
-				Installation.ValidateAndFix();
-				
-				uint majorVersion;
-				uint minorVersion;
-				uint patchVersion;
-				cuGetVersionNumber(out majorVersion, out minorVersion, out patchVersion);
-				
-				if ((majorVersion != requiredMajorVersion) ||
-					(minorVersion != requiredMinorVersion) ||
-					(patchVersion != requiredPatchVersion))
+			{
+				try
 				{
-					throw new CubiquityException("Wrong version of Cubiquity native code library found! " +
-						"Expected version " + requiredMajorVersion + "." + requiredMinorVersion + "." + requiredPatchVersion + 
-						" but found version " + majorVersion + "." + minorVersion + "." + patchVersion + ".\n" +
-						"If you are using the development version of Cubiquity (from the Git repository) then try a stable snapshot instead.\n");
+					Installation.ValidateAndFix();
+					
+					uint majorVersion;
+					uint minorVersion;
+					uint patchVersion;
+					cuGetVersionNumber(out majorVersion, out minorVersion, out patchVersion);
+					
+					if ((majorVersion != requiredMajorVersion) ||
+						(minorVersion != requiredMinorVersion) ||
+						(patchVersion != requiredPatchVersion))
+					{
+						throw new CubiquityInstallationException("Wrong version of Cubiquity native code library found! " +
+							"Expected version " + requiredMajorVersion + "." + requiredMinorVersion + "." + requiredPatchVersion + 
+							" but found version " + majorVersion + "." + minorVersion + "." + patchVersion + ".\n" +
+							"If you are using the development version of Cubiquity (from the Git repository) then try a stable snapshot instead.\n");
+					}
+					
+					logFilePath = GetLogFilePath();
 				}
-				
-				logFilePath = GetLogFilePath();
+				// It seems we should not allow exceptions to propagate out of here, as Unity then
+				// repeatedly calls this function (probably because it is a static constructor).
+				catch(Exception e)
+				{
+					Debug.LogException(e);
+				}
 			}
 			
 			private static void Validate(int returnCode)

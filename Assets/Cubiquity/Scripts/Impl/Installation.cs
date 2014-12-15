@@ -11,7 +11,11 @@ namespace Cubiquity
 		{		
 			public static void ValidateAndFix()
 			{	
-				// Get the name of the library we will copy (different per platform).
+#if (!UNITY_4_3 && !UNITY_4_5 && !UNITY_4_6)
+                throw new CubiquityInstallationException("We're sorry, but Cubiquity for Unity3D is not currently supported on your version of Unity.\n" +
+                "At the moment we only support Unity versions 4.3.x, 4.5.x, and 4.6.x.");
+#else
+                // Get the name of the library we will copy (different per platform).
 				string fileName = "";
 				switch(Application.platform)
 				{
@@ -27,8 +31,7 @@ namespace Cubiquity
 					fileName = "libCubiquityC.so";
 					break;
 				default:
-					Debug.LogError("We're sorry, but Cubiquity for Unity3D is not currently supported on your platform");
-					return;
+					throw new CubiquityInstallationException("We're sorry, but Cubiquity for Unity3D is not currently supported on your platform");
 				}
 				
 				// Copy the native code library from the SDK to the working directory.
@@ -66,7 +69,7 @@ namespace Cubiquity
 						catch(Exception e)
 						{
 							Debug.LogException(e);
-							Debug.LogError("Failed to copy '" + fileName + "'");
+                            throw new CubiquityInstallationException("Failed to copy '" + fileName + "'", e);
 						}
 							
 					}
@@ -83,14 +86,15 @@ namespace Cubiquity
 					catch(Exception e)
 					{
 						Debug.LogException(e);
-						Debug.LogError("Failed to copy '" + fileName + "'");
+                        throw new CubiquityInstallationException("Failed to copy '" + fileName + "'", e);
 					}
 				}
 				
 				if(System.IO.File.Exists(destFile) == false)
 				{
-					Debug.LogError("The Cubiquity DLL was not found in the project root folder, and this problem was not resolved.");
+                    throw new CubiquityInstallationException("The Cubiquity DLL was not found in the project root folder, and this problem was not resolved.");
 				}
+#endif
 			}
 			
 			// From http://stackoverflow.com/q/1177607
