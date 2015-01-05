@@ -164,7 +164,8 @@ namespace Cubiquity
 					
 					Selection.activeGameObject = coloredCubesVolume.gameObject;
 
-                    coloredCubesVolume.EditModeUpdate();
+                    // Need to force an update, otherwise there is noticable lag when painting voxels.
+                    coloredCubesVolume.ForceUpdate();
 				}
 				else if ( e.type == EventType.Layout )
 			    {
@@ -172,8 +173,6 @@ namespace Cubiquity
 			       HandleUtility.AddDefaultControl( GUIUtility.GetControlID( GetHashCode(), FocusType.Passive ) );
 			    }
 			}
-
-            coloredCubesVolume.EditModeUpdate();
 		}
 		
 		private static void OnEditorToolChanged()

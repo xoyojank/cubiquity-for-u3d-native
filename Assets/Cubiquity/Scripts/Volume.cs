@@ -153,39 +153,48 @@ namespace Cubiquity
 
         private bool flushRequested;
 
+        private int editModeUpdates = 0;
+
         // ------------------------------------------------------------------------------
         // These editor-only functions are used to emulate repeated calls to Update() in edit mode. Setting the '[ExecuteInEditMode]' attribute does cause
         // Update() to be called automatically in edit mode, but it only happens in response to user-driven events such as moving the mouse in the editor
         // window. We want to support background loading of our terrain and so we hook into the 'EditorApplication.update' event for this purpose.
         // ------------------------------------------------------------------------------
 #if UNITY_EDITOR
-        void StartEditModeUpdateIfInEditMode()
-        {
-            if (Application.isPlaying == false)
-            {
-                // Handle the case where the delegate is already running added
-                // by removing it before adding it. This should stop it being
-                // multiple times. See http://stackoverflow.com/a/4094637
-                EditorApplication.update -= EditModeUpdate;
-                EditorApplication.update += EditModeUpdate;
-            }
-        }
 
-        void StopEditModeUpdate()
+        // Public so that we can manually drive it from the editor as required,
+        // but user code should not do this so it's hidden from the docs.
+        /// \cond
+        public void ForceUpdate()
         {
-            EditorApplication.update -= EditModeUpdate;
+            Update();
         }
 
         /// \cond
-        public void EditModeUpdate() // Public so we can call it from Editor scripts
+        public void EditModeUpdateHandler() // Public so we can call it from Editor scripts
         {
-            DebugUtils.Assert(Application.isPlaying == false, "EditModeUpdate() should never be called in play mode!");
+            DebugUtils.Assert(Application.isPlaying == false, "EditModeUpdateHandler() should never be called in play mode!");
 
             if (enabled)
             {
-                Update();
-                SceneView.RepaintAll();
+                if (isMeshSyncronized)
+                {
+                    if(editModeUpdates % 20 == 0)
+                    {
+                        //Debug.Log("Low freq update");
+                        ForceUpdate();
+                        //SceneView.RepaintAll();
+                    }
+                }
+                else
+                {
+                    //Debug.Log("High freq update");
+                    ForceUpdate();
+                    //SceneView.RepaintAll();
+                }
             }
+
+            editModeUpdates++;
         }
         /// \endcond
 #endif
@@ -206,13 +215,7 @@ namespace Cubiquity
 		}
 		
 		void OnDisable()
-		{
-            // It important to stop the EditModeUpdate() here, as the user might create a volume and then destroy it
-            // before it has finsihed syncing. Unity would then be trying to call EditModeUpdate() on a deleted object.
-#if UNITY_EDITOR
-            StopEditModeUpdate();
-#endif
-			
+		{			
 			// Ideally the VolumeData would handle it's own initialization and shutdown, but it's OnEnable()/OnDisable() methods don't seems to be
 			// called when switching between edit/play mode if it has been turned into an asset. Therefore we do it here as well just to be sure.
 			if(data != null)
@@ -251,20 +254,11 @@ namespace Cubiquity
             }
 
             rootOctreeNodeGameObject = null;
-
-            // We've deleted all our data and it will be rebuilt when we run Update(). This means
-            // we need to start our background EditModeUpdate() function if we are in edit mode.
-#if UNITY_EDITOR
-            StartEditModeUpdateIfInEditMode();
-#endif
         }
 
         protected abstract bool SynchronizeOctree(uint maxSyncOperations);
 		
-		// Public so that we can manually drive it from the editor as required,
-        // but user code should not do this so it's hidden from the docs.
-		/// \cond
-		public void Update()
+		private void Update()
 		{
             if (flushRequested)
             {
@@ -323,19 +317,6 @@ namespace Cubiquity
                 else
                 {
                     isMeshSyncronized = SynchronizeOctree(maxSyncOperationsInEditMode);
-
-                    // Once the mesh is synced we can disconnect this event. Further changes to the volume will only happen due to
-                    // the user changing something and in this case we can drive updates from the code which caused the changes.
-                    // Note that we try to stop EditModeUpdate() even if it's not running (which most of the time it won't be),
-                    // but this shouldn't matter and could even have benefits if somehow we start it multiple times.
-                    if (isMeshSyncronized)
-                    {
-                        // If we reach this point at runtime then UNITY_EDITOR must be defined as we are in edit mode, but we don't know
-                        // this at compile time so the #if is still needed to check that the StopEditModeUpdate() method is defined.
-#if UNITY_EDITOR
-                        StopEditModeUpdate();
-#endif
-                    }
                 }
             }
 		}

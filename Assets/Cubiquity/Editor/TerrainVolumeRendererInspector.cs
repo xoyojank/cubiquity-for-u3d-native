@@ -52,7 +52,7 @@ namespace Cubiquity
                 Volume volume = renderer.gameObject.GetComponent<Volume>();
                 if(volume != null)
                 {
-                    volume.Update();
+                    volume.ForceUpdate();
                 }
             }
 		}
