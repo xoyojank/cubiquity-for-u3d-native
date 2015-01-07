@@ -15,13 +15,30 @@ namespace Cubiquity
                 throw new CubiquityInstallationException("We're sorry, but Cubiquity for Unity3D is not currently supported on your version of Unity.\n" +
                 "At the moment we only support Unity versions 4.3.x, 4.5.x, and 4.6.x.");
 #else
-                // Get the name of the library we will copy (different per platform).
+                // Get the architecture (32 or 64 bit). Is there a better way?
+                string archName = "";
+                switch (IntPtr.Size)
+                {
+                    case 4:
+                        archName = "x86";
+                        break;
+                    case 8:
+                        archName = "x86-64";
+                        break;
+                    default:
+                        throw new CubiquityInstallationException("We're sorry, but Cubiquity for Unity3D is not currently supported on your architecture (IntPtr.Size = " + IntPtr.Size + ").");
+                }
+
+                // Get the name and the path of the library we will copy (different per platform).
 				string fileName = "";
+                string sourcePath = Paths.SDK;
 				switch(Application.platform)
 				{
 				case RuntimePlatform.WindowsEditor:
 				case RuntimePlatform.WindowsPlayer:
 					fileName = "CubiquityC.dll";
+                    sourcePath = System.IO.Path.Combine(sourcePath, "Windows");
+                    sourcePath = System.IO.Path.Combine(sourcePath, archName);
 					break;
 				case RuntimePlatform.OSXEditor:
 				case RuntimePlatform.OSXPlayer:
@@ -33,15 +50,15 @@ namespace Cubiquity
 				default:
 					throw new CubiquityInstallationException("We're sorry, but Cubiquity for Unity3D is not currently supported on your platform");
 				}
-				
-				// Copy the native code library from the SDK to the working directory.
-		        string sourcePath = Paths.SDK;
+		        
+                // Destination path is always the current directory.
 				string destPath = System.IO.Directory.GetCurrentDirectory();
 		
 		        // Use Path class to manipulate file and directory paths. 
 		        string sourceFile = System.IO.Path.Combine(sourcePath, fileName);
 		        string destFile = System.IO.Path.Combine(destPath, fileName);
-				
+
+                // If required, copy the native code library from the SDK to the working directory.
 				if(System.IO.File.Exists(destFile))
 				{
 					byte[] sourceChecksum = GetChecksum(sourceFile);
