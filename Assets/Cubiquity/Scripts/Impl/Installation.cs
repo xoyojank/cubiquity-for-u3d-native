@@ -46,6 +46,8 @@ namespace Cubiquity
 					break;
 				case RuntimePlatform.LinuxPlayer:
 					fileName = "libCubiquityC.so";
+                    sourcePath = System.IO.Path.Combine(sourcePath, "Linux");
+                    sourcePath = System.IO.Path.Combine(sourcePath, archName);
 					break;
 				default:
 					throw new CubiquityInstallationException("We're sorry, but Cubiquity for Unity3D is not currently supported on your platform");
