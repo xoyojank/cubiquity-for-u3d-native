@@ -36,6 +36,19 @@
  *
  * Note that both Magica Voxel and image slices are only appropriate for importing colored cubes volumes. Currently there are no methods for creating terrain volumes *outside* of %Cubiquity for Unity3D, but you can still create them procedurally as discussed later.
  *
+ * \subsection secHeightmaps Importing heightmaps (Experimental!)
+ *
+ * We also provide somewhat experimental support for importing heightmaps and converting them to terrain volumes:
+ *
+ * \par
+ * `ProcessVDB.exe -import -heightmap input.png -terrain output.vdb -scale 0.25`
+ *
+ * Note that only 8-bit input iages are supported. Additionally, the `-scale 0.25` part of the coommand causes the resulting volume to be scaled by a factor of 0.25 compared to the heightmap. Scaling down the heightmap as part of the conversion process makes it much easier to obtain smooth volumes rather than them having a jagged appearance. Therefore you will want to ensure you have a high resolution heightmap as input.
+ *
+ * The generated volume contains two material identifiers. One material identifier is assigned to all the voxels near the surface of the terrain, and the other is assigned to all voxels further below the surface. The assumption is that you wil have a colormap corresponding to your heightmap, and that you will create a material in Unity which projects the colormap from above in the places where the material identifiers indiate that a voxel is part of the surface. The examples folder includes a terrain which has been imported from a heightmap in this way, and you can use the attached material as a starting point.
+ *
+ * This process may seem somewhat convoluted at the moment, which is because this feature is still experimental. Hopefully the workflow will improve in later versions of the package.
+ *
  * \section secGenerating Generating Volume Data Through Scripts
  *
  * %Cubiquity for Unity3D provides a very simple but powerful API for generating volumes through code. Each volume is essentially just a 3D grid of voxel values, and the API gives you direct access to these through the VolumeData's GetVoxel(...) and SetVoxel(...) methods. You can then choose any method you wish to decide which values should be written to which voxels. Common approaches include:
