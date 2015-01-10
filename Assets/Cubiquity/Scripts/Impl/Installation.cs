@@ -42,6 +42,8 @@ namespace Cubiquity
 					break;
 				case RuntimePlatform.OSXEditor:
 				case RuntimePlatform.OSXPlayer:
+					sourcePath = System.IO.Path.Combine(sourcePath, "OSX");
+					// No need to append archName as OSX uses universal binaries.
 					fileName = "libCubiquityC.dylib";
 					break;
 				case RuntimePlatform.LinuxPlayer:
