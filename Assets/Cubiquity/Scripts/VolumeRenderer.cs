@@ -48,12 +48,16 @@ namespace Cubiquity
                 if (mMaterial != value)
                 {
                     mMaterial = value;
+
+                    // All Cubiquity materials have some standard parameters, and we should
+                    // probably refactor these into some kind of base material if Unity supports that?
+                    mMaterial.SetFloat("_height", 0.0f);
+                    computeNormalMultiplier(mMaterial);
+
+                    // The material has been changed, so the LODed version will be regenerated on demand.
                     mMaterialLod1 = null;
                     mMaterialLod2 = null;
-                    /*mMaterialLod1 = new Material(value);
-                    mMaterialLod1.SetFloat("_height", 1.0f);
-                    mMaterialLod2 = new Material(value);
-                    mMaterialLod2.SetFloat("_height", 2.0f);*/
+
                     hasChanged = true;
                 }
             }
@@ -68,7 +72,9 @@ namespace Cubiquity
                 if (mMaterialLod1 == null)
                 {
                     mMaterialLod1 = new Material(mMaterial);
+                    
                     mMaterialLod1.SetFloat("_height", 1.0f);
+                    computeNormalMultiplier(mMaterialLod1);
                 }
                 return mMaterialLod1;
             }
@@ -82,7 +88,9 @@ namespace Cubiquity
                 if (mMaterialLod2 == null)
                 {
                     mMaterialLod2 = new Material(mMaterial);
+
                     mMaterialLod2.SetFloat("_height", 2.0f);
+                    computeNormalMultiplier(mMaterialLod2);
                 }
                 return mMaterialLod2;
             }
@@ -195,5 +203,17 @@ namespace Cubiquity
 		
 		// Dummy start method rqured for the 'enabled' checkbox to show up in the inspector.
 		void Start() { }
+
+        private void computeNormalMultiplier(Material mat)
+        {
+            // We compute surface normals using derivative operations in the fragment shader, but for some reason
+            // these are backwards on Linux. We can correct for this in the shader by setting the multiplier below.
+#if UNITY_STANDALONE_LINUX && !UNITY_EDITOR
+            float normalMultiplier = -1.0f;
+#else
+            float normalMultiplier = 1.0f;
+#endif
+            mat.SetFloat("normalMultiplier", normalMultiplier);
+        }
 	}
 }
