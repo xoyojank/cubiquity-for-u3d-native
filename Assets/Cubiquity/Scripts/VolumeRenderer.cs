@@ -41,6 +41,21 @@ namespace Cubiquity
         {
             get
             {
+                // We have a couple of material properties which need to be set but should not be saved.
+                // The normal multiplier is platform/render system specific and the LOD _height is an
+                // internal detail which should not be exposed throgh the material inspector. We don't
+                // initialize them in the setter because that is not called when materials are serialized
+                // from disk. So instead we make sure the properties are set each time someone accesses this
+                // material property. That might seem slow, but in practice the material is not accessed often,
+                // because it is copied to the mesh and that copy is used for rendering.
+                if(mMaterial != null)
+                {
+                    // All Cubiquity materials have some standard parameters, and we should
+                    // probably refactor these into some kind of base material if Unity supports that?
+                    mMaterial.SetFloat("_height", 0.0f);
+                    computeNormalMultiplier(mMaterial);
+                }
+
                 return mMaterial;
             }
             set
@@ -48,11 +63,6 @@ namespace Cubiquity
                 if (mMaterial != value)
                 {
                     mMaterial = value;
-
-                    // All Cubiquity materials have some standard parameters, and we should
-                    // probably refactor these into some kind of base material if Unity supports that?
-                    mMaterial.SetFloat("_height", 0.0f);
-                    computeNormalMultiplier(mMaterial);
 
                     // The material has been changed, so the LODed version will be regenerated on demand.
                     mMaterialLod1 = null;
@@ -71,10 +81,8 @@ namespace Cubiquity
             {
                 if (mMaterialLod1 == null)
                 {
-                    mMaterialLod1 = new Material(mMaterial);
-                    
+                    mMaterialLod1 = new Material(mMaterial);                    
                     mMaterialLod1.SetFloat("_height", 1.0f);
-                    computeNormalMultiplier(mMaterialLod1);
                 }
                 return mMaterialLod1;
             }
@@ -88,9 +96,7 @@ namespace Cubiquity
                 if (mMaterialLod2 == null)
                 {
                     mMaterialLod2 = new Material(mMaterial);
-
                     mMaterialLod2.SetFloat("_height", 2.0f);
-                    computeNormalMultiplier(mMaterialLod2);
                 }
                 return mMaterialLod2;
             }
@@ -209,11 +215,10 @@ namespace Cubiquity
             // We compute surface normals using derivative operations in the fragment shader, but for some reason
             // these are backwards on Linux. We can correct for this in the shader by setting the multiplier below.
 #if UNITY_STANDALONE_LINUX && !UNITY_EDITOR
-            float normalMultiplier = -1.0f;
+            mat.SetFloat("normalMultiplier", -1.0f);
 #else
-            float normalMultiplier = 1.0f;
+            mat.SetFloat("normalMultiplier", 1.0f);
 #endif
-            mat.SetFloat("normalMultiplier", normalMultiplier);
         }
 	}
 }
