@@ -4,9 +4,7 @@ Shader "FakeColoredCubes"
 	SubShader
 	{
 		// Set up for transparent rendering.
-		Tags { "Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent" }		
-		ZWrite Off
-		Blend SrcAlpha OneMinusSrcAlpha
+		Tags { "RenderType" = "Opaque" }
          
 		CGPROGRAM
 		
@@ -16,7 +14,7 @@ Shader "FakeColoredCubes"
 		#include "../../../Resources/Shaders/ColoredCubesUtilities.cginc"
 		
 		#pragma multi_compile DIFFUSE_TEXTURE_OFF DIFFUSE_TEXTURE_ON
-		#pragma surface surf Lambert alpha
+		#pragma surface surf Lambert addshadow
 		#pragma target 3.0
 		#pragma glsl		
 
@@ -28,7 +26,6 @@ Shader "FakeColoredCubes"
 		// These properties are specific to the fake colored cube.
 		float4 _CubeColor;
 		float4 _CubePosition; // In volume space
-		float _CubeOpacity;
 
 		struct Input
 		{
@@ -56,7 +53,7 @@ Shader "FakeColoredCubes"
 			
 			// Set the appropriate attributes of the output struct.
 			o.Albedo = (_CubeColor.rgb + float3(noise, noise, noise)) * diffuseVal;
-			o.Alpha = _CubeOpacity;
+			o.Alpha = 1.0f;
 			o.Normal = unpackedNormal;
 		}
 		ENDCG

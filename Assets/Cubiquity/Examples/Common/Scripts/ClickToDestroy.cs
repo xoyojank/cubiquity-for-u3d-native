@@ -99,7 +99,6 @@ public class ClickToDestroy : MonoBehaviour
 	{
 		// Set up a material which we will apply to the cubes which we spawn to replace destroyed voxels.
 		Material fakeVoxelMaterial = Resources.Load("Materials/FakeColoredCubes", typeof(Material)) as Material;
-		fakeVoxelMaterial.SetFloat("_CubeOpacity", 1.0f);
 		Texture diffuseMap = coloredCubesVolume.GetComponent<ColoredCubesVolumeRenderer>().material.GetTexture("_DiffuseMap");
 		if(diffuseMap != null)
 		{
@@ -153,7 +152,6 @@ public class ClickToDestroy : MonoBehaviour
 							{
 								GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
 								cube.AddComponent<Rigidbody>();
-								cube.AddComponent<FadeOutGameObject>();
 								cube.transform.parent = coloredCubesVolume.transform;
 								cube.transform.localPosition = new Vector3(x, y, z);
 								cube.transform.localRotation = Quaternion.identity;
@@ -174,6 +172,10 @@ public class ClickToDestroy : MonoBehaviour
 								
 								cube.rigidbody.AddTorque(xTorque, yTorque, zTorque);
 								cube.rigidbody.AddForce((explosionForce.normalized + up) * 100.0f);
+
+                                // Cubes are just a temporary visual effect, and we delete them after a few seconds.
+                                float lifeTime = Random.Range(8.0f, 12.0f);
+                                Destroy(cube, lifeTime);
 							}
 						}
 					}
