@@ -32,6 +32,8 @@ namespace Cubiquity
         [System.NonSerialized]
         public bool hasChanged = true;
         /// \endcond
+
+        public bool useInEditMode = false;
 		
 		// Dummy start method rqured for the 'enabled' checkbox to show up in the inspector.
 		void Start() { }
