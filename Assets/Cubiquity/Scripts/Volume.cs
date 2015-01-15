@@ -331,7 +331,10 @@ namespace Cubiquity
         /// \cond
         public void OnGUI()
         {            
-            GUILayout.BeginArea(new Rect(10, 10, 300, 300));
+            // This code doesn't belong in Volume? There should
+            // probably be one global copy of this, not one per volume.
+
+            /*GUILayout.BeginArea(new Rect(10, 10, 300, 300));
             GUI.skin.label.alignment = TextAnchor.MiddleLeft;
             string debugPanelMessage = "Cubiquity Debug Panel\n";
             if(isMeshSyncronized)
@@ -343,7 +346,7 @@ namespace Cubiquity
                 debugPanelMessage += "Mesh sync: In progress...";
             }
             GUILayout.Box(debugPanelMessage);
-            GUILayout.EndArea();
+            GUILayout.EndArea();*/
         }
         /// \endcond
 
