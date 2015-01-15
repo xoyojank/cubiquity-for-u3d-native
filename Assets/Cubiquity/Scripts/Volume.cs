@@ -229,10 +229,14 @@ namespace Cubiquity
 			UnregisterVolumeData();
 		}
 
-        private void RequestFlushInternalData()
+        // Public as the editor sometimes needs to flush the internal data,
+        // but user code should not do this so it's hidden from the docs.
+        /// \cond
+        public void RequestFlushInternalData()
         {
             flushRequested = true;
         }
+        /// \endcond
 
         private void FlushInternalData()
         {
