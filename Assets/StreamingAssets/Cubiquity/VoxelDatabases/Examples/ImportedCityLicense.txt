@@ -1,4 +1,4 @@
-This work ('Capitol' voxel city) was created by William Rigby is licensed under a Creative Commons Attribution 4.0 International License. You are allowed:
+This work (ImportedCity) was created by William Rigby is licensed under a Creative Commons Attribution 4.0 International License. You are allowed:
 	• to Share - to download it, run it on your server, send it to friends etc.
 	• to Adapt - remix, transform, and build upon the material for any purpose, even commercially.
 
