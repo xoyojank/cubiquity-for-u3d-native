@@ -13,3 +13,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   basePath: 0
   relativePathToVoxelDatabase: Examples/VoxeliensColoredCubes.vdb
+  mWritePermissions: 0
