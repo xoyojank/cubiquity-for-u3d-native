@@ -1,0 +1,1 @@
+This folder contains data in various formats which can be imported into Cubiquity. Please see the user manual for details.
