@@ -74,7 +74,7 @@ NavMeshSettings:
     widthInaccuracy: 16.666666
     heightInaccuracy: 10
   m_NavMesh: {fileID: 0}
---- !u!21 &68990477
+--- !u!21 &559697843
 Material:
   serializedVersion: 3
   m_ObjectHideFlags: 0
@@ -210,6 +210,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c245eb6d16ab5d44c8e2b197a4f2d9de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mUseInEditMode: 0
 --- !u!114 &1324738884
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -221,9 +222,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92724a2f276b54f44877f83b61cf602a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  material: {fileID: 68990477}
+  mMaterial: {fileID: 559697843}
   mCastShadows: 1
   mReceiveShadows: 1
+  mShowWireframe: 0
+  mLodThreshold: 1
+  mMinimumLOD: 0
 --- !u!114 &1324738885
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -235,7 +239,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27a2f374dab8c1140bbc2e9f918cba37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mData: {fileID: 11400000, guid: a10d6739dc3e1604aa4fc6cbce8b237b, type: 2}
+  mData: {fileID: 11400000, guid: 043e6084ac7eaa944ba863b1c755bb39, type: 2}
 --- !u!4 &1324738886
 Transform:
   m_ObjectHideFlags: 0
