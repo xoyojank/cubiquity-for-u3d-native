@@ -153,14 +153,14 @@ namespace Cubiquity
 
         private bool flushRequested;
 
-        private int editModeUpdates = 0;
-
         // ------------------------------------------------------------------------------
         // These editor-only functions are used to emulate repeated calls to Update() in edit mode. Setting the '[ExecuteInEditMode]' attribute does cause
         // Update() to be called automatically in edit mode, but it only happens in response to user-driven events such as moving the mouse in the editor
         // window. We want to support background loading of our terrain and so we hook into the 'EditorApplication.update' event for this purpose.
         // ------------------------------------------------------------------------------
 #if UNITY_EDITOR
+
+        private int editModeUpdates = 0;
 
         // Public so that we can manually drive it from the editor as required,
         // but user code should not do this so it's hidden from the docs.
