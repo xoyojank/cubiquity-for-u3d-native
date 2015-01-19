@@ -11,7 +11,7 @@ Shader "FakeColoredCubes"
 		// We include this file so we can access functionality such as noise from the colored cubes shader.
 		// Using the relative path here is slightly error-prone, but it seems a Unity bug prevents us from using 
 		// the absolute path: http://forum.unity3d.com/threads/custom-cginc-relative-to-assets-folder-in-dx11.163271/
-		#include "../../../Resources/Shaders/ColoredCubesUtilities.cginc"
+		#include "../../../../Resources/Shaders/ColoredCubesUtilities.cginc"
 		
 		#pragma multi_compile DIFFUSE_TEXTURE_OFF DIFFUSE_TEXTURE_ON
 		#pragma surface surf Lambert addshadow
