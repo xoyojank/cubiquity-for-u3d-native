@@ -283,7 +283,7 @@ namespace Cubiquity
 				if(Application.isPlaying)
 				{
 					Debug.LogWarning("You should not provide a relative path when creating empty volume " +
-						"data in play mode, because the streaming assets folder might not have write access..");
+						"data in play mode, because the streaming assets folder might not have write access.");
 				}
 
 				// As the user is providing a name for the voxel database then it follows that they want to make use of it later.
