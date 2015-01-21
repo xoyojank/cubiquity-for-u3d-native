@@ -7,10 +7,10 @@ Version 1.2.0
 -------------
  - Features
   - ConvertToVDB and ConvertToImages now replaced by ProcessVDB tool
-   - Supports import of heightmaps
-  - Experimental support for level-of-detail on TerrainVolumes.
+   - Supports experimental import of heightmaps
   - Performance and memory gains due to use of octree and timestamping.
   - Can now optionally use \unsafe flag for faster transfer of mesh data.
+  - Provides 64-bit versions of native code binaries.
 
 Version 1.1.3
 -------------
