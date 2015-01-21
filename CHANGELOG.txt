@@ -11,10 +11,13 @@ Version 1.2.0
   - Performance and memory gains due to use of octree and timestamping.
   - Can now optionally use \unsafe flag for faster transfer of mesh data.
   - Provides 64-bit versions of native code binaries.
+  - Coliders can optioanlly exist in Unity editor for integration with other tools. 
+ - Bug fixes
+  - Fixed problem saving scenes on Unity 4.6
 
 Version 1.1.3
 -------------
- - Bugfixes
+ - Bug fixes
   - Fixed problems with terrain volume collision detection and added test.
  
 Version 1.1.2
