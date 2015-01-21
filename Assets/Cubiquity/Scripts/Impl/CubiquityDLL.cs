@@ -29,6 +29,7 @@ namespace Cubiquity
 			const uint requiredMajorVersion = 1;
 			const uint requiredMinorVersion = 2;
 			const uint requiredPatchVersion = 0;
+            const uint requiredBuildVersion = 0;
 			
 			// This static constructor is supposed to make sure that the Cubiquity.dll is in the right place before the DllImport is done.
 			// It doesn't seem to work, because in Standalone builds the message below is printed after the exception about the .dll not
@@ -42,15 +43,17 @@ namespace Cubiquity
 					uint majorVersion;
 					uint minorVersion;
 					uint patchVersion;
-					cuGetVersionNumber(out majorVersion, out minorVersion, out patchVersion);
+                    uint buildVersion;
+					cuGetVersionNumber(out majorVersion, out minorVersion, out patchVersion, out buildVersion);
 					
 					if ((majorVersion != requiredMajorVersion) ||
 						(minorVersion != requiredMinorVersion) ||
-						(patchVersion != requiredPatchVersion))
+						(patchVersion != requiredPatchVersion) ||
+                        (buildVersion != requiredBuildVersion))
 					{
 						throw new CubiquityInstallationException("Wrong version of Cubiquity native code library found! " +
-							"Expected version " + requiredMajorVersion + "." + requiredMinorVersion + "." + requiredPatchVersion + 
-							" but found version " + majorVersion + "." + minorVersion + "." + patchVersion + ".\n" +
+                            "Expected version " + requiredMajorVersion + "." + requiredMinorVersion + "." + requiredPatchVersion + "." + requiredBuildVersion +
+                            " but found version " + majorVersion + "." + minorVersion + "." + patchVersion + "." + buildVersion + ".\n" +
 							"If you are using the development version of Cubiquity (from the Git repository) then try a stable snapshot instead.\n");
 					}
 					
@@ -78,10 +81,10 @@ namespace Cubiquity
 			// Version functions
 			////////////////////////////////////////////////////////////////////////////////
 			[DllImport (dllToImport)]
-			private static extern int cuGetVersionNumber(out uint majorVersion, out uint minorVersion, out uint patchVersion);
-			public static void GetVersionNumber(out uint majorVersion, out uint minorVersion, out uint patchVersion)
+            private static extern int cuGetVersionNumber(out uint majorVersion, out uint minorVersion, out uint patchVersion, out uint buildVersion);
+            public static void GetVersionNumber(out uint majorVersion, out uint minorVersion, out uint patchVersion, out uint buildVersion)
 			{
-				Validate(cuGetVersionNumber(out majorVersion, out minorVersion, out patchVersion));
+                Validate(cuGetVersionNumber(out majorVersion, out minorVersion, out patchVersion, out buildVersion));
 			}
 			
 			////////////////////////////////////////////////////////////////////////////////

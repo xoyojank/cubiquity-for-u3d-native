@@ -112,6 +112,12 @@ namespace Cubiquity
 				settingsPressed = true;
 			}
 			EditorGUILayout.EndHorizontal();
+
+            if ((sculptPressed || smoothPressed || paintPressed) && (terrainVolume.data != null) && 
+                (terrainVolume.data.writePermissions == VolumeData.WritePermissions.ReadOnly))
+            {
+                EditorGUILayout.HelpBox("The attached volume data (" + terrainVolume.data.name + ") is set to read only! Changes you make here cannot be saved.", MessageType.Error);
+            }
 				
 			if(sculptPressed)
 			{

@@ -1,5 +1,5 @@
 /** \page pageQuickStart Quick Start
- * 
+ *
  * %Cubiquity for Unity3D is designed to be as easy and intuitive as possible, and so this quick start guide should be all you need to begin creating voxel worlds for your games. If you have any difficulties or wish to follow up some topics in more depth then you can see the appropriate sections of this user manual for more details.
  *
  * \section secFirstTerrainVolume Creating your first voxel terrain
@@ -7,7 +7,7 @@
  * %Cubiquity for Unity3D supports two types of voxel environments. We will begin by looking at the *Terrain Volume* which, as the name suggests, is intended for representing natural terrains. From a user point of view it is similar to Unity3D's built-in terrain, but additionally supports caves, overhangs, and flexible run-time editing.
  *
  * Begin by opening the scene 'EmptySceneWithLighting' in the `Assets/Cubiquity/Examples` folder. Now create a Terrain Volume from within the Unity3D editor by going to the main menu and selecting `GameObject -> Create Other -> Terrain Volume`. The terrain volume will be created at the origin of your scene and should appear as shown in the image below:
- * 
+ *
  * \image html NewTerrainVolume.jpg "A newly created terrain volume"
  *
  * \subsection secEditing Editing the voxel terrain
@@ -32,7 +32,7 @@
  *
  * Let's try replacing the volume data with one of the example volumes which comes with %Cubiquity. We begin by creating a new asset from an existing .vdb file (see \ref pagePrinciples "Main Principles" if you are not familiar with these concepts). To do this we go to `Assets -> Create -> Colored Cubes Volume Data -> From Voxel Database...` and select 'StreamingAssets\Cubiquity\VoxelDatabases\Examples\VoxeliensColoredCubes.vdb' (this is a map from our previous game <a href="http://www.volumesoffun.com/voxeliens/">Voxeliens</a>). This will create an asset called 'VoxeliensColoredCubes' in your project, and if you click on it an look at the inspector you can see it links to the .vdb file you selected.
  *
- * We now wish to tell %Cubiquity to use the newly created asset as the data for the colored cubes volume which exists in our scene. To do this, select the colored  cubes volume, go to 'Settings' in the inspector, and click the small circle next to the 'Volume Data' field. From here you can select the 'VoxeliensColoredCubes' asset which will cause it be be used as the source data for the volume.
+ * We now wish to tell %Cubiquity to use the newly created asset as the data for the colored cubes volume which exists in our scene. To do this, select the colored cubes volume, go to 'Settings' in the inspector, and click the small circle next to the 'Volume Data' field. From here you can select the 'VoxeliensColoredCubes' asset which will cause it be be used as the source data for the volume.
  *
  * \image html VoxeliensColoredCubesVolume.jpg "The colored cubes volume after importing our map from Voxeliens"
  *
@@ -43,6 +43,12 @@
  * When you press play you should find you are able to fly around the scene, and that if you left-click on the volume it will create a small explosion which breaks off the cubes in the surrounding area. The separated cubes then fall under gravity and can bounce around the scene. This is simply an example of the kind of functionality we can achieve, and you can learn more by reading the <a href="annotated.html"><b>Class List</b></a> later in this user manual, or by looking at the code in ClickToDestroy.cs.
  *
  * \image html ColoredCubesVolumeDestruction.jpg "Destroying a colored cubes volume at runtime"
+ *
+ * \subsection secOtherVolumeData Other volume data
+ *
+ * If you want to see something a bit more impressive than this small terrain then you can also look at our city map. Return to edit mode, and again select the colored cubes volume, go to 'Settings' in the inspector, and click the small circle next to the 'Volume Data' field. From here you can select the 'ImportedCity' asset. This volume was imported from the game <a href="http://buildandshoot.com/">Build and Shoot</a> using our 'ProcessVDB' tool. For more information on importing volume data see the \ref pageObtainingVolDat "Obtaining Volume Data" section of this user manual.
+ *
+ * \image html City.png "A city map imported into Cubiquity from the game 'Build and Shoot'"
  *
  * That wraps up the quick start, so feel free to play around with the system some more and move on to the other chapters when you feel ready.
  *

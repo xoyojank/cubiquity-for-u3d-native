@@ -90,23 +90,7 @@ namespace Cubiquity
         protected override bool SynchronizeOctree(uint availableSyncOperations)
 		{
             VolumeCollider volumeCollider = gameObject.GetComponent<VolumeCollider>();
-
-            // FIXME - This doesn't really belong in Synchronize()
 			ColoredCubesVolumeRenderer volumeRenderer = gameObject.GetComponent<ColoredCubesVolumeRenderer>();
-			if(volumeRenderer != null)
-			{
-				if(volumeRenderer.material != null)
-				{		
-					// We compute surface normals using derivative operations in the fragment shader, but for some reason
-					// these are backwards on Linux. We can correct for this in the shader by setting the multiplier below.
-					#if UNITY_STANDALONE_LINUX && !UNITY_EDITOR
-						float normalMultiplier = -1.0f;
-					#else
-						float normalMultiplier = 1.0f;
-					#endif					
-					volumeRenderer.material.SetFloat("normalMultiplier", normalMultiplier);
-				}
-			}
 
 			Vector3 camPos = CameraUtils.getCurrentCameraPosition();
 
@@ -117,7 +101,11 @@ namespace Cubiquity
 
             int minimumLOD = GetComponent<VolumeRenderer>() ? GetComponent<VolumeRenderer>().minimumLOD : 0;
 
-            if (volumeRenderer.hasChanged)
+            // Although the LOD system is partially functional I don't feel it's ready for release yet.
+            // The following line disables it by forcing the highest level of detail to always be used.
+            minimumLOD = 0;
+
+            if (volumeRenderer != null && volumeRenderer.hasChanged)
             {
                 CubiquityDLL.SetLodRange(data.volumeHandle.Value, minimumLOD, 0);
             }

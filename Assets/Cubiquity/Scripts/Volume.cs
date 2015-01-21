@@ -153,14 +153,14 @@ namespace Cubiquity
 
         private bool flushRequested;
 
-        private int editModeUpdates = 0;
-
         // ------------------------------------------------------------------------------
         // These editor-only functions are used to emulate repeated calls to Update() in edit mode. Setting the '[ExecuteInEditMode]' attribute does cause
         // Update() to be called automatically in edit mode, but it only happens in response to user-driven events such as moving the mouse in the editor
         // window. We want to support background loading of our terrain and so we hook into the 'EditorApplication.update' event for this purpose.
         // ------------------------------------------------------------------------------
 #if UNITY_EDITOR
+
+        private int editModeUpdates = 0;
 
         // Public so that we can manually drive it from the editor as required,
         // but user code should not do this so it's hidden from the docs.
@@ -229,10 +229,14 @@ namespace Cubiquity
 			UnregisterVolumeData();
 		}
 
-        private void RequestFlushInternalData()
+        // Public as the editor sometimes needs to flush the internal data,
+        // but user code should not do this so it's hidden from the docs.
+        /// \cond
+        public void RequestFlushInternalData()
         {
             flushRequested = true;
         }
+        /// \endcond
 
         private void FlushInternalData()
         {
@@ -327,7 +331,10 @@ namespace Cubiquity
         /// \cond
         public void OnGUI()
         {            
-            GUILayout.BeginArea(new Rect(10, 10, 300, 300));
+            // This code doesn't belong in Volume? There should
+            // probably be one global copy of this, not one per volume.
+
+            /*GUILayout.BeginArea(new Rect(10, 10, 300, 300));
             GUI.skin.label.alignment = TextAnchor.MiddleLeft;
             string debugPanelMessage = "Cubiquity Debug Panel\n";
             if(isMeshSyncronized)
@@ -339,7 +346,7 @@ namespace Cubiquity
                 debugPanelMessage += "Mesh sync: In progress...";
             }
             GUILayout.Box(debugPanelMessage);
-            GUILayout.EndArea();
+            GUILayout.EndArea();*/
         }
         /// \endcond
 

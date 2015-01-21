@@ -135,26 +135,31 @@ namespace Cubiquity
 
                             // Set up the collision mesh
                             VolumeCollider volumeCollider = voxelTerrainGameObject.GetComponent<VolumeCollider>();
-                            if ((volumeCollider != null) && (Application.isPlaying))
+                            if (volumeCollider != null)
                             {
-                                // I'm not quite comfortable with this. For some reason we have to create this new mesh, fill it,
-                                // and set it as the collider's shared mesh, whereas I would rather just pass the collider's sharedMesh
-                                // straight to the functon that fills it. For some reason that doesn't work properly, and we see
-                                // issues with objects falling through terrain or not updating when part of the terrain is deleted.
-                                // It's to be investigated further... perhaps we could try deleting and recreating the MeshCollider?
-                                // Still, the approach below seems to work properly.
-                                Mesh collisionMesh = new Mesh();
-                                if (voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(TerrainVolume))
-                                {
-                                    MeshConversion.BuildMeshFromNodeHandleForTerrainVolume(collisionMesh, nodeHandle, true);
-                                }
-                                else if (voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(ColoredCubesVolume))
-                                {
-                                    MeshConversion.BuildMeshFromNodeHandleForColoredCubesVolume(collisionMesh, nodeHandle, true);
-                                }
+                                bool useCollider = volumeCollider.useInEditMode || Application.isPlaying;
 
-                                MeshCollider meshCollider = nodeGameObject.GetOrAddComponent<MeshCollider>() as MeshCollider;
-                                meshCollider.sharedMesh = collisionMesh;
+                                if (useCollider)
+                                {
+                                    // I'm not quite comfortable with this. For some reason we have to create this new mesh, fill it,
+                                    // and set it as the collider's shared mesh, whereas I would rather just pass the collider's sharedMesh
+                                    // straight to the functon that fills it. For some reason that doesn't work properly, and we see
+                                    // issues with objects falling through terrain or not updating when part of the terrain is deleted.
+                                    // It's to be investigated further... perhaps we could try deleting and recreating the MeshCollider?
+                                    // Still, the approach below seems to work properly.
+                                    Mesh collisionMesh = new Mesh();
+                                    if (voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(TerrainVolume))
+                                    {
+                                        MeshConversion.BuildMeshFromNodeHandleForTerrainVolume(collisionMesh, nodeHandle, true);
+                                    }
+                                    else if (voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(ColoredCubesVolume))
+                                    {
+                                        MeshConversion.BuildMeshFromNodeHandleForColoredCubesVolume(collisionMesh, nodeHandle, true);
+                                    }
+
+                                    MeshCollider meshCollider = nodeGameObject.GetOrAddComponent<MeshCollider>() as MeshCollider;
+                                    meshCollider.sharedMesh = collisionMesh;
+                                }
                             }
                         }
                         // If there is no mesh in Cubiquity then we make sure there isn't one in Unity.
