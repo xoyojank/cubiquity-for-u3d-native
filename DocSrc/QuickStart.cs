@@ -18,7 +18,7 @@
  *
  * Take some time to experiment with the editing tools which are available. You can choose a tool to apply (sculpt, smooth, etc) by selecting one of the buttons at the top of the inspector, and then choose your desired brush options and/or materials. Left-clicking on the terrain will then apply the tool.
  *
- * Now lets try adding a collider so that other objects can interact with the terrain. To do this we add a 'Terrain Volume Collider' component through `Add Component -> Scripts -> Cubiquity -> Terrain Volume Collider`. Note that this is different from the 'MeshCollider' which is often added to other Unity objects. 
+ * Now lets try adding a collider so that other objects can interact with the terrain. To do this we add a 'Terrain Volume Collider' component through `Add Component -> Scripts -> %Cubiquity -> Terrain Volume Collider`. Note that this is different from the 'MeshCollider' which is often added to other Unity objects. 
  *
  * To test the collisions we can now import one of the standard Unity character controllers and walk around the terrain in play mode. Be aware that it can take a few seconds for the terrain to generate after you press the play button, so for this reason you should set your character to start a hundred units or so above the terrain. This way the terrain will have time to load before the character reaches ground level (there are better approaches, but this is fine for quick-start purposes).
  *
@@ -26,7 +26,7 @@
  *
  * The TerrainVolume presented in the previous section is intended for creating real-world terrain with realistic textures and materials applied. But %Cubiquity for Unity3D also supports a second type of voxel environment in which the world is built out of millions of colored cubes. This is not so realistic, but is an increasingly popular approach which has a strong stylistic appeal. Almost any kind of world can be built in this way, and it again provides opportunities for editing the world in response to player actions or gameplay events.
  *
- * To see this in action you should begin by deleting the terrain volume which you currently have in the scene from the previous section. You should also delete the character controller which you added. You can then create a *Colored Cubes Volume* by going to the main menu and selecting `GameObject -> Create Other -> Colored Cubes Volume`. The initial volume should look like that shown below:
+ * To see this in action you should return to edit mode and delete the terrain volume which you currently have in the scene from the previous section. You should also delete the character controller which you added. You can then create a *Colored Cubes Volume* by going to the main menu and selecting `GameObject -> Create Other -> Colored Cubes Volume`. The initial volume should look like that shown below:
  *
  * \image html NewColoredCubesVolume.jpg "A newly created colored cubes volume"
  *
@@ -40,7 +40,7 @@
  *
  * \subsection secRuntimeModifications Modifying the volume at run-time
  *
- * We will now give a quick demonstration of how the volume can be modified during gameplay. Go to the 'Assets/Cubiquity/Examples/SharedAssets/Scripts' folder and find the 'ClickToDestroy' script. Drag this on to the Colored Cubes Volume in the scene hierarchy to add it as a component. We will also want a collider for this to work sorrectly so add one via `Add Component -> Scripts -> Cubiquity -> Colored Cubes Volume Collider` (note that a Colored Cubes Volume Collider is different to the Terrain Volume Collider you used in the earlier example)
+ * We will now give a quick demonstration of how the volume can be modified during gameplay. Go to the 'Assets/Cubiquity/Examples/SharedAssets/Scripts' folder and find the 'ClickToDestroy' script. Drag this on to the Colored Cubes Volume in the scene hierarchy to add it as a component. We will also want a collider for this to work correctly so add one via `Add Component -> Scripts -> %Cubiquity -> Colored Cubes Volume Collider` (note that a Colored Cubes Volume Collider is different to the Terrain Volume Collider you used in the earlier example)
  *
  * When you press play you should find you are able to fly around the scene, and that if you left-click on the volume it will create a small explosion which breaks off the cubes in the surrounding area. The separated cubes then fall under gravity and can bounce around the scene. This is simply an example of the kind of functionality we can achieve, and you can learn more by reading the <a href="annotated.html"><b>Class List</b></a> later in this user manual, or by looking at the code in ClickToDestroy.cs.
  *
