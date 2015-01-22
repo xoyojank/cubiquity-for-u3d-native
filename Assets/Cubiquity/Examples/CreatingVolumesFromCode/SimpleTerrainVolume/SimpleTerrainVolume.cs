@@ -8,7 +8,7 @@ public class SimpleTerrainVolume : MonoBehaviour
 	// Use this for initialization
 	void Start ()
     {
-        // Create a volume the same size as the VoxelForge volume
+        // Dimensions of our volume.
         int width = 64;
         int height = 64;
         int depth = 64;
