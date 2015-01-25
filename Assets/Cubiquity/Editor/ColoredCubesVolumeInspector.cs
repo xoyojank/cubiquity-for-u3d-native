@@ -108,17 +108,6 @@ namespace Cubiquity
 				coloredCubesVolume.data = EditorGUILayout.ObjectField("Volume Data: ", coloredCubesVolume.data, typeof(ColoredCubesVolumeData), true) as ColoredCubesVolumeData;
 			}
 			
-			/*if(GUILayout.Button("Load Voxel Database..."))
-			{			
-				string pathToVoxelDatabase = EditorUtility.OpenFilePanel("Choose a Voxel Database (.vdb) file to load", Paths.voxelDatabases, "vdb");
-				
-				string relativePathToVoxelDatabase = Paths.MakeRelativePath(Paths.voxelDatabases + Path.DirectorySeparatorChar, pathToVoxelDatabase);
-				
-				ColoredCubesVolumeData data = VolumeData.CreateFromVoxelDatabase<ColoredCubesVolumeData>(relativePathToVoxelDatabase);
-				
-				coloredCubesVolume.data = data;
-			}*/
-			
 			if(!Licensing.isCommercial)
 			{
 				// Warn about unlicensed version.
@@ -136,7 +125,7 @@ namespace Cubiquity
 		}
 		
 		public void OnSceneGUI()
-		{
+		{            
 			if(addMode || deleteMode || paintMode)
 			{
 				//Debug.Log ("ColoredCubesVolumeEditor.OnSceneGUI()");
@@ -174,6 +163,9 @@ namespace Cubiquity
 					}
 					
 					Selection.activeGameObject = coloredCubesVolume.gameObject;
+
+                    // Need to force an update, otherwise there is noticable lag when painting voxels.
+                    coloredCubesVolume.ForceUpdate();
 				}
 				else if ( e.type == EventType.Layout )
 			    {

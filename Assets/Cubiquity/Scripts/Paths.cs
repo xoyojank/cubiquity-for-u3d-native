@@ -46,37 +46,5 @@ namespace Cubiquity
 		{
 			get { return Application.streamingAssetsPath + "/Cubiquity/VoxelDatabases/CreatedForAssets"; }
 		}
-		
-		/// Utility method to construct a relative path between its two inputs.
-		/**
-		 * \param fromPath The path to start from
-		 * \param toPath The path to finish at
-		 * \return A string containing a relative path between the two inputs.
-		 */
-		// Implementation taken from here: http://stackoverflow.com/a/340454
-		public static String MakeRelativePath(String fromPath, String toPath)
-	    {
-	        if (String.IsNullOrEmpty(fromPath)) throw new ArgumentNullException("fromPath");
-	        if (String.IsNullOrEmpty(toPath))   throw new ArgumentNullException("toPath");
-	
-	        Uri fromUri = new Uri(fromPath);
-	        Uri toUri = new Uri(toPath);
-	
-	        if (fromUri.Scheme != toUri.Scheme) { return toPath; } // path can't be made relative.
-	
-	        Uri relativeUri = fromUri.MakeRelativeUri(toUri);
-	        String relativePath = Uri.UnescapeDataString(relativeUri.ToString());
-	
-	        if (toUri.Scheme.ToUpperInvariant() == "FILE")
-	        {
-				// Note: We don't use the platforms 'DirectorySeparatorChar' here because we save the result (e.g. path to .vdb)
-				// and we need that to work cross-platform. E.g., if we create a VolumeData asset from Windows then we should not
-				// use the Windows '\' seperator as this won't work when we try to load the asset on OS X.
-	            relativePath = relativePath.Replace(Path.DirectorySeparatorChar, '/');
-				relativePath = relativePath.Replace(Path.AltDirectorySeparatorChar, '/');
-	        }
-	
-	        return relativePath;
-	    }
 	}
 }

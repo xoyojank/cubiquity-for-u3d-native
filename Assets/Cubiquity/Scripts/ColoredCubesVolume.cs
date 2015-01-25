@@ -87,52 +87,68 @@ namespace Cubiquity
 	    }
 		
 		/// \cond
-		protected override void Synchronize()
-		{			
-			base.Synchronize();
-			
+        protected override bool SynchronizeOctree(uint availableSyncOperations)
+		{
+            VolumeCollider volumeCollider = gameObject.GetComponent<VolumeCollider>();
 			ColoredCubesVolumeRenderer volumeRenderer = gameObject.GetComponent<ColoredCubesVolumeRenderer>();
-			if(volumeRenderer != null)
-			{
-				if(volumeRenderer.material != null)
-				{		
-					// We compute surface normals using derivative operations in the fragment shader, but for some reason
-					// these are backwards on Linux. We can correct for this in the shader by setting the multiplier below.
-					#if UNITY_STANDALONE_LINUX && !UNITY_EDITOR
-						float normalMultiplier = -1.0f;
-					#else
-						float normalMultiplier = 1.0f;
-					#endif					
-					volumeRenderer.material.SetFloat("normalMultiplier", normalMultiplier);
-				}
-			}
-			
-			// Syncronize the mesh data.
-			if(data != null)
-			{
-				// Syncronize the mesh data.
-				if(data.volumeHandle.HasValue)
+
+			Vector3 camPos = CameraUtils.getCurrentCameraPosition();
+
+            // This is messy - perhaps the LOD thresold shold not be a parameter to update. Instead it could be passed
+            // as a parameter during traversal, so different traversal could retrieve differnt LODs. We then wouldn't
+            // want a single 'renderThisNode' member of Cubiquity nodes, but instead some threshold we could compare to.
+            float lodThreshold = GetComponent<VolumeRenderer>() ? GetComponent<VolumeRenderer>().lodThreshold : 0.0f;
+
+            int minimumLOD = GetComponent<VolumeRenderer>() ? GetComponent<VolumeRenderer>().minimumLOD : 0;
+
+            // Although the LOD system is partially functional I don't feel it's ready for release yet.
+            // The following line disables it by forcing the highest level of detail to always be used.
+            minimumLOD = 0;
+
+            // Next line commented out so the system starts up with LOD disabled.
+            //if (volumeRenderer != null && volumeRenderer.hasChanged)
+            {
+                CubiquityDLL.SetLodRange(data.volumeHandle.Value, minimumLOD, 0);
+            }
+
+            bool cubiquityUpToDate = CubiquityDLL.UpdateVolume(data.volumeHandle.Value, camPos.x, camPos.y, camPos.z, lodThreshold);
+
+			if(CubiquityDLL.HasRootOctreeNode(data.volumeHandle.Value) == 1)
+			{                        
+				uint rootNodeHandle = CubiquityDLL.GetRootOctreeNode(data.volumeHandle.Value);
+						
+				if(rootOctreeNodeGameObject == null)
 				{
-					CubiquityDLL.UpdateVolume(data.volumeHandle.Value);
-					
-					if(CubiquityDLL.HasRootOctreeNode(data.volumeHandle.Value) == 1)
-					{		
-						uint rootNodeHandle = CubiquityDLL.GetRootOctreeNode(data.volumeHandle.Value);
-						
-						if(rootOctreeNodeGameObject == null)
-						{
-							rootOctreeNodeGameObject = OctreeNode.CreateOctreeNode(rootNodeHandle, gameObject);	
-						}
-						
-						OctreeNode rootOctreeNode = rootOctreeNodeGameObject.GetComponent<OctreeNode>();
-						int nodeSyncsPerformed = rootOctreeNode.syncNode(maxNodesPerSync, gameObject);
-						
-						// If no node were syncronized then the mesh data is up to
-						// date and we can set the flag to convey this to the user.
-						isMeshSyncronized = (nodeSyncsPerformed == 0);
-					}
+                    rootOctreeNodeGameObject = OctreeNode.CreateOctreeNode(rootNodeHandle, gameObject);	
 				}
+                
+                OctreeNode.syncNode(ref availableSyncOperations, rootOctreeNodeGameObject, rootNodeHandle, gameObject);
+
+                if (volumeRenderer != null && volumeRenderer.hasChanged)
+                {
+                    OctreeNode.syncNodeWithVolumeRenderer(rootOctreeNodeGameObject, volumeRenderer, true);                    
+                }
+                
+                if (volumeCollider != null && volumeCollider.hasChanged)
+                {
+                    OctreeNode.syncNodeWithVolumeCollider(rootOctreeNodeGameObject, volumeCollider, true);
+                }
 			}
+
+            // These properties might have to be synced with the volume (e.g. LOD settings) or with components
+            // (e.g. shadow/material settings). Therefore we don't clear the flags until all syncing is completed.
+            if (volumeRenderer != null)
+            {
+                volumeRenderer.hasChanged = false;
+            }
+            if (volumeCollider != null)
+            {
+                volumeCollider.hasChanged = false;
+            }
+
+            // If there were still sync operations available then there was no more syncing to be done with the
+            // Cubiquity octree. So if the Cubiquity octree was also up to date then we have synced everything.
+            return cubiquityUpToDate && availableSyncOperations > 0;
 		}
 		/// \endcond
 	}

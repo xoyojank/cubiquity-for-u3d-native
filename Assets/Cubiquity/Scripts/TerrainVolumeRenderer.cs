@@ -17,7 +17,7 @@ namespace Cubiquity
 			if(material == null)
 			{
 				// Triplanar textuing seems like a good default material for the terrain volume.
-				material = Resources.Load("Materials/Triplanar", typeof(Material)) as Material;
+				material = Instantiate(Resources.Load("Materials/Triplanar", typeof(Material))) as Material;
 			}
 		}
 	}

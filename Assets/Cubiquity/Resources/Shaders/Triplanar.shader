@@ -70,15 +70,18 @@
 		void vert (inout appdata_full v, out Input o)
 		{
 			UNITY_INITIALIZE_OUTPUT(Input,o);
+
+			// It seems that 'v.normal' (not 'o.volumeNormal') get used 
+			// for the lighting so we need to make sure both are normalised.
+			v.normal = normalize(v.normal);
+			o.volumeNormal = v.normal;
 			
 			// Volume-space positions and normals are used for triplanar texturing
 			float4 worldPos = mul(_Object2World, v.vertex);
 			o.volumePos =  mul(_World2Volume, worldPos);
-			o.volumeNormal = v.normal;
 			
 			// The first four material weights are stored in color and are copied by Unity.
-			// But I don't think it copied the tangents (it can't know to) so do that here.
-			//o.otherFourMatStrengths = v.tangent;
+			// But the second four are stored in texture coordinates and need to be copied manually.
 			o.otherFourMatStrengths.xy = v.texcoord.xy;
 			o.otherFourMatStrengths.zw = v.texcoord1.xy;
 		}

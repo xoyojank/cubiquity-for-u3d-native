@@ -10,7 +10,7 @@
  *
  * \image html CreateNewVolume.png "Creating a new volume through the main menu"
  *
- * This adds a new game object to the scene and automatically attaches Volume, Volume Renderer, and VolumeCollider components. It also creates a small volume data with just the floor filled in so that you have something from which to start your editing. Note that you are not given any options during the creation process (it is intended to be a simple one-click-and-you're-done' interface), but you can later create bigger/different volume data as discussed in the section on \ref secNewVolData.
+ * This adds a new game object to the scene and automatically attaches Volume andVolume Renderer components. Note that no VolumeCollider is added - this has some performance overhead so we prefer you to add it manually is required. It also creates a small volume data with just the floor filled in so that you have something from which to start your editing. Note that you are not given any options during the creation process (it is intended to be a simple one-click-and-you're-done' interface), but you can later create bigger/different volume data as discussed in the section on \ref secNewVolData.
  *
  * \section secTransVolumes Transforming Volumes
  *
@@ -92,9 +92,9 @@
  *
  * \subsection secColliderComp The Volume Collider
  *
- * The VolumeCollider should be added to a volume if you want it to be able to participate in collisions. This component currently does not expose any properties, but its presence causes a mesh collider to be created for the volume.
+ * The VolumeCollider should be added to a volume if you want it to be able to participate in collisions. Internally, the presence of a VolumeCollider causes MeshColliders to be generated for the meshes which represent the volume. Although this component currently does not expose any real properties, it is possible to toggle whether the collider is active in edit mode. This is generally not desirable because the additional overhead makes sculpting difficult, but it can be useful when working with third-party tools which expect the collider to be present. An example would be a tool which can place objects (buildings, trees, etc) on the surface of the terrain.
  *
- * \image html TerrainVolumeRenderer.png "The volume collider does not currently expose any properties."
+ * \image html TerrainVolumeCollider.png "The volume collider has only minimal settings."
  *
  * \section secNewVolData Creating New Volume Data And Assets
  *

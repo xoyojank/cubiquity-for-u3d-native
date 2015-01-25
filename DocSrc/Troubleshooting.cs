@@ -10,4 +10,11 @@
  *
  * More information on this issue: http://answers.unity3d.com/questions/609621/hideflagsdontsave-causes-checkconsistency-transfor.html
  *
+ * \section secDuplicationErrors 'Duplicate volume data detected' or 'Multiple use of volume data detected'
+ *
+ * This warning will be given when you appear to have an invalid setup in terms of volume/data sharing. Usually this is a result of attempting to duplicate volumes in the Unity editor (often via Ctrl-D) but it can also happen from code. Make sure you read and understand the \ref pageDuplication "relevant section of the user manual".
+ *
+ * Note that the two warning messages are distinct - the first means you have multiple VolumeData instances accessing the same voxel database while the second means you have multiple Volumes referencing the same volumeData.
+ *
+ * If the warning persists after you have attempted to fix it and cleared the console, then you may need to restart Unity.
  */

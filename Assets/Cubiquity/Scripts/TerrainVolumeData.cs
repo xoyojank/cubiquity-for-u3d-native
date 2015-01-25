@@ -4,14 +4,10 @@ using System;
 using System.IO;
 using System.Collections;
 
-using Cubiquity;
 using Cubiquity.Impl;
 
-// VolumeData and it's subclasses are not in the Cubiquity namespace because it seems to cause problems with 'EditorGUILayout.ObjectField(...)'.
-// Specifically the pop-up window (which appears when click the small circle with the dot in it) does not display the other volume data assets 
-// in the project if the Cubiquity namespace is used. This appears to simply be a namespace-related bug in Unity.
-//namespace Cubiquity
-//{
+namespace Cubiquity
+{
 	/// An implementation of VolumeData which stores a MaterialSet for each voxel.
 	/**
 	 * This class provides the actual 3D grid of material weights which are used by the TerrainVolume. You can use the provided interface to directly
@@ -35,17 +31,15 @@ using Cubiquity.Impl;
 		 */
 		public MaterialSet GetVoxel(int x, int y, int z)
 		{
-			MaterialSet materialSet;
+			// The initialization can fail (bad filename, database locked, etc), so the volume handle could still be null.
 			if(volumeHandle.HasValue)
 			{
-				CubiquityDLL.GetVoxelMC(volumeHandle.Value, x, y, z, out materialSet);
+                return CubiquityDLL.GetMaterialSetVoxel(volumeHandle.Value, x, y, z);
 			}
 			else
 			{
-				// Should maybe throw instead?
-				materialSet = new MaterialSet();
+				return new MaterialSet();
 			}
-			return materialSet;
 		}
 		
 		/// Sets the material weights of the specified position.
@@ -57,39 +51,85 @@ using Cubiquity.Impl;
 		 */
 		public void SetVoxel(int x, int y, int z, MaterialSet materialSet)
 		{
+			// The initialization can fail (bad filename, database locked, etc), so the volume handle could still be null.
 			if(volumeHandle.HasValue)
 			{
 				if(x >= enclosingRegion.lowerCorner.x && y >= enclosingRegion.lowerCorner.y && z >= enclosingRegion.lowerCorner.z
 					&& x <= enclosingRegion.upperCorner.x && y <= enclosingRegion.upperCorner.y && z <= enclosingRegion.upperCorner.z)
 				{						
-					CubiquityDLL.SetVoxelMC(volumeHandle.Value, x, y, z, materialSet);
+					CubiquityDLL.SetVoxel(volumeHandle.Value, x, y, z, materialSet);
 				}
+			}
+		}
+
+		public override void CommitChanges()
+		{
+			if(!IsVolumeHandleNull())
+			{
+				if(writePermissions == WritePermissions.ReadOnly)
+				{
+					throw new InvalidOperationException("Cannot commit changes to read-only voxel database (" + fullPathToVoxelDatabase +")");
+				}
+
+				CubiquityDLL.AcceptOverrideChunks(volumeHandle.Value);
+				//We can discard the chunks now that they have been accepted.
+				CubiquityDLL.DiscardOverrideChunks(volumeHandle.Value);
+			}
+		}
+		
+		public override void DiscardChanges()
+		{
+			if(!IsVolumeHandleNull())
+			{
+				CubiquityDLL.DiscardOverrideChunks(volumeHandle.Value);
 			}
 		}
 		
 		/// \cond
 		protected override void InitializeEmptyCubiquityVolume(Region region)
 		{			
-			// This function might get called multiple times. E.g the user might call it striaght after crating the volume (so
-			// they can add some initial data to the volume) and it might then get called again by OnEnable(). Handle this safely.
-			if(volumeHandle == null)
+			// We check 'mVolumeHandle' instead of 'volumeHandle' as the getter for the latter will in turn call this method.
+			DebugUtils.Assert(mVolumeHandle == null, "Volume handle should be null prior to initializing volume");
+
+			if(!initializeAlreadyFailed) // If it failed before it will fail again - avoid spamming error messages.
 			{
-				// Create an empty region of the desired size.
-				volumeHandle = CubiquityDLL.NewEmptyTerrainVolume(region.lowerCorner.x, region.lowerCorner.y, region.lowerCorner.z,
-					region.upperCorner.x, region.upperCorner.y, region.upperCorner.z, fullPathToVoxelDatabase, DefaultBaseNodeSize);
+				try
+				{
+					// Create an empty region of the desired size.
+					volumeHandle = CubiquityDLL.NewEmptyTerrainVolume(region.lowerCorner.x, region.lowerCorner.y, region.lowerCorner.z,
+						region.upperCorner.x, region.upperCorner.y, region.upperCorner.z, fullPathToVoxelDatabase, DefaultBaseNodeSize);
+				}
+				catch(CubiquityException exception)
+				{
+					volumeHandle = null;
+					initializeAlreadyFailed = true;
+					Debug.LogException(exception);
+					Debug.LogError("Failed to open voxel database '" + fullPathToVoxelDatabase + "'");
+				}
 			}
 		}
 		/// \endcond
 		
 		/// \cond
-		public override void InitializeExistingCubiquityVolume()
+		protected override void InitializeExistingCubiquityVolume()
 		{			
-			// This function might get called multiple times. E.g the user might call it striaght after crating the volume (so
-			// they can add some initial data to the volume) and it might then get called again by OnEnable(). Handle this safely.
-			if(volumeHandle == null)
+			// We check 'mVolumeHandle' instead of 'volumeHandle' as the getter for the latter will in turn call this method.
+			DebugUtils.Assert(mVolumeHandle == null, "Volume handle should be null prior to initializing volume");
+
+			if(!initializeAlreadyFailed) // If it failed before it will fail again - avoid spamming error messages.
 			{
-				// Create an empty region of the desired size.
-				volumeHandle = CubiquityDLL.NewTerrainVolumeFromVDB(fullPathToVoxelDatabase, DefaultBaseNodeSize);
+				try
+				{
+					// Create an empty region of the desired size.
+					volumeHandle = CubiquityDLL.NewTerrainVolumeFromVDB(fullPathToVoxelDatabase, writePermissions, DefaultBaseNodeSize);
+				}
+				catch(CubiquityException exception)
+				{
+					volumeHandle = null;
+					initializeAlreadyFailed = true;
+					Debug.LogException(exception);
+					Debug.LogError("Failed to open voxel database '" + fullPathToVoxelDatabase + "'");
+				}
 			}
 		}
 		/// \endcond
@@ -98,21 +138,24 @@ using Cubiquity.Impl;
 		public override void ShutdownCubiquityVolume()
 		{
 			// Shutdown could get called multiple times. E.g by OnDisable() and then by OnDestroy().
-			if(volumeHandle.HasValue)
+			if(!IsVolumeHandleNull())
 			{
 				// We only save if we are in editor mode, not if we are playing.
-				bool saveChanges = !Application.isPlaying;
+				bool saveChanges = (!Application.isPlaying) && (writePermissions == WritePermissions.ReadWrite);
 				
 				if(saveChanges)
 				{
-					CubiquityDLL.AcceptOverrideBlocksMC(volumeHandle.Value);
+					CommitChanges();
 				}
-				CubiquityDLL.DiscardOverrideBlocksMC(volumeHandle.Value);
+				else
+				{
+					DiscardChanges();
+				}
 				
-				CubiquityDLL.DeleteTerrainVolume(volumeHandle.Value);
+				CubiquityDLL.DeleteVolume(volumeHandle.Value);
 				volumeHandle = null;
 			}
 		}
 		/// \endcond
 	}
-//}
+}

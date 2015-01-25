@@ -1,4 +1,6 @@
 using UnityEngine;
+
+using System;
 using System.Collections;
 
 namespace Cubiquity
@@ -9,7 +11,7 @@ namespace Cubiquity
 	 * returns an error code Cubiquity for Unity3D retrieves the error message, packages it up into a CubiquityException, and throws it.
 	 * You can find out more about the problem by reading the error message and consulting the %Cubiquity log file.
 	 */
-	public class CubiquityException: System.Exception
+	public class CubiquityException: Exception
 	{
 	   public CubiquityException()
 	   {
@@ -19,10 +21,27 @@ namespace Cubiquity
 			:base(message)
 	   {
 	   }
-		
-		public CubiquityException(string message, CubiquityException innerException)
+
+       public CubiquityException(string message, Exception innerException)
 			:base(message, innerException)
 	   {
 	   }
 	}
+
+    public class CubiquityInstallationException : CubiquityException
+    {
+        public CubiquityInstallationException()
+        {
+        }
+
+        public CubiquityInstallationException(string message)
+            : base(message)
+        {
+        }
+
+        public CubiquityInstallationException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+    }
 }

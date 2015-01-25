@@ -18,10 +18,6 @@
  * \par
  * The easiest way to get started making voxel environments is to use the built-in editing tools. These are embedded within the Unity3D editor, and they let you directly manipulate your worlds though the scene view. You can create worlds, edit them, and set rendering or physical properties. In this section of the user manual we take you though all the tools which are at your disposal and give tips for getting the most out of them. \ref pageUserInterface "Read more..."
  *
- * \subpage pageObtainingVolDat
- * \par
- * You may wish to generate or obtain volume data from external sources and then bring it into %Cubiquity. In this section we explain some of your options for doing so. \ref pageObtainingVolDat "Read more..."
- *
  * \subpage pageTroubleShooting
  * \par
  * Sometimes things can go wrong, and if they do then this is the place to look for help. \ref pageTroubleShooting "Read more..."

@@ -27,7 +27,6 @@ namespace Cubiquity
 	[ExecuteInEditMode]
 	public abstract class Volume : MonoBehaviour
 	{		
-		
 		[SerializeField]
 		private VolumeData mData = null;
 		/// Represents the actual 3D grid of voxels describing your object or environment.
@@ -43,8 +42,12 @@ namespace Cubiquity
 			{
 				if(this.mData != value)
 				{
+					UnregisterVolumeData();
 					this.mData = value;
-					RequestFlushInternalData();
+					RegisterVolumeData();
+
+                    // Delete the octree, so that next time Update() is called a new octree is constructed to match the new volume data.
+                    RequestFlushInternalData();
 				}
 			}
 	    }
@@ -66,16 +69,20 @@ namespace Cubiquity
 				{
 					// If so update it.
 					mIsMeshSyncronized = value;
-					
-					// And fire the appropriate event.
-					if(mIsMeshSyncronized)
-					{
-						if(OnMeshSyncComplete != null) { OnMeshSyncComplete(); }
-					}
-					else
-					{
-						if(OnMeshSyncLost != null) { OnMeshSyncLost(); }
-					}
+
+                    // And fire the appropriate event. The isMeshSyncronized flag works in edit mode,
+                    // but we only fire the events in play mode (unless we find an edit-mode use too?)
+                    if (Application.isPlaying)
+                    {
+                        if (mIsMeshSyncronized)
+                        {
+                            if (OnMeshSyncComplete != null) { OnMeshSyncComplete(); }
+                        }
+                        else
+                        {
+                            if (OnMeshSyncLost != null) { OnMeshSyncLost(); }
+                        }
+                    }
 				}
 			}
 		} private bool mIsMeshSyncronized = false;
@@ -126,74 +133,89 @@ namespace Cubiquity
 		 * updates rather than 'x' times per update?
 		 */
 		/// \cond
-		protected int maxNodesPerSync = 4;
+		protected uint maxSyncOperationsInPlayMode = 4;
+        protected uint maxSyncOperationsInEditMode = 16; // Can be higher than in play mode as we have no collision mehses
 		/// \endcond
 
 		// The root node of our octree. It is protected so that derived classes can use it, but users
 		// are not supposed to create derived classes themselves so we hide this property from the docs.
 		/// \cond
+        [System.NonSerialized]
 		protected GameObject rootOctreeNodeGameObject;
 		/// \endcond
 		
-		private bool flushRequested;
-		
+        // Used to check when the game object changes layer, so we can move the children to match.
 		private int previousLayer = -1;
+
+		// Used to catch the user using the same volume data for multiple volumes (which they should not do).
+		// It's not a really robust approach but it works well enough and only serves to issue a warning anyway.
+		private static Dictionary<int, int> volumeDataAndVolumes = new Dictionary<int, int>();
+
+        private bool flushRequested;
+
+        // ------------------------------------------------------------------------------
+        // These editor-only functions are used to emulate repeated calls to Update() in edit mode. Setting the '[ExecuteInEditMode]' attribute does cause
+        // Update() to be called automatically in edit mode, but it only happens in response to user-driven events such as moving the mouse in the editor
+        // window. We want to support background loading of our terrain and so we hook into the 'EditorApplication.update' event for this purpose.
+        // ------------------------------------------------------------------------------
+#if UNITY_EDITOR
+
+        private int editModeUpdates = 0;
+
+        // Public so that we can manually drive it from the editor as required,
+        // but user code should not do this so it's hidden from the docs.
+        /// \cond
+        public void ForceUpdate()
+        {
+            Update();
+        }
+
+        /// \cond
+        public void EditModeUpdateHandler() // Public so we can call it from Editor scripts
+        {
+            DebugUtils.Assert(Application.isPlaying == false, "EditModeUpdateHandler() should never be called in play mode!");
+
+            if (enabled)
+            {
+                if (isMeshSyncronized)
+                {
+                    if(editModeUpdates % 20 == 0)
+                    {
+                        //Debug.Log("Low freq update");
+                        ForceUpdate();
+                        //SceneView.RepaintAll();
+                    }
+                }
+                else
+                {
+                    //Debug.Log("High freq update");
+                    ForceUpdate();
+                    //SceneView.RepaintAll();
+                }
+            }
+
+            editModeUpdates++;
+        }
+        /// \endcond
+#endif
+        // ------------------------------------------------------------------------------
 		
 		void Awake()
 		{
-			if(rootOctreeNodeGameObject != null)
-			{
-				// This should not happen because the rootOctreeNodeGameObject should have been set to null before being serialized.
-				Debug.LogWarning("Root octree node is already set. This is probably a bug in Cubiquity for Unity3D, but it is not serious.");
-				FlushInternalData();
-			}
+			RegisterVolumeData();
 		}
 		
 		void OnEnable()
-		{	
-			// Ideally the VolumeData would handle it's own initialization and shutdown, but it's OnEnable()/OnDisable() methods don't seems to be
-			// called when switching between edit/play mode if it has been turned into an asset. Therefore we do it here as well just to be sure.
-			if(data != null)
-			{
-				data.InitializeExistingCubiquityVolume();
-			}
-			
-			// When switching to MonoDevelop, editing code, and then switching back to Unity, some kind of scene reload is performed.
-			// It's actually a bit unclear, but it results in a new octree being built without the old one being destroyed first. It
-			// seems Awake/OnDestroy() are not called as part of this process, and we are not allowed to modify the scene graph from
-			// OnEnable()/OnDisable(). Therefore we just set a flag to say that the root node shot be deleted at the next update cycle.
-			//
-			// We set the flag here (rather than OnDisable() where it might make more sense) because the flag doesn't survive the
-			// script reload, and we don't really want to serialize it.
-			RequestFlushInternalData();
-			
-			// When in edit mode a component's Update() function is not normally called, and even if the 'ExecuteInEditMode' attribute
-			// is set then it executes only when something changes. For our purposes we need a continuous stream of updates in order to
-			// handle background loading of the volume. Therefore we define a new function 'EditModeUpdate' and connect it to the editor's
-			// update delegate.
-			#if UNITY_EDITOR
-				if(!EditorApplication.isPlaying)
-				{
-					EditorApplication.update += EditModeUpdate;
-				}
-				else
-				{
-					StartCoroutine(Synchronization());
-				}
-			#else
-				StartCoroutine(Synchronization());
-			#endif
+		{
+            // We have taken steps to make sure that our octree does not get saved to disk or persisted between edit/play mode,
+            // but it will still survive if we just disable and then enable the volume. This is because the OnDisable() and
+            // OnEnable() methods do now allow us to modify our game object hierarchy. Note that this disable/enable process
+            // may also happen automatically such as during a script reload? Requesting a flush of the octree is the safest option.
+            RequestFlushInternalData();
 		}
 		
 		void OnDisable()
 		{			
-			// Disconnect the edit-mode update. It will be reconnected in OnEnable() if we are in edit mode.
-			// We don't need to stop the Syncronization() coroutine as this happens automatically:
-			// http://answers.unity3d.com/questions/34169/does-deactivating-a-gameobject-automatically-stop.html
-			#if UNITY_EDITOR
-				EditorApplication.update -= EditModeUpdate;
-			#endif
-			
 			// Ideally the VolumeData would handle it's own initialization and shutdown, but it's OnEnable()/OnDisable() methods don't seems to be
 			// called when switching between edit/play mode if it has been turned into an asset. Therefore we do it here as well just to be sure.
 			if(data != null)
@@ -201,58 +223,58 @@ namespace Cubiquity
 				data.ShutdownCubiquityVolume();
 			}
 		}
-		
-		#if UNITY_EDITOR
-		void EditModeUpdate()
+
+		void OnDestroy()
 		{
-			// Just a sanity check to make sure our understanding of edit/play mode behaviour is correct.
-			DebugUtils.Assert(!EditorApplication.isPlaying, "EditModeUpdate() is not expected to be executing in play mode!");
-			
-			Synchronize();
+			UnregisterVolumeData();
 		}
-		#endif
-		private void RequestFlushInternalData()
-		{
-			flushRequested = true;
-		}
+
+        // Public as the editor sometimes needs to flush the internal data,
+        // but user code should not do this so it's hidden from the docs.
+        /// \cond
+        public void RequestFlushInternalData()
+        {
+            flushRequested = true;
+        }
+        /// \endcond
+
+        private void FlushInternalData()
+        {
+            // It should be enough to delete the root octree node in this function but we're seeing cases 
+            // of octree nodes surviving the transition between edit and play modes. I'm not quite sure 
+            // why, but the approach below of deleting all child objects seems to solve the problem.
+
+            // Find all the child objects 
+            List<GameObject> childObjects = new List<GameObject>();
+            foreach (Transform childTransform in gameObject.transform)
+            {
+                childObjects.Add(childTransform.gameObject);
+            }
+
+            // Destroy all children
+            foreach (GameObject childObject in childObjects)
+            {
+                Impl.Utility.DestroyOrDestroyImmediate(childObject);
+            }
+
+            rootOctreeNodeGameObject = null;
+        }
+
+        protected abstract bool SynchronizeOctree(uint maxSyncOperations);
 		
-		// We do not serialize the root octree node but in practice we have still seen some issues. It seems that Unity does
-		// still serialize other data (meshes, etc) in the scene even though the root game object which they are a child of
-		// is not serialize. Actually this needs more investigation. Problematic scenarios include when saving the scene, 
-		// switching from edit mode to play mode (which includes implicit serialization), or when changing and recompiling scripts.
-		//
-		// To handle thee scenarios we need the ability to explicitly destroy the root node, rather than just not serializing it.
-		private void FlushInternalData()
+		private void Update()
 		{
-			DestroyImmediate(rootOctreeNodeGameObject);
-			rootOctreeNodeGameObject = null;
-		}
-		
-		private IEnumerator Synchronization()
-		{			
-			// Perform the syncronization.
-			while(true)
-			{
-				#if UNITY_EDITOR
-					// Just a sanity check to make sure our understanding of edit/play mode behaviour is correct.
-					DebugUtils.Assert(EditorApplication.isPlaying, "Synchronization coroutine is not expected to be executing in edit mode!");
-				#endif
-				
-				Synchronize();
-				yield return null;
-			}
-		}
-		
-		// Protected so that derived classes can access it, but users derive their own classes so we hide it from the docs.
-		/// \cond
-		protected virtual void Synchronize()
-		{
-			if(flushRequested)
-			{
-				FlushInternalData();
-				flushRequested = false;
-			}
-			
+            if (flushRequested)
+            {
+                FlushInternalData();
+                flushRequested = false;
+
+                // It seems prudent to return at this point, and leave the actual updating to the next call of this function.
+                // This is because we've just destroyed a bunch of stuff by flushing and Unity actually defers Destroy() until
+                // later in the frame. It actually seems t work ok without the return, but it makes me feel a little safer.
+                return;
+            }
+
 			// Check whether the gameObject has been moved to a new layer.
 			if(gameObject.layer != previousLayer)
 			{
@@ -261,67 +283,205 @@ namespace Cubiquity
 				previousLayer = gameObject.layer;
 			}
 			
-			// NOTE - The following line passes transform.worldToLocalMatrix as a shader parameter. This is explicitly
-			// forbidden by the Unity docs which say:
-			//
-			//   IMPORTANT: If you're setting shader parameters you MUST use Renderer.worldToLocalMatrix instead.
-			//
-			// However, we don't have a renderer on this game object as the rendering is handled by the child OctreeNodes.
-			// The Unity doc's do not say why this is the case, but my best guess is that it is related to secret scaling 
-			// which Unity may perform before sending data to the GPU (probably to avoid precision problems). See here:
-			//
-			//   http://forum.unity3d.com/threads/153328-How-to-reproduce-_Object2World
-			//
-			// It seems to work in our case, even with non-uniform scaling applied to the volume. Perhaps we are just geting
-			// lucky, pehaps it just works on our platform, or perhaps it is actually valid for some other reason. Just be aware.
+			// Set shader parameters.
 			VolumeRenderer volumeRenderer = gameObject.GetComponent<VolumeRenderer>();
 			if(volumeRenderer != null)
 			{
 				if(volumeRenderer.material != null)
 				{
+                    Vector3i volumeSize = (data.enclosingRegion.upperCorner - data.enclosingRegion.lowerCorner);
+                    volumeSize.x++; volumeSize.y++; volumeSize.z++;
+                    volumeRenderer.material.SetVector("_VolumeSize", (Vector3)volumeSize);
+
+                    // NOTE - The following line passes transform.worldToLocalMatrix as a shader parameter. This is explicitly
+                    // forbidden by the Unity docs which say:
+                    //
+                    //   IMPORTANT: If you're setting shader parameters you MUST use Renderer.worldToLocalMatrix instead.
+                    //
+                    // However, we don't have a renderer on this game object as the rendering is handled by the child OctreeNodes.
+                    // The Unity doc's do not say why this is the case, but my best guess is that it is related to secret scaling 
+                    // which Unity may perform before sending data to the GPU (probably to avoid precision problems). See here:
+                    //
+                    //   http://forum.unity3d.com/threads/153328-How-to-reproduce-_Object2World
+                    //
+                    // It seems to work in our case, even with non-uniform scaling applied to the volume. Perhaps we are just geting
+                    // lucky, pehaps it just works on our platform, or perhaps it is actually valid for some other reason. Just be aware.
 					volumeRenderer.material.SetMatrix("_World2Volume", transform.worldToLocalMatrix);
 				}
 			}
+
+            if (data != null && data.volumeHandle.HasValue)
+            {
+                // When we are in game mode we limit the number of nodes which we update per frame, to maintain a nice.
+                // framerate The Update() method is called repeatedly and so over time the whole mesh gets syncronized. 
+                if (Application.isPlaying)
+                {
+                    isMeshSyncronized = SynchronizeOctree(maxSyncOperationsInPlayMode);
+                }
+                else
+                {
+                    isMeshSyncronized = SynchronizeOctree(maxSyncOperationsInEditMode);
+                }
+            }
 		}
 		/// \endcond
-		
-		#if UNITY_EDITOR
-			private class OnSaveHandler : UnityEditor.AssetModificationProcessor
+
+        // Public so that we can manually drive it from the editor as required,
+        // but user code should not do this so it's hidden from the docs.
+        /// \cond
+        public void OnGUI()
+        {            
+            // This code doesn't belong in Volume? There should
+            // probably be one global copy of this, not one per volume.
+
+            /*GUILayout.BeginArea(new Rect(10, 10, 300, 300));
+            GUI.skin.label.alignment = TextAnchor.MiddleLeft;
+            string debugPanelMessage = "Cubiquity Debug Panel\n";
+            if(isMeshSyncronized)
+            {
+                debugPanelMessage += "Mesh sync: Completed";
+            }
+            else
+            {
+                debugPanelMessage += "Mesh sync: In progress...";
+            }
+            GUILayout.Box(debugPanelMessage);
+            GUILayout.EndArea();*/
+        }
+        /// \endcond
+
+		private void RegisterVolumeData()
+		{
+			if(mData != null)
 			{
-			    public static void OnWillSaveAssets( string[] assets )
-			    {
-					Object[] volumes = Object.FindObjectsOfType(typeof(Volume));
-					foreach(Object volume in volumes)
+				int volumeID = GetInstanceID();
+				int volumeDataID = mData.GetInstanceID();
+
+				int existingVolumeID;
+				if(volumeDataAndVolumes.TryGetValue(volumeDataID, out existingVolumeID))
+				{
+					if(existingVolumeID != volumeID)
 					{
-						((Volume)volume).FlushInternalData();
+						// It's being used by a different instance, so warn the user.
+						// In play mode the best we can do is give the user the instance IDs.
+						string volumeName = "Instance ID = " + volumeID;
+						string existingVolumeName = "Instance ID = " + existingVolumeID;
+						string volumeDataName = "Instance ID = " + volumeDataID;
+						
+						// But in the editor we can try and find names for them.
+						#if UNITY_EDITOR
+						Object volume = EditorUtility.InstanceIDToObject(volumeID);
+						if(volume) volumeName = volume.name;
+
+						Object existingVolume = EditorUtility.InstanceIDToObject(existingVolumeID);
+						if(existingVolume) existingVolumeName = existingVolume.name;
+
+						volumeDataName = AssetDatabase.GetAssetPath(volumeDataID);
+						#endif
+
+						// Let the user know what has gone wrong.
+						string warningMessage = "Multiple use of volume data detected! Did you attempt to duplicate or clone an existing volume? " +
+							"Each volume data should only be used by a single volume - please see the Cubiquity for Unity3D user manual and API documentation for more information. " +
+							"\nBoth '" + existingVolumeName + "' and '" + volumeName + "' reference the volume data called '" + volumeDataName + "'." +
+							"\nNote: If you see this message regarding an asset which you have already deleted then you may need to close the scene and/or restart Unity.";
+						Debug.LogWarning(warningMessage);
 					}
-			    }
+				}
+				else
+				{
+					volumeDataAndVolumes.Add(volumeDataID, volumeID);
+				}
 			}
-			
-			[InitializeOnLoad]
-			private class OnPlayHandler
+		}
+
+		private void UnregisterVolumeData()
+		{
+			if(mData != null)
 			{
-			    static OnPlayHandler()
-			    {
-					// Catch the event which occurs when switching modes.
-			        EditorApplication.playmodeStateChanged += OnPlaymodeStateChanged;
-			    }
-			 
-			    static void OnPlaymodeStateChanged ()
-			    {
-					// We only need to discard the octree in edit mode, beacause when leaving play mode serialization is not
-					// performed. This event occurs both when leaving the old mode and again when entering the new mode, but 
-					// when entering edit mode the root null should already be null and ddiscarding it again is harmless.
-					if(!EditorApplication.isPlaying)
-					{
-						Object[] volumes = Object.FindObjectsOfType(typeof(Volume));
-						foreach(Object volume in volumes)
-						{
-							((Volume)volume).FlushInternalData();
-						}
-					}
-			    }
+				// Remove the volume data entry from our duplicate-checking dictionary.
+				// This could fail, e.g. if the user does indeed create two volumes with the same volume data
+				// then deleting the first will remove the entry which then won't exist when deleting the second.
+				volumeDataAndVolumes.Remove(mData.GetInstanceID());
 			}
-		#endif
+		}
+
+#if UNITY_EDITOR
+        // Because our hierarchy of Octree nodes is generated at runtime (and is depenant on the camera position) we do not 
+        // want to serialize it with the scene. Setting the 'DontSave' flag on the root would seem like an intiative solution 
+        // but actually results in errors which, while harmless, will be disconcerting to the users. See this Unity Answers thread  
+        // for more details: http://answers.unity3d.com/questions/609621/hideflagsdontsave-causes-checkconsistency-transfor.html
+        //
+        // We have found two posible solutions to this problem. The first solution is to make use of a 'ghost object' which sits
+        // at the root of our scene and has it's transformation updated every frame to match out current volume's transformation.
+        // The octree can then be attached to this ghost object rather than the real volume. This get's rid of the harmless error
+        // message because the ghost is at the root of the scene, and so there is no parent object to complain when it is not
+        // found on scene load. However, this solution has some known problems:
+        //
+        //     - The bounding box of the real volume is no longer correct, as it has no tree/mesh data of it's own. You can't
+        //       manually set the bounding box, so we'd probably have to create a fake degenerate mesh and attach it to the
+        //       volume. The coresponding MeshFilter/MeshRenderer then show up in the volume inspector, I believe even with the
+        //       'HideInHierarchy' flag set (they are then greyed out).
+        //
+        //     - The 'Show Wireframe' feature doesn't work, as you can only see the wireframe of a selected object and you can't
+        //       select the hidden ghost object.
+        //
+        //     - I also have concerns about how well selection/gizmos will work with a ghost object. For example, clicking the
+        //       ghost in the scene view should select the ral object. But this isn't really tested yet.
+        //
+        // The second solution is to attach the octree to the real volume game object, and then attempt to delete it before
+        // serialization is performed. Unity won't allow us to modify the object hierarchy in the OnDisable() method, so we have
+        // to resort to using the slightly 'hacky' functions below. The only know drawback of this approach is that it means
+        // the scene is flagged as 'unsaved' immediatly after saving it (probably because the octree is then rebuilt). But
+        // thinking about it now, this probably affects the 'ghost object' solution as well. This second solution is what we
+        // have implemented below.
+        private class OnSaveHandler : UnityEditor.AssetModificationProcessor
+        {
+            public static string[] OnWillSaveAssets(string[] assets)
+            {
+                // Flush internal data of any volumes in the scene
+                Object[] volumes = Object.FindObjectsOfType(typeof(Volume));
+                foreach (Object volume in volumes)
+                {
+                    ((Volume)volume).FlushInternalData();
+                }
+
+                // Return the list of assets to be saved (we haven't changed this).
+                return assets;
+            }
+        }
+
+        // I'm not sure this code is really needed. Any internal data is discarded in the OnEnable() function and this ensures
+        // correct functionality. We are also using 'OnWillSaveAssets()' to ensure the octree doesn't get saved when writing to
+        // disk. However, we can still have a situation where the octree is serialized (internal serialization, not saving the
+        // scene) when switching between edit and play mode, and although the resulting behaviour is correct (because OnEnable()
+        // will later discard the old octree) it could be wasteful.
+        //
+        // The following code attempts to resolve this by flushing the octree when switching between modes. But it's not clear
+        // if this flushing actually happens in time, or if it really helps performance. But there's no reason to think it hurts
+        // so it's left here pending further investigation.
+        [InitializeOnLoad]
+        private class OnPlayHandler
+        {
+            static OnPlayHandler()
+            {
+                // Catch the event which occurs when switching modes.
+                EditorApplication.playmodeStateChanged += OnPlaymodeStateChanged;
+            }
+
+            static void OnPlaymodeStateChanged()
+            {
+                // We only need to discard the octree in edit mode, beacause when leaving play mode serialization is not
+                // performed. This event occurs both when leaving the old mode and again when entering the new mode, but 
+                // when entering edit mode the root null should already be null and discarding it again is harmless.
+                {
+                    Object[] volumes = Object.FindObjectsOfType(typeof(Volume));
+                    foreach (Object volume in volumes)
+                    {
+                        ((Volume)volume).FlushInternalData();
+                    }
+                }
+            }
+        }
+#endif
 	}
 }

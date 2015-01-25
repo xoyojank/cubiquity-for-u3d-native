@@ -18,11 +18,11 @@ namespace Cubiquity
 			TerrainVolumeData data = VolumeDataAsset.CreateEmptyVolumeData<TerrainVolumeData>(new Region(0, 0, 0, width-1, height-1, depth-1));
 			
 			// Create some ground in the terrain so it shows up in the editor.
-			// Soil as a base (mat 1) and then a couple of layers of grass (mat 2).
-			TerrainVolumeGenerator.GenerateFloor(data, 6, (uint)1, 8, (uint)2);
+			// Soil as a base (mat 1) and then a couple of layers of grass (mat 0).
+			TerrainVolumeGenerator.GenerateFloor(data, 6, (uint)1, 8, (uint)0);
 			
 			// Now create the terrain game object from the data.
-			GameObject terrain = TerrainVolume.CreateGameObject(data, true, true);
+			GameObject terrain = TerrainVolume.CreateGameObject(data, true, false);
 			
 			// And select it, so the user can get straight on with editing.
 			Selection.activeGameObject = terrain;
@@ -37,11 +37,20 @@ namespace Cubiquity
 		[MenuItem ("Assets/Create/Terrain Volume Data/From Voxel Database...")]
 		static void CreateTerrainVolumeDataAssetFromVoxelDatabase()
 		{	
+			// Resulting path already contains UNIX-style seperators (even on Wondows).
 			string pathToVoxelDatabase = EditorUtility.OpenFilePanel("Choose a Voxel Database (.vdb) file to load", Paths.voxelDatabases, "vdb");
+
+            if (pathToVoxelDatabase.Length != 0)
+            {
+                // Check the user didn't navigate outside of the required folder.
+                string folderContainingSelectedVDB = Path.GetDirectoryName(pathToVoxelDatabase);
+                if (PathUtils.IsSameFolderOrSubfolder(folderContainingSelectedVDB, Paths.voxelDatabases) == false)
+                {
+                    Debug.LogError("The chosen .vdb file must be inside the '" + Paths.voxelDatabases + "' folder");
+                    return;
+                }	
 			
-			if(pathToVoxelDatabase.Length != 0)
-			{
-				string relativePathToVoxelDatabase = Paths.MakeRelativePath(Paths.voxelDatabases + Path.DirectorySeparatorChar, pathToVoxelDatabase);
+				string relativePathToVoxelDatabase = PathUtils.MakeRelativePath(Paths.voxelDatabases + '/', pathToVoxelDatabase);
 			
 				// Pass through to the other version of the method.
 				VolumeDataAsset.CreateFromVoxelDatabase<TerrainVolumeData>(relativePathToVoxelDatabase);
@@ -57,7 +66,7 @@ namespace Cubiquity
 			
 			ColoredCubesVolumeData data = VolumeDataAsset.CreateEmptyVolumeData<ColoredCubesVolumeData>(new Region(0, 0, 0, width-1, height-1, depth-1));
 			
-			GameObject coloredCubesGameObject = ColoredCubesVolume.CreateGameObject(data, true, true);
+			GameObject coloredCubesGameObject = ColoredCubesVolume.CreateGameObject(data, true, false);
 			
 			// And select it, so the user can get straight on with editing.
 			Selection.activeGameObject = coloredCubesGameObject;
@@ -86,11 +95,20 @@ namespace Cubiquity
 		[MenuItem ("Assets/Create/Colored Cubes Volume Data/From Voxel Database...")]
 		static void CreateColoredCubesVolumeDataAssetFromVoxelDatabase()
 		{	
+			// Resulting path already contains UNIX-style seperators (even on Wondows).
 			string pathToVoxelDatabase = EditorUtility.OpenFilePanel("Choose a Voxel Database (.vdb) file to load", Paths.voxelDatabases, "vdb");
+
+            if (pathToVoxelDatabase.Length != 0)
+            {
+                // Check the user didn't navigate outside of the required folder.
+                string folderContainingSelectedVDB = Path.GetDirectoryName(pathToVoxelDatabase);
+                if (PathUtils.IsSameFolderOrSubfolder(folderContainingSelectedVDB, Paths.voxelDatabases) == false)
+                {
+                    Debug.LogError("The chosen .vdb file must be inside the '" + Paths.voxelDatabases + "' folder");
+                    return;
+                }			
 			
-			if(pathToVoxelDatabase.Length != 0)
-			{
-				string relativePathToVoxelDatabase = Paths.MakeRelativePath(Paths.voxelDatabases + Path.DirectorySeparatorChar, pathToVoxelDatabase);
+				string relativePathToVoxelDatabase = PathUtils.MakeRelativePath(Paths.voxelDatabases + '/', pathToVoxelDatabase);
 			
 				// Pass through to the other version of the method.
 				VolumeDataAsset.CreateFromVoxelDatabase<ColoredCubesVolumeData>(relativePathToVoxelDatabase);

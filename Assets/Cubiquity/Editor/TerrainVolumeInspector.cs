@@ -112,6 +112,12 @@ namespace Cubiquity
 				settingsPressed = true;
 			}
 			EditorGUILayout.EndHorizontal();
+
+            if ((sculptPressed || smoothPressed || paintPressed) && (terrainVolume.data != null) && 
+                (terrainVolume.data.writePermissions == VolumeData.WritePermissions.ReadOnly))
+            {
+                EditorGUILayout.HelpBox("The attached volume data (" + terrainVolume.data.name + ") is set to read only! Changes you make here cannot be saved.", MessageType.Error);
+            }
 				
 			if(sculptPressed)
 			{
@@ -256,6 +262,12 @@ namespace Cubiquity
 		
 		public void OnSceneGUI()
 		{
+            // We use these 'Handles' functions to allow us to embed OnGUI() code into OnSceneGUI().
+            // See http://answers.unity3d.com/questions/26669/using-editorguilayout-controls-in-onscenegui.html
+            Handles.BeginGUI();
+            terrainVolume.OnGUI();
+            Handles.EndGUI();
+
 			// If we don't have a renderer then there's no terrain being
 			// displayed, and so not much we can do in this function.
 			TerrainVolumeRenderer terrainVolumeRenderer = terrainVolume.GetComponent<TerrainVolumeRenderer>();
@@ -314,6 +326,8 @@ namespace Cubiquity
 							TerrainVolumeEditor.PaintTerrainVolume(terrainVolume, pickResult.volumeSpacePos.x, pickResult.volumeSpacePos.y, pickResult.volumeSpacePos.z, brushInnerRadius, brushOuterRadius, brushOpacity, (uint)selectedTexture);
 						}
 					}
+
+                    // Note: We don't call Update() here, that seems to happen automatically later as a result of assigning the shader keywords.
 				}
 				
 				if ( e.type == EventType.Layout )
@@ -322,8 +336,8 @@ namespace Cubiquity
 			       HandleUtility.AddDefaultControl( GUIUtility.GetControlID( GetHashCode(), FocusType.Passive ) );
 			    }
 				
-				// We need to repaint so that the brush marker follows
-				// the mouse even when a mouse button is not pressed.
+				// We need to repaint so that the brush marker follows the mouse even when a mouse button is not pressed.
+                // This does not seem to call Update(), but that seems to happen automatically later as a result of assigning the shader keywords.
 				HandleUtility.Repaint();
 			}
 			

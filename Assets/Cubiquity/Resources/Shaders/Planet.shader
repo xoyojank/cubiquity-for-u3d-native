@@ -2,6 +2,10 @@
 {
 	Properties
 	{
+		// This property is used to center/align the cubemap with the planet.
+		// It usually makes sense to center planets at the origin so the default it often ok.
+		_Center ("Planet center (in volume-space coordinates)", Vector) = (0.0, 0.0, 0.0, 0.0)
+		
 		_Tex0 ("Surface Texture", CUBE) = "white" {}
 		_Tex1 ("Layer 1 Texture", 2D) = "white" {}
 		_Tex2 ("Layer 2 Texture", 2D) = "white" {}
@@ -18,6 +22,8 @@
 		#pragma glsl
 		
 		#include "TerrainVolumeUtilities.cginc"
+		
+		float4 _Center;
 		
 		samplerCUBE _Tex0;
 		
@@ -53,9 +59,14 @@
 		{
 			IN.volumeNormal = normalize(IN.volumeNormal);
 			
+			// We could use the surface normal to smple the cube map but actually it is not precise enough (at some point
+			// it was packed into 16 bits). It's fine for lighting but artifacts are visible when using it for the cube map.
+			// Therefore we take a vector from the center of the planet to the surface. This is a much higher quality normal,
+			// but of course it only works for perfectly spherical objects. 
+			float3 cubemapSampleDir = IN.volumePos.xyz - _Center.xyz;
+			
 			// Unity's cubemap functionality is intended for reflection maps rather than wrapping 
 			// textures around a sphere. As a result they show up backwards uness we invert them here.
-			float3 cubemapSampleDir = IN.volumeNormal;
 			cubemapSampleDir.x = -cubemapSampleDir.x;
 			
 			// Vertex colors coming out of Cubiquity don't actually sum to one

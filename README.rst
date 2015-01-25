@@ -5,8 +5,8 @@ Introduction
 ------------
 Cubiquity for Unity3D is an integration layer between our Cubiquity voxel engine and Unity. It allows the creation of volumetric (voxel-based) environments which can be dynamically modified in both the Unity editor and also in-game, enabling dynamic digging, building, and destruction. It uses the power of native code for optimal performance and memory usage, yet still works with both the Free and Pro versions of Unity.
 
-.. image:: http://i.imgur.com/jGP69pV.jpg
-   :target: http://youtu.be/6z0jd-J8QMQ
+.. image:: http://i.imgur.com/qrdvuJV.jpg
+   :target: http://youtu.be/rhV2dcM4IkE?t=20s
 *Our tank demo shows how a voxel environment can be destroyed in real-time* `(download) <http://www.volumesoffun.com/downloads/Cubiquity/CubiquityUnity3DTest3.zip>`_
 
 Key Features

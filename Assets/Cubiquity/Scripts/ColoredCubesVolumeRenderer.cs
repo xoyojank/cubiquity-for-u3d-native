@@ -17,7 +17,7 @@ namespace Cubiquity
 			if(material == null)
 			{
 				// This shader should be appropriate in most scenarios, and makes a good default.
-				material = Resources.Load("Materials/ColoredCubes", typeof(Material)) as Material;
+				material = Instantiate(Resources.Load("Materials/ColoredCubes", typeof(Material))) as Material;
 			}
 		}
 	}
