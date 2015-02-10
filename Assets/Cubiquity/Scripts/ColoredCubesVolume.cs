@@ -105,8 +105,7 @@ namespace Cubiquity
             // The following line disables it by forcing the highest level of detail to always be used.
             minimumLOD = 0;
 
-            // Next line commented out so the system starts up with LOD disabled.
-            //if (volumeRenderer != null && volumeRenderer.hasChanged)
+            if (volumeRenderer != null && volumeRenderer.hasChanged)
             {
                 CubiquityDLL.SetLodRange(data.volumeHandle.Value, minimumLOD, 0);
             }
