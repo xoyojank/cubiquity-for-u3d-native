@@ -156,9 +156,9 @@ public class ClickToDestroy : MonoBehaviour
 								cube.transform.localPosition = new Vector3(x, y, z);
 								cube.transform.localRotation = Quaternion.identity;
 								cube.transform.localScale = new Vector3(0.9f, 0.9f, 0.9f);
-								cube.renderer.material = fakeVoxelMaterial;
-								cube.renderer.material.SetColor("_CubeColor", (Color32)color);
-								cube.renderer.material.SetVector("_CubePosition", new Vector4(x, y, z, 0.0f));
+								cube.GetComponent<Renderer>().material = fakeVoxelMaterial;
+								cube.GetComponent<Renderer>().material.SetColor("_CubeColor", (Color32)color);
+								cube.GetComponent<Renderer>().material.SetVector("_CubePosition", new Vector4(x, y, z, 0.0f));
 								
 								Vector3 explosionForce = cube.transform.position - pos;
 								
@@ -170,8 +170,8 @@ public class ClickToDestroy : MonoBehaviour
 								
 								Vector3 up = new Vector3(0.0f, 2.0f, 0.0f);
 								
-								cube.rigidbody.AddTorque(xTorque, yTorque, zTorque);
-								cube.rigidbody.AddForce((explosionForce.normalized + up) * 100.0f);
+								cube.GetComponent<Rigidbody>().AddTorque(xTorque, yTorque, zTorque);
+								cube.GetComponent<Rigidbody>().AddForce((explosionForce.normalized + up) * 100.0f);
 
                                 // Cubes are just a temporary visual effect, and we delete them after a few seconds.
                                 float lifeTime = Random.Range(8.0f, 12.0f);
