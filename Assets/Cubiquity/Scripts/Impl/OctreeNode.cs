@@ -289,7 +289,14 @@ namespace Cubiquity
                     meshRenderer.enabled = volumeRenderer.enabled && octreeNode.renderThisNode;
 
                     meshRenderer.receiveShadows = volumeRenderer.receiveShadows;
+
+					// Shadow casting behaviour is specified differently in Unity 4 vs. Unity 5.
+#if (UNITY_4_3 || UNITY_4_5 || UNITY_4_6)
                     meshRenderer.castShadows = volumeRenderer.castShadows;
+#else
+					meshRenderer.shadowCastingMode = volumeRenderer.castShadows ? 
+						UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.Off;
+#endif
 
                     switch (octreeNode.height)
                     {
