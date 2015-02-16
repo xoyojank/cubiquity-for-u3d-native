@@ -327,7 +327,10 @@ namespace Cubiquity
 						}
 					}
 
-                    // Note: We don't call Update() here, that seems to happen automatically later as a result of assigning the shader keywords.
+
+					// Forcing the update seems to be requireded in Unity 5, whereas in Unity 4 it seems to happen automatically
+					// later as a result of assigning the shader keywords. Seems best to manually call it just in case.
+					terrainVolume.ForceUpdate();
 				}
 				
 				if ( e.type == EventType.Layout )
@@ -337,7 +340,6 @@ namespace Cubiquity
 			    }
 				
 				// We need to repaint so that the brush marker follows the mouse even when a mouse button is not pressed.
-                // This does not seem to call Update(), but that seems to happen automatically later as a result of assigning the shader keywords.
 				HandleUtility.Repaint();
 			}
 			
