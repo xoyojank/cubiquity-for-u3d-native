@@ -3,15 +3,20 @@ Cubiquity For Unity3D Changelog
 
 Note that in general we only list versions which actually get submitted to the assets store, but that within each entry we list all important changes which have been made since the last submitted version.
 
+Version 1.2.1
+-------------
+ - Features
+  - Added support for Unity 5.
+
 Version 1.2.0
 -------------
  - Features
-  - ConvertToVDB and ConvertToImages now replaced by ProcessVDB tool
-   - Supports experimental import of heightmaps
+  - ConvertToVDB and ConvertToImages now replaced by ProcessVDB tool.
+   - Supports experimental import of heightmaps.
   - Performance and memory gains due to use of octree and timestamping.
   - Can now optionally use \unsafe flag for faster transfer of mesh data.
   - Provides 64-bit versions of native code binaries.
-  - Coliders can optioanlly exist in Unity editor for integration with other tools. 
+  - Colliders can optionally exist in Unity editor for integration with other tools. 
  - Bug fixes
   - Fixed problem saving scenes on Unity 4.6
 
