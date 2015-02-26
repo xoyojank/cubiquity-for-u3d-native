@@ -1,4 +1,9 @@
-﻿using UnityEngine;
+﻿// Uncomment the following line to enable eight materials on the
+// terrain. Be aware that this may have problems on Unity 5.
+// You will also need to uncomment the same define in the shaders.
+//#define EIGHT_MATERIALS
+
+using UnityEngine;
 using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
@@ -199,19 +204,25 @@ namespace Cubiquity
 		
 		private void DrawTextureSelector()
 		{
+#if EIGHT_MATERIALS
+            const int noOfMaterials = 8;
+#else
+            const int noOfMaterials = 4;
+#endif
+
 			EditorGUILayout.LabelField("Textures", EditorStyles.boldLabel);
 			
 			EditorGUILayout.HelpBox("The avalible textures are defined by the currently active " +
 				"material, which you can set on the Terrain Volume Renderer component", MessageType.None);
-			
-			Texture2D[] diffuseMaps = new Texture2D[8]; //HARDCODED!!
+
+            Texture2D[] diffuseMaps = new Texture2D[noOfMaterials];
 			
 			// If we have a renderer and a material available then we can attempt
 			// to set the texture on the buttons according to what is in the material
 			if((terrainVolume.GetComponent<TerrainVolumeRenderer>()) &&
 				(terrainVolume.GetComponent<TerrainVolumeRenderer>().material))
 			{
-				for(int i = 0; i < 8; i++) //HARDCODED!!
+                for (int i = 0; i < noOfMaterials; i++)
 				{
 					diffuseMaps[i] = terrainVolume.GetComponent<TerrainVolumeRenderer>().material.GetTexture("_Tex" + i) as Texture2D;
 				}
@@ -327,7 +338,10 @@ namespace Cubiquity
 						}
 					}
 
-                    // Note: We don't call Update() here, that seems to happen automatically later as a result of assigning the shader keywords.
+
+					// Forcing the update seems to be requireded in Unity 5, whereas in Unity 4 it seems to happen automatically
+					// later as a result of assigning the shader keywords. Seems best to manually call it just in case.
+					terrainVolume.ForceUpdate();
 				}
 				
 				if ( e.type == EventType.Layout )
@@ -337,7 +351,6 @@ namespace Cubiquity
 			    }
 				
 				// We need to repaint so that the brush marker follows the mouse even when a mouse button is not pressed.
-                // This does not seem to call Update(), but that seems to happen automatically later as a result of assigning the shader keywords.
 				HandleUtility.Repaint();
 			}
 			

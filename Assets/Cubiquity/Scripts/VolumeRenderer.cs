@@ -212,12 +212,29 @@ namespace Cubiquity
 
         private void computeNormalMultiplier(Material mat)
         {
-            // We compute surface normals using derivative operations in the fragment shader, but for some reason
-            // these are backwards on Linux. We can correct for this in the shader by setting the multiplier below.
-#if UNITY_STANDALONE_LINUX && !UNITY_EDITOR
-            mat.SetFloat("normalMultiplier", -1.0f);
+            // We compute surface normals using derivative operations in the fragment shader,
+			// but we are finding it hard to automatically get the correct behaviour on all
+			// platforms. We can correct for this in the shader by setting the multiplier below.
+#if (UNITY_4_3 || UNITY_4_5 || UNITY_4_6)
+	#if UNITY_STANDALONE_LINUX && !UNITY_EDITOR
+	            mat.SetFloat("normalMultiplier", -1.0f);
+	#else
+	            mat.SetFloat("normalMultiplier", 1.0f);
+	#endif
 #else
-            mat.SetFloat("normalMultiplier", 1.0f);
+			mat.SetFloat("normalMultiplier", 1.0f);
+
+			// I have literally no idea why Unity 5 needs us to invert the normal when
+			// using the Direct3D render system in edit mode (but not in play mode).
+			if(Application.isPlaying == false)
+			{
+				string gdv = SystemInfo.graphicsDeviceVersion;
+				if(gdv.IndexOf("Direct3D") != -1)
+				{
+					mat.SetFloat("normalMultiplier", -1.0f);
+				}
+			}
+			
 #endif
         }
 	}

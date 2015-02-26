@@ -10,6 +10,8 @@
 		_Tex6 ("Texture 6", 2D) = "white" {}
 		_Tex7 ("Texture 7", 2D) = "white" {}
 	}
+
+	// This version of the shader supports eight materials and is expected to work on most platforms.
 	SubShader {
 		Tags { "RenderType"="Opaque" }
 		LOD 200
@@ -20,25 +22,34 @@
 		#pragma glsl
 		#pragma multi_compile BRUSH_MARKER_OFF BRUSH_MARKER_ON
 		
+		// Uncomment the following line to enable eight materials on the
+		// terrain. Be aware that this may have problems on Unity 5.
+		// You will also need to uncomment the same define in the C# code.
+		//#pragma multi_compile EIGHT_MATERIALS
+		
 		#include "TerrainVolumeUtilities.cginc"
 
 		sampler2D _Tex0;
 		sampler2D _Tex1;
 		sampler2D _Tex2;
 		sampler2D _Tex3;
+#if EIGHT_MATERIALS
 		sampler2D _Tex4;
 		sampler2D _Tex5;
 		sampler2D _Tex6;
 		sampler2D _Tex7;
+#endif
 		
 		float4 _Tex0_ST;
 		float4 _Tex1_ST;
 		float4 _Tex2_ST;
 		float4 _Tex3_ST;
+#if EIGHT_MATERIALS
 		float4 _Tex4_ST;
 		float4 _Tex5_ST;
 		float4 _Tex6_ST;
 		float4 _Tex7_ST;
+#endif
 		
 		//float3 _TexInvScale0;
 		//float3 _TexInvScale1;
@@ -62,7 +73,9 @@
 		struct Input
 		{
 			float4 color : COLOR;
+#if EIGHT_MATERIALS
 			float4 otherFourMatStrengths : TEXCOORD0;
+#endif
 			float3 worldPos : POSITION;
 			float3 volumeNormal;
 			float4 volumePos;
@@ -81,10 +94,12 @@
 			float4 worldPos = mul(_Object2World, v.vertex);
 			o.volumePos =  mul(_World2Volume, worldPos);
 			
+#if EIGHT_MATERIALS
 			// The first four material weights are stored in color and are copied by Unity.
 			// But the second four are stored in texture coordinates and need to be copied manually.
 			o.otherFourMatStrengths.xy = v.texcoord.xy;
 			o.otherFourMatStrengths.zw = v.texcoord1.xy;
+#endif
 		}
 
 		void surf (Input IN, inout SurfaceOutput o)
@@ -98,6 +113,7 @@
 			// Vertex colors coming out of Cubiquity don't actually sum to one
 			// (roughly 0.5 as that's where the isosurface is). Make them sum
 			// to one, though Cubiquity should probably be changed to do this.
+#if EIGHT_MATERIALS
 			half4 materialStrengths = IN.color;
 			half4 otherFourMaterialStrengths = IN.otherFourMatStrengths;
 			half materialStrengthsSum = 
@@ -105,6 +121,12 @@
 				otherFourMaterialStrengths.x + otherFourMaterialStrengths.y + otherFourMaterialStrengths.z + otherFourMaterialStrengths.w;
 			materialStrengths /= materialStrengthsSum;
 			otherFourMaterialStrengths /= materialStrengthsSum;
+#else
+			half4 materialStrengths = IN.color;
+			half materialStrengthsSum = 
+				materialStrengths.x + materialStrengths.y + materialStrengths.z + materialStrengths.w;
+			materialStrengths /= materialStrengthsSum;
+#endif
 			
 			// Texture coordinates are calculated from the model
 			// space position, scaled by a user-supplied factor.
@@ -130,10 +152,12 @@
 			diffuse += texTriplanar(_Tex2, texCoords, _Tex2_ST, dx, dy, triplanarBlendWeights * materialStrengths.b);
 			diffuse += texTriplanar(_Tex3, texCoords, _Tex3_ST, dx, dy, triplanarBlendWeights * materialStrengths.a);
 			
+#if EIGHT_MATERIALS
 			diffuse += texTriplanar(_Tex4, texCoords, _Tex4_ST, dx, dy, triplanarBlendWeights * otherFourMaterialStrengths.r);
 			diffuse += texTriplanar(_Tex5, texCoords, _Tex5_ST, dx, dy, triplanarBlendWeights * otherFourMaterialStrengths.g);
 			diffuse += texTriplanar(_Tex6, texCoords, _Tex6_ST, dx, dy, triplanarBlendWeights * otherFourMaterialStrengths.b);
 			diffuse += texTriplanar(_Tex7, texCoords, _Tex7_ST, dx, dy, triplanarBlendWeights * otherFourMaterialStrengths.a);
+#endif
 			
 #if BRUSH_MARKER_ON
 			float brushStrength = 0.0f;

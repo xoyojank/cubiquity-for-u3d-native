@@ -11,10 +11,6 @@ namespace Cubiquity
 		{		
 			public static void ValidateAndFix()
 			{	
-#if (!UNITY_4_3 && !UNITY_4_5 && !UNITY_4_6)
-                throw new CubiquityInstallationException("We're sorry, but Cubiquity for Unity3D is not currently supported on your version of Unity.\n" +
-                "At the moment we only support Unity versions 4.3.x, 4.5.x, and 4.6.x.");
-#else
                 // Get the architecture (32 or 64 bit). Is there a better way?
                 string archName = "";
                 switch (IntPtr.Size)
@@ -115,7 +111,6 @@ namespace Cubiquity
 				{
                     throw new CubiquityInstallationException("The Cubiquity DLL was not found in the project root folder, and this problem was not resolved.");
 				}
-#endif
 			}
 			
 			// From http://stackoverflow.com/q/1177607
