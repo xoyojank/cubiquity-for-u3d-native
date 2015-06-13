@@ -7,7 +7,7 @@ namespace Cubiquity
 	{
 		public static bool isCommercial
 	    {
-	        get { return false; }
+	        get { return true; }
 	    }
 	}
 }

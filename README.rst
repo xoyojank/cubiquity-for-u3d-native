@@ -13,50 +13,44 @@ Key Features
 ------------
 - Supports two kinds of voxel environment – cubic and smooth
 
-  - Build your world from millions of tiny colored cubes to create detailed 3D worlds. 
-  
+  - Build your world from millions of tiny colored cubes to create detailed 3D worlds.
+
   - Create realistic terrains with powerful sculpting tools.
-  
+
 - Advanced Graphical capabilities
 
-  - Flexible material system supports arbitrary blending between multiple materials.  
-  
+  - Flexible material system supports arbitrary blending between multiple materials.
+
   - Level-of-detail meshes ensure fast operation across a range of hardware.
-  
+
   - Supports Unity's Surface Shader system to allow easy customization of appearance.
-  
+
   - Works with real-time shadows and other dynamic lighting solutions.
-  
+
 - Physics
 
   - Mesh data can be passed into Unity's physics engine for unified collision detection and handling.
-  
+
   - Collision detection can also be performed directly against the voxel data.
-  
+
   - Custom raycast functionality for picking voxels.
-  
+
 - Create worlds easily
 
   - Import voxel terrains from external sources such as heightmaps.
-  
+
   - Direct access to the voxel data allows you to procedurally generate worlds from code.
-  
+
   - Editing tools available both in-editor and in-game (coming soon).
-  
+
 - Solid engineering
 
   - Cubiquity is powered by the PolyVox voxel library, which has been in development for over seven years and is used by several games.
-  
-  - Package includes all C# scripts allowing you to customize it to your needs.
-  
-  - Integrates seamlessly with many other packages from the asset store.
-  
-- Licensing options
 
-  - Available free for non-commercial and evaluation use (see LICENSE.txt).
-  
-  - A commercial license is available through the Unity Asset Store
-  
+  - Package includes all C# scripts allowing you to customize it to your needs.
+
+  - Integrates seamlessly with many other packages from the asset store.
+
 More details
 ------------
 For many years we have been actively developing the `PolyVox voxel terrain library <http://www.volumesoffun.com/polyvox-about/>`_ which has been used `by several games and engines <http://www.volumesoffun.com/polyvox-projects/>`_. PolyVox is an extremely powerful and flexible library, but requires an advanced knowledge of C++ and graphics programming to use effectively. Therefore we have recently introduced Cubiquity as a higher-level and easier to use interface to this functionality.
