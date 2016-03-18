@@ -6,7 +6,7 @@ Cubiquity For Unity3D
 
 Introduction
 ------------
-Cubiquity for Unity3D is an integration layer between our Cubiquity voxel engine and Unity. It allows the creation of volumetric (voxel-based) environments which can be dynamically modified in both the Unity editor and also in-game, enabling dynamic digging, building, and destruction. It uses the power of native code for optimal performance and memory usage, yet still works with both the Free and Pro versions of Unity.
+Cubiquity for Unity3D is an integration layer between our `Cubiquity <https://bitbucket.org/volumesoffun/cubiquity>`_ voxel engine and Unity. It allows the creation of volumetric (voxel-based) environments which can be dynamically modified in both the Unity editor and also in-game, enabling dynamic digging, building, and destruction. It uses the power of native code for optimal performance and memory usage, yet still works with both the Free and Pro versions of Unity.
 
 .. image:: http://i.imgur.com/qrdvuJV.jpg
    :target: http://youtu.be/rhV2dcM4IkE?t=20s
@@ -14,6 +14,7 @@ Cubiquity for Unity3D is an integration layer between our Cubiquity voxel engine
 
 Key Features
 ------------
+- Open source software released under the MIT license.
 - Supports two kinds of voxel environment – cubic and smooth
 
   - Build your world from millions of tiny colored cubes to create detailed 3D worlds.
@@ -56,7 +57,7 @@ Key Features
 
 More details
 ------------
-For many years we have been actively developing the `PolyVox voxel terrain library <http://www.volumesoffun.com/polyvox-about/>`_ which has been used `by several games and engines <http://www.volumesoffun.com/polyvox-projects/>`_. PolyVox is an extremely powerful and flexible library, but requires an advanced knowledge of C++ and graphics programming to use effectively. Therefore we have recently introduced Cubiquity as a higher-level and easier to use interface to this functionality.
+For many years we have been actively developing the `PolyVox voxel terrain library <http://www.volumesoffun.com/polyvox-about/>`_ which has been used `by several games and engines <http://www.volumesoffun.com/polyvox-projects/>`_. PolyVox is an extremely powerful and flexible library, but requires an advanced knowledge of C++ and graphics programming to use effectively. Therefore we have recently introduced `Cubiquity <https://bitbucket.org/volumesoffun/cubiquity>`_ as a higher-level and easier to use interface to this functionality.
 
 Cubiquity is independent of any particular game engine, but this Git repository provides the integration layer which connects Cubiquity to the Unity3D engine. It is this combination of the Cubiquity library and the integration layer which we are making available for download from our website and also through the Unity3D asset store.
 
