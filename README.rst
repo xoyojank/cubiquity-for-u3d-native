@@ -1,7 +1,7 @@
 Cubiquity For Unity3D
 =====================
 
-.. note ::
+.. attention ::
 	This system is not currently under active development, but a replacement system ('Cubiquity 2') is currently in the research phase. For more details please see this blog post: http://www.volumesoffun.com/reflections-on-cubiquity-and-finding-the-path-forward/
 
 Introduction
