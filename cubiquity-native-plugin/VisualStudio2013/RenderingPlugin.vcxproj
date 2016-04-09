@@ -22,6 +22,7 @@
     <ProjectGuid>{F7CFEF5A-54BD-42E8-A59E-54ABAEB4EA9C}</ProjectGuid>
     <RootNamespace>RenderingPlugin</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <ProjectName>CubiquityPlugin</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -161,10 +162,125 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\cubiquity\Core\BackgroundTaskProcessor.cpp" />
+    <ClCompile Include="..\..\cubiquity\Core\Brush.cpp" />
+    <ClCompile Include="..\..\cubiquity\Core\Clock.cpp" />
+    <ClCompile Include="..\..\cubiquity\Core\Color.cpp" />
+    <ClCompile Include="..\..\cubiquity\Core\ColoredCubesVolume.cpp" />
+    <ClCompile Include="..\..\cubiquity\Core\ColoredCubicSurfaceExtractionTask.cpp" />
+    <ClCompile Include="..\..\cubiquity\Core\CubiquityC.cpp" />
+    <ClCompile Include="..\..\cubiquity\Core\Logging.cpp" />
+    <ClCompile Include="..\..\cubiquity\Core\MainThreadTaskProcessor.cpp" />
+    <ClCompile Include="..\..\cubiquity\Core\MaterialSet.cpp" />
+    <ClCompile Include="..\..\cubiquity\Core\Raycasting.cpp" />
+    <ClCompile Include="..\..\cubiquity\Core\SmoothSurfaceExtractionTask.cpp" />
+    <ClCompile Include="..\..\cubiquity\Core\Task.cpp" />
+    <ClCompile Include="..\..\cubiquity\Core\TerrainVolume.cpp" />
+    <ClCompile Include="..\..\cubiquity\Core\TerrainVolumeEditor.cpp" />
+    <ClCompile Include="..\..\cubiquity\Core\TerrainVolumeGenerator.cpp" />
+    <ClCompile Include="..\..\cubiquity\Core\VoxelDatabase.cpp" />
     <ClCompile Include="..\RenderingPlugin.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\cubiquity\Core\BackgroundTaskProcessor.h" />
+    <ClInclude Include="..\..\cubiquity\Core\BitField.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Brush.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Clock.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Color.h" />
+    <ClInclude Include="..\..\cubiquity\Core\ColoredCubesVolume.h" />
+    <ClInclude Include="..\..\cubiquity\Core\ColoredCubicSurfaceExtractionTask.h" />
+    <ClInclude Include="..\..\cubiquity\Core\ConcurrentQueue.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Cubiquity.h" />
+    <ClInclude Include="..\..\cubiquity\Core\CubiquityC.h" />
+    <ClInclude Include="..\..\cubiquity\Core\CubiquityForwardDeclarations.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\AmbientOcclusionCalculator.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Array.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\AStarPathfinder.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\BaseVolume.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Config.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\CubicSurfaceExtractor.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\DefaultIsQuadNeeded.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\DefaultMarchingCubesController.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Density.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Exceptions.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\FilePager.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\Assertions.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\AStarPathfinderImpl.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\ErrorHandling.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\ExceptionsImpl.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\Interpolation.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\IteratorController.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\LoggingImpl.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\MarchingCubesTables.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\Morton.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\PlatformDefinitions.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\RandomUnitVectors.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\RandomVectors.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\Timer.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\Utility.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Logging.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\LowPassFilter.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\MarchingCubesSurfaceExtractor.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Material.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\MaterialDensityPair.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Mesh.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\PagedVolume.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Picking.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\RawVolume.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Raycast.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Region.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Vector.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Vertex.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\VolumeResampler.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Exceptions.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Logging.h" />
+    <ClInclude Include="..\..\cubiquity\Core\MainThreadTaskProcessor.h" />
+    <ClInclude Include="..\..\cubiquity\Core\MaterialSet.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Octree.h" />
+    <ClInclude Include="..\..\cubiquity\Core\OctreeNode.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Raycasting.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Region.h" />
+    <ClInclude Include="..\..\cubiquity\Core\SmoothSurfaceExtractionTask.h" />
+    <ClInclude Include="..\..\cubiquity\Core\SQLiteUtils.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Task.h" />
+    <ClInclude Include="..\..\cubiquity\Core\TaskProcessor.h" />
+    <ClInclude Include="..\..\cubiquity\Core\TerrainVolume.h" />
+    <ClInclude Include="..\..\cubiquity\Core\TerrainVolumeEditor.h" />
+    <ClInclude Include="..\..\cubiquity\Core\TerrainVolumeGenerator.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Vector.h" />
+    <ClInclude Include="..\..\cubiquity\Core\Volume.h" />
+    <ClInclude Include="..\..\cubiquity\Core\VoxelDatabase.h" />
+    <ClInclude Include="..\..\cubiquity\Core\VoxelTraits.h" />
+    <ClInclude Include="..\..\cubiquity\Core\WritePermissions.h" />
     <ClInclude Include="..\UnityPluginInterface.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\AmbientOcclusionCalculator.inl" />
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\AStarPathfinder.inl" />
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\BaseVolume.inl" />
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\BaseVolumeSampler.inl" />
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\CubicSurfaceExtractor.inl" />
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\IteratorController.inl" />
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\LowPassFilter.inl" />
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\MarchingCubesSurfaceExtractor.inl" />
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\Mesh.inl" />
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\PagedVolume.inl" />
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\PagedVolumeChunk.inl" />
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\PagedVolumeSampler.inl" />
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\Picking.inl" />
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\RawVolume.inl" />
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\RawVolumeSampler.inl" />
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\Raycast.inl" />
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\Region.inl" />
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\Vector.inl" />
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\VolumeResampler.inl" />
+    <None Include="..\..\cubiquity\Core\Octree.inl" />
+    <None Include="..\..\cubiquity\Core\OctreeNode.inl" />
+    <None Include="..\..\cubiquity\Core\Volume.inl" />
+    <None Include="..\..\cubiquity\Core\VoxelDatabase.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\cubiquity\Core\Dependancies\PolyVox\LICENSE.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,0 +1,11 @@
+*.sdf
+*.opensdf
+*.suo
+cmake_install.cmake
+cubiquity/CMakeFiles
+cubiquity/Core/CMakeFiles
+cubiquity/Examples/CubiquityCTest/CMakeFiles
+cubiquity/Examples/OpenGL/CMakeFiles
+cubiquity/Examples/OpenGL/external/CMakeFiles
+cubiquity/Tools/ProcessVDB/CMakeFiles
+*.user

@@ -1,0 +1,357 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\RenderingPlugin.cpp" />
+    <ClCompile Include="..\..\cubiquity\Core\BackgroundTaskProcessor.cpp">
+      <Filter>Cubiquity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\cubiquity\Core\Brush.cpp">
+      <Filter>Cubiquity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\cubiquity\Core\Clock.cpp">
+      <Filter>Cubiquity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\cubiquity\Core\Color.cpp">
+      <Filter>Cubiquity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\cubiquity\Core\ColoredCubesVolume.cpp">
+      <Filter>Cubiquity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\cubiquity\Core\ColoredCubicSurfaceExtractionTask.cpp">
+      <Filter>Cubiquity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\cubiquity\Core\CubiquityC.cpp">
+      <Filter>Cubiquity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\cubiquity\Core\Logging.cpp">
+      <Filter>Cubiquity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\cubiquity\Core\MainThreadTaskProcessor.cpp">
+      <Filter>Cubiquity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\cubiquity\Core\MaterialSet.cpp">
+      <Filter>Cubiquity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\cubiquity\Core\Raycasting.cpp">
+      <Filter>Cubiquity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\cubiquity\Core\SmoothSurfaceExtractionTask.cpp">
+      <Filter>Cubiquity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\cubiquity\Core\Task.cpp">
+      <Filter>Cubiquity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\cubiquity\Core\TerrainVolume.cpp">
+      <Filter>Cubiquity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\cubiquity\Core\TerrainVolumeEditor.cpp">
+      <Filter>Cubiquity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\cubiquity\Core\TerrainVolumeGenerator.cpp">
+      <Filter>Cubiquity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\cubiquity\Core\VoxelDatabase.cpp">
+      <Filter>Cubiquity</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\UnityPluginInterface.h" />
+    <ClInclude Include="..\..\cubiquity\Core\BackgroundTaskProcessor.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\BitField.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Brush.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Clock.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Color.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\ColoredCubesVolume.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\ColoredCubicSurfaceExtractionTask.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\ConcurrentQueue.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Cubiquity.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\CubiquityC.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\CubiquityForwardDeclarations.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Exceptions.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Logging.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\MainThreadTaskProcessor.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\MaterialSet.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Octree.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\OctreeNode.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Raycasting.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Region.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\SmoothSurfaceExtractionTask.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\SQLiteUtils.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Task.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\TaskProcessor.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\TerrainVolume.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\TerrainVolumeEditor.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\TerrainVolumeGenerator.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Vector.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Volume.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\VoxelDatabase.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\VoxelTraits.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\WritePermissions.h">
+      <Filter>Cubiquity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\AmbientOcclusionCalculator.h">
+      <Filter>PolyVox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Array.h">
+      <Filter>PolyVox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\AStarPathfinder.h">
+      <Filter>PolyVox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\BaseVolume.h">
+      <Filter>PolyVox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Config.h">
+      <Filter>PolyVox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\CubicSurfaceExtractor.h">
+      <Filter>PolyVox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\DefaultIsQuadNeeded.h">
+      <Filter>PolyVox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\DefaultMarchingCubesController.h">
+      <Filter>PolyVox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Density.h">
+      <Filter>PolyVox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Exceptions.h">
+      <Filter>PolyVox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\FilePager.h">
+      <Filter>PolyVox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Logging.h">
+      <Filter>PolyVox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\LowPassFilter.h">
+      <Filter>PolyVox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\MarchingCubesSurfaceExtractor.h">
+      <Filter>PolyVox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Material.h">
+      <Filter>PolyVox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\MaterialDensityPair.h">
+      <Filter>PolyVox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Mesh.h">
+      <Filter>PolyVox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\PagedVolume.h">
+      <Filter>PolyVox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Picking.h">
+      <Filter>PolyVox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\RawVolume.h">
+      <Filter>PolyVox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Raycast.h">
+      <Filter>PolyVox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Region.h">
+      <Filter>PolyVox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Vector.h">
+      <Filter>PolyVox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Vertex.h">
+      <Filter>PolyVox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\VolumeResampler.h">
+      <Filter>PolyVox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\Assertions.h">
+      <Filter>PolyVox\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\AStarPathfinderImpl.h">
+      <Filter>PolyVox\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\ErrorHandling.h">
+      <Filter>PolyVox\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\ExceptionsImpl.h">
+      <Filter>PolyVox\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\Interpolation.h">
+      <Filter>PolyVox\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\IteratorController.h">
+      <Filter>PolyVox\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\LoggingImpl.h">
+      <Filter>PolyVox\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\MarchingCubesTables.h">
+      <Filter>PolyVox\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\Morton.h">
+      <Filter>PolyVox\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\PlatformDefinitions.h">
+      <Filter>PolyVox\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\RandomUnitVectors.h">
+      <Filter>PolyVox\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\RandomVectors.h">
+      <Filter>PolyVox\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\Timer.h">
+      <Filter>PolyVox\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\Utility.h">
+      <Filter>PolyVox\Impl</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Cubiquity">
+      <UniqueIdentifier>{ef4063bd-397e-42c9-9233-81e9415da4af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PolyVox">
+      <UniqueIdentifier>{bcf3449d-1e53-482c-9017-73e3f04344ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PolyVox\Impl">
+      <UniqueIdentifier>{ac79b9b7-2770-495f-978b-da06f23130ec}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\cubiquity\Core\Octree.inl">
+      <Filter>Cubiquity</Filter>
+    </None>
+    <None Include="..\..\cubiquity\Core\OctreeNode.inl">
+      <Filter>Cubiquity</Filter>
+    </None>
+    <None Include="..\..\cubiquity\Core\Volume.inl">
+      <Filter>Cubiquity</Filter>
+    </None>
+    <None Include="..\..\cubiquity\Core\VoxelDatabase.inl">
+      <Filter>Cubiquity</Filter>
+    </None>
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\AmbientOcclusionCalculator.inl">
+      <Filter>PolyVox</Filter>
+    </None>
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\AStarPathfinder.inl">
+      <Filter>PolyVox</Filter>
+    </None>
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\BaseVolume.inl">
+      <Filter>PolyVox</Filter>
+    </None>
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\BaseVolumeSampler.inl">
+      <Filter>PolyVox</Filter>
+    </None>
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\CubicSurfaceExtractor.inl">
+      <Filter>PolyVox</Filter>
+    </None>
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\LowPassFilter.inl">
+      <Filter>PolyVox</Filter>
+    </None>
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\MarchingCubesSurfaceExtractor.inl">
+      <Filter>PolyVox</Filter>
+    </None>
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\Mesh.inl">
+      <Filter>PolyVox</Filter>
+    </None>
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\PagedVolume.inl">
+      <Filter>PolyVox</Filter>
+    </None>
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\PagedVolumeChunk.inl">
+      <Filter>PolyVox</Filter>
+    </None>
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\PagedVolumeSampler.inl">
+      <Filter>PolyVox</Filter>
+    </None>
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\Picking.inl">
+      <Filter>PolyVox</Filter>
+    </None>
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\RawVolume.inl">
+      <Filter>PolyVox</Filter>
+    </None>
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\RawVolumeSampler.inl">
+      <Filter>PolyVox</Filter>
+    </None>
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\Raycast.inl">
+      <Filter>PolyVox</Filter>
+    </None>
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\Region.inl">
+      <Filter>PolyVox</Filter>
+    </None>
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\Vector.inl">
+      <Filter>PolyVox</Filter>
+    </None>
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\VolumeResampler.inl">
+      <Filter>PolyVox</Filter>
+    </None>
+    <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\IteratorController.inl">
+      <Filter>PolyVox\Impl</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\cubiquity\Core\Dependancies\PolyVox\LICENSE.txt">
+      <Filter>PolyVox</Filter>
+    </Text>
+  </ItemGroup>
+</Project>
