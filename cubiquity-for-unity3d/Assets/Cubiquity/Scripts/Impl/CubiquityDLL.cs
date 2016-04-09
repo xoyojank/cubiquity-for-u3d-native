@@ -21,7 +21,7 @@ namespace Cubiquity
 
 		public class CubiquityDLL
 		{
-			private const string dllToImport = "CubiquityC";
+            private const string dllToImport = "CubiquityPlugin";
 			private static string logFilePath;
 			
 			const int CU_OK = 0;
