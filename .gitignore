@@ -9,3 +9,4 @@ cubiquity/Examples/OpenGL/CMakeFiles
 cubiquity/Examples/OpenGL/external/CMakeFiles
 cubiquity/Tools/ProcessVDB/CMakeFiles
 *.user
+cubiquity-native-plugin/VisualStudio2013/x64
