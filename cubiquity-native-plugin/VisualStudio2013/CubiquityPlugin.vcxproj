@@ -152,7 +152,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\..\cubiquity\Core\Dependancies;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\cubiquity\Core\Dependancies;..\..\cubiquity\Core\;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -180,7 +180,9 @@
     <ClCompile Include="..\..\cubiquity\Core\TerrainVolumeEditor.cpp" />
     <ClCompile Include="..\..\cubiquity\Core\TerrainVolumeGenerator.cpp" />
     <ClCompile Include="..\..\cubiquity\Core\VoxelDatabase.cpp" />
-    <ClCompile Include="..\RenderingPlugin.cpp" />
+    <ClCompile Include="..\CubiquityPlugin.cpp" />
+    <ClCompile Include="..\D3D11OctreeNode.cpp" />
+    <ClCompile Include="..\D3D11VolumeRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\cubiquity\Core\BackgroundTaskProcessor.h" />
@@ -253,7 +255,10 @@
     <ClInclude Include="..\..\cubiquity\Core\VoxelDatabase.h" />
     <ClInclude Include="..\..\cubiquity\Core\VoxelTraits.h" />
     <ClInclude Include="..\..\cubiquity\Core\WritePermissions.h" />
+    <ClInclude Include="..\D3D11OctreeNode.h" />
+    <ClInclude Include="..\D3D11VolumeRenderer.h" />
     <ClInclude Include="..\UnityPluginInterface.h" />
+    <ClInclude Include="..\Utils.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\AmbientOcclusionCalculator.inl" />

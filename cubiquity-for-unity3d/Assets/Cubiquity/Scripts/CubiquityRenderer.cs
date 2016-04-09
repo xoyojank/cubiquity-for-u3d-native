@@ -35,7 +35,7 @@ public class CubiquityRenderer : MonoBehaviour
 		tex.Apply();
 
 		// Set texture onto our matrial
-		GetComponent<Renderer>().material.mainTexture = tex;
+        //GetComponent<Renderer>().material.mainTexture = tex;
 
 		// Pass texture pointer to the plugin
 		SetTextureFromUnity (tex.GetNativeTexturePtr());

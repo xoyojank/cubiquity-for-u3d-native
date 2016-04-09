@@ -11,3 +11,4 @@ cubiquity/Tools/ProcessVDB/CMakeFiles
 *.user
 cubiquity-native-plugin/VisualStudio2013/x64
 *.log
+/cubiquity-for-unity3d/obj/Debug

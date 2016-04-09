@@ -27,7 +27,7 @@ namespace Cubiquity
 			const int CU_OK = 0;
 			
 			const uint requiredMajorVersion = 1;
-			const uint requiredMinorVersion = 2;
+			const uint requiredMinorVersion = 3;
 			const uint requiredPatchVersion = 0;
             const uint requiredBuildVersion = 0;
 			
@@ -38,8 +38,6 @@ namespace Cubiquity
 			{
 				try
 				{
-					Installation.ValidateAndFix();
-					
 					uint majorVersion;
 					uint minorVersion;
 					uint patchVersion;

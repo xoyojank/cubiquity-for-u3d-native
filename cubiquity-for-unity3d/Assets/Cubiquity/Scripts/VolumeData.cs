@@ -311,9 +311,6 @@ namespace Cubiquity
 		
 		private void Awake()
 		{
-			// Make sure the Cubiquity library is installed.
-			Installation.ValidateAndFix();
-
 			RegisterPath();
 		}
 		

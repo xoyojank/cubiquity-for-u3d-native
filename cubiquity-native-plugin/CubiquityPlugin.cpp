@@ -2,10 +2,9 @@
 
 
 #include "UnityPluginInterface.h"
+#include "D3D11VolumeRenderer.h"
 
 #include <math.h>
-#include <stdio.h>
-#include <vector>
 
 // --------------------------------------------------------------------------
 // Include headers for the graphics APIs we support
@@ -23,27 +22,9 @@
 		#include <OpenGL/OpenGL.h>
 	#endif
 #endif
+#include "Utils.h"
 
 
-
-// --------------------------------------------------------------------------
-// Helper utilities
-
-
-// Prints a string
-static void DebugLog (const char* str)
-{
-	#if UNITY_WIN
-	OutputDebugStringA (str);
-	#else
-	printf ("%s", str);
-	#endif
-}
-
-// COM-like Release macro
-#ifndef SAFE_RELEASE
-#define SAFE_RELEASE(a) if (a) { a->Release(); a = NULL; }
-#endif
 
 
 
@@ -232,15 +213,15 @@ static void SetGraphicsDeviceD3D9 (IDirect3DDevice9* device, GfxDeviceEventType 
 
 #if SUPPORT_D3D11
 
-static ID3D11Device* g_D3D11Device;
-static ID3D11Buffer* g_D3D11VB; // vertex buffer
-static ID3D11Buffer* g_D3D11CB; // constant buffer
-static ID3D11VertexShader* g_D3D11VertexShader;
-static ID3D11PixelShader* g_D3D11PixelShader;
-static ID3D11InputLayout* g_D3D11InputLayout;
-static ID3D11RasterizerState* g_D3D11RasterState;
-static ID3D11BlendState* g_D3D11BlendState;
-static ID3D11DepthStencilState* g_D3D11DepthState;
+ID3D11Device* g_D3D11Device;
+ID3D11Buffer* g_D3D11VB; // vertex buffer
+ID3D11Buffer* g_D3D11CB; // constant buffer
+ID3D11VertexShader* g_D3D11VertexShader;
+ID3D11PixelShader* g_D3D11PixelShader;
+ID3D11InputLayout* g_D3D11InputLayout;
+ID3D11RasterizerState* g_D3D11RasterState;
+ID3D11BlendState* g_D3D11BlendState;
+ID3D11DepthStencilState* g_D3D11DepthState;
 
 #if !UNITY_METRO
 typedef HRESULT (WINAPI *D3DCompileFunc)(

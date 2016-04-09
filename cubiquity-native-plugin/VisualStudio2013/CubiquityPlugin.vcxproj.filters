@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\RenderingPlugin.cpp" />
     <ClCompile Include="..\..\cubiquity\Core\BackgroundTaskProcessor.cpp">
       <Filter>Cubiquity</Filter>
     </ClCompile>
@@ -53,6 +52,9 @@
     <ClCompile Include="..\..\cubiquity\Core\VoxelDatabase.cpp">
       <Filter>Cubiquity</Filter>
     </ClCompile>
+    <ClCompile Include="..\CubiquityPlugin.cpp" />
+    <ClCompile Include="..\D3D11OctreeNode.cpp" />
+    <ClCompile Include="..\D3D11VolumeRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\UnityPluginInterface.h" />
@@ -266,6 +268,9 @@
     <ClInclude Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\Utility.h">
       <Filter>PolyVox\Impl</Filter>
     </ClInclude>
+    <ClInclude Include="..\Utils.h" />
+    <ClInclude Include="..\D3D11OctreeNode.h" />
+    <ClInclude Include="..\D3D11VolumeRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Cubiquity">
