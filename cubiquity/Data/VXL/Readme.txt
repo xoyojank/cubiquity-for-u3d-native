@@ -1,0 +1,1 @@
+The VXL files in this folder are provided to test and demonstrate the Cubiquity import functionality, and do not form part of Cubiquity per se. They were created by William Rigby and are released under the Creative Commons Attribution 4.0 International license. The original source files can be found here: http://www.buildandshoot.com/viewtopic.php?f=8&t=913

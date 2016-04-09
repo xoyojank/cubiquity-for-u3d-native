@@ -1,0 +1,31 @@
+Cubiquity was originally created as a closed source commercial project which was pre-compiled into a shared library for shipping with our Unity and Unreal integration layers. As such it was not designed for other people to compile, and you may find there are parts of the build process which are dependent on our development machines.
+
+Therefore, if you want to compile Cubiquity from source you are largely on your own. You may be able to make use of the provided CMake scripts if you know how to use them and they are supported on your target platform, or you may wish to just create an empty project in your chosen development environment and simply copy across the contents of the 'Core' folder. You may have to make some minor changes to the source to get it to build on your platform.
+
+The notes below are for our own internal use and give reminders of what we used to do prior to release. They are included here just in case they are useful.
+
+Internal release checklist
+--------------------------
+
+Build Cubiquity library for all platforms:
+	- Check release mode.
+	- Check version number.
+	- Ensure debug log is disabled. 
+	- Ensure asserts are disabled.
+	- On Windows
+		- Check files with VirusTotal website.
+	- On OS X
+		- Build in Release mode: cmake -DCMAKE_BUILD_TYPE=Release ..
+		- Fix paths in executables so that they search the current directory for the library.
+			- Use https://github.com/auriamg/macdylibbundler/
+			- Sample command: ~/macdylibbundler/dylibbundler -d . -p . -x ProcessVDB
+		- Move to Cubiquity for Unity3D folder
+			- Delete original binaries, so we can verify that the hard-coded paths are fixed.
+			- e.g. mv * ~/cubiquity-for-unity3d/Assets/StreamingAssets/Cubiquity/SDK/OSX
+	- On Linux
+		- To be followed on both 32 and 64-bit build machines.
+			- Install cmake make g++ libx11-dev libxi-dev libgl1-mesa-dev libglu1-mesa-dev libxrandr-dev libxext-dev
+			- Install xorg-dev
+			- Build in Release mode: cmake -DCMAKE_BUILD_TYPE=Release ..
+			- Move to target folder: mv libCubiquityC.so ../../../cubiquity-for-unity3d/Assets/StreamingAssets/Cubiquity/SDK/
+		

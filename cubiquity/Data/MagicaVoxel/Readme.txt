@@ -1,0 +1,1 @@
+The Magica Voxel files in this folder are provided to test and demonstrate the Cubiquity import functionality, and do not form part of Cubiquity per se. They were created by Mike Judge and are released under the Creative Commons Attribution 4.0 International license. The original source files can be found here: https://github.com/mikelovesrobots/mmmm

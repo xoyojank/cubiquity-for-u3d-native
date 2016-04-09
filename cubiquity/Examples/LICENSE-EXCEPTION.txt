@@ -1,0 +1,5 @@
+The contents of this folder are not part of the Cubiquity library and instead serve only to illustrate it's functionality. They are derived from the code at:
+
+http://www.opengl-tutorial.org/
+
+which is released under the WTF Public License.
