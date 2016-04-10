@@ -271,6 +271,22 @@
     <ClInclude Include="..\Utils.h" />
     <ClInclude Include="..\D3D11OctreeNode.h" />
     <ClInclude Include="..\D3D11VolumeRenderer.h" />
+    <ClInclude Include="..\CubiquityPlugin.h" />
+    <ClInclude Include="..\Unity\IUnityGraphics.h">
+      <Filter>Unity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Unity\IUnityGraphicsD3D9.h">
+      <Filter>Unity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Unity\IUnityGraphicsD3D11.h">
+      <Filter>Unity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Unity\IUnityGraphicsD3D12.h">
+      <Filter>Unity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Unity\IUnityInterface.h">
+      <Filter>Unity</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Cubiquity">
@@ -281,6 +297,12 @@
     </Filter>
     <Filter Include="PolyVox\Impl">
       <UniqueIdentifier>{ac79b9b7-2770-495f-978b-da06f23130ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Unity">
+      <UniqueIdentifier>{06f91ea3-d541-4abc-adcc-d6316fc877f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{8125870b-bb69-4580-b8f9-7453b6603cc4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -358,5 +380,19 @@
     <Text Include="..\..\cubiquity\Core\Dependancies\PolyVox\LICENSE.txt">
       <Filter>PolyVox</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\Shaders\TerrainPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\TerrainVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\ColoredCubesPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\ColoredCubesVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

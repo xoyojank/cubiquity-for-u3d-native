@@ -78,15 +78,12 @@ void D3D11OctreeNode::ProcessOctreeNode(uint32_t octreeNodeHandle, D3D11OctreeNo
 				d3d11OctreeNode->noOfIndices = noOfIndices;
 
 				HRESULT hr;
-				// create index buffer;
-				D3D11_BUFFER_DESC bufferDesc;
-				ZeroMemory(&bufferDesc, sizeof(bufferDesc));
+				// create index buffer
+				D3D11_BUFFER_DESC bufferDesc = { 0 };
 				bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-				bufferDesc.ByteWidth = sizeof(uint16_t)* noOfIndices;
+				bufferDesc.ByteWidth = sizeof(uint16_t) * noOfIndices;
 				bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-				bufferDesc.CPUAccessFlags = 0;
-				D3D11_SUBRESOURCE_DATA subResData;
-				ZeroMemory(&subResData, sizeof(subResData));
+				D3D11_SUBRESOURCE_DATA subResData = { 0 };
 				subResData.pSysMem = indices;
 				hr = g_D3D11Device->CreateBuffer(&bufferDesc, &subResData, &d3d11OctreeNode->indexBuffer);
 				assert(SUCCEEDED(hr));

@@ -9,7 +9,7 @@ using namespace DirectX;
 class D3D11VolumeRenderer
 {
 public:
-	D3D11VolumeRenderer();
+	static D3D11VolumeRenderer* Instance();
 
 	bool Setup(const std::string& assetPath);
 
@@ -18,13 +18,12 @@ public:
 	void UpdateMatrix(const XMFLOAT4X4& viewMatrix, const XMFLOAT4X4& projectionMatrix);
 	void RenderVolume(ID3D11DeviceContext* context, uint32_t volumeType, D3D11OctreeNode* rootNode);
 
-private:
-	void RenderOctreeNode(ID3D11DeviceContext* context, D3D11OctreeNode* d3d11OctreeNode);
-
+public:
 	static bool LoadFileIntoBuffer(const std::string& fileName, std::vector<char>& buffer);
 
-	static void CompileShaderFromString(std::vector<char> &buffer, const D3D11_INPUT_ELEMENT_DESC* desc,
-		ID3D11VertexShader** outVS, ID3D11PixelShader** outPS, ID3D11InputLayout** outIL);
+private:
+	D3D11VolumeRenderer();
+	void RenderOctreeNode(ID3D11DeviceContext* context, D3D11OctreeNode* d3d11OctreeNode);
 
 private:
 	struct ConstantBufferVS

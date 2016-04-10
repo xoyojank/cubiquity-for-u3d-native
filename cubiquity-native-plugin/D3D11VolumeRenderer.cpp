@@ -16,21 +16,29 @@ typedef HRESULT(WINAPI *D3DCompileFunc)(
 	ID3D10Blob** ppCode,
 	ID3D10Blob** ppErrorMsgs);
 
-const char* ShaderFilePath[] = 
+const char* VertexShaderFilePath[] = 
 {
-	"Cubiquity/Shaders/ColoredCubes.fx",
-	"Cubiquity/Shaders/TerrainVoxel.fx"
+	"Cubiquity/Shaders/ColoredCubesVertexShader.cso",
+	"Cubiquity/Shaders/TerrainVertexShader.cso"
+};
+const char* PixelShaderFilePath[] =
+{
+	"Cubiquity/Shaders/ColoredCubesPixelShader.cso",
+	"Cubiquity/Shaders/TerrainPixelShader.cso"
 };
 
+
 D3D11_INPUT_ELEMENT_DESC ColorCubesInputElementDesc[] = {
-	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{ "COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "POSITION", 0, DXGI_FORMAT_R8G8B8A8_UINT, 0, offsetof(CuColoredCubesVertex, encodedPosX), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "COLOR", 0, DXGI_FORMAT_R32_UINT, 0, offsetof(CuColoredCubesVertex, data), D3D11_INPUT_PER_VERTEX_DATA, 0 },
 };
 D3D11_INPUT_ELEMENT_DESC TerrainInputElementDesc[] = {
-	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{ "COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "POSITION", 0, DXGI_FORMAT_R16G16B16A16_UINT, 0, offsetof(CuTerrainVertex, encodedPosX), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, offsetof(CuTerrainVertex, material0), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "COLOR", 1, DXGI_FORMAT_R8G8B8A8_UNORM, 0, offsetof(CuTerrainVertex, material4), D3D11_INPUT_PER_VERTEX_DATA, 0 },
 };
 const D3D11_INPUT_ELEMENT_DESC* InputElementDesc[] = { ColorCubesInputElementDesc, TerrainInputElementDesc };
+const UINT NumOfInputElement[] = { 2, 3 };
 
 //--------------------------------------------------------------------------------------
 D3D11VolumeRenderer::D3D11VolumeRenderer()
@@ -48,22 +56,33 @@ D3D11VolumeRenderer::D3D11VolumeRenderer()
 
 bool D3D11VolumeRenderer::Setup(const std::string& assetPath)
 {
+	if (this->cbVSData != nullptr)
+	{
+		// has loaded
+		return true;
+	}
 	this->cbVSData = (ConstantBufferVS*)_aligned_malloc(sizeof(ConstantBufferVS), 16);
 	HRESULT hr;
 	// constant buffer
-	D3D11_BUFFER_DESC desc;
-	memset(&desc, 0, sizeof(desc));
-	desc.Usage = D3D11_USAGE_DEFAULT;
+	D3D11_BUFFER_DESC desc = { 0 };
+	desc.Usage = D3D11_USAGE_DYNAMIC;
 	desc.ByteWidth = sizeof(ConstantBufferVS);
 	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	hr = g_D3D11Device->CreateBuffer(&desc, NULL, &constantBuffer);
 	V_RETURN(hr);
 	// shaders & input layout
-	std::vector<char> buffer;
+	std::vector<char> vsBuffer, psBuffer;
 	for (int i = 0; i < 2; ++i)
 	{
-		LoadFileIntoBuffer(assetPath + ShaderFilePath[i], buffer);
-		CompileShaderFromString(buffer, InputElementDesc[i], &this->vertexShader[i], &this->pixelShader[i], &this->inputLayout[i]);
+		LoadFileIntoBuffer(assetPath + VertexShaderFilePath[i], vsBuffer);
+		LoadFileIntoBuffer(assetPath + PixelShaderFilePath[i], psBuffer);
+		hr = g_D3D11Device->CreateVertexShader(vsBuffer.data(), vsBuffer.size(), nullptr, &this->vertexShader[i]);
+		V_RETURN(hr);
+		hr = g_D3D11Device->CreatePixelShader(psBuffer.data(), psBuffer.size(), nullptr, &this->pixelShader[i]);
+		V_RETURN(hr);
+		hr = g_D3D11Device->CreateInputLayout(InputElementDesc[i], NumOfInputElement[i], vsBuffer.data(), vsBuffer.size(), &this->inputLayout[i]);
+		V_RETURN(hr);
 	}
 
 	return true;
@@ -85,8 +104,8 @@ void D3D11VolumeRenderer::UpdateMatrix(const XMFLOAT4X4& viewMatrix, const XMFLO
 {
 	if (this->cbVSData)
 	{
-		this->cbVSData->View = XMLoadFloat4x4(&viewMatrix);
-		this->cbVSData->Projection = XMLoadFloat4x4(&projectionMatrix);
+		this->cbVSData->View = XMMatrixTranspose(XMLoadFloat4x4(&viewMatrix));
+		this->cbVSData->Projection = XMMatrixTranspose(XMLoadFloat4x4(&projectionMatrix));
 	}
 }
 
@@ -120,8 +139,9 @@ void D3D11VolumeRenderer::RenderOctreeNode(ID3D11DeviceContext* context, D3D11Oc
 {
 	if (d3d11OctreeNode->noOfIndices > 0 && d3d11OctreeNode->renderThisNode)
 	{
-		// update contant buffer
-		this->cbVSData->World = XMMatrixTranslation(d3d11OctreeNode->posX, d3d11OctreeNode->posY, d3d11OctreeNode->posZ);
+		// update constant buffer
+		XMMATRIX worldMatrix = XMMatrixTranslation(d3d11OctreeNode->posX, d3d11OctreeNode->posY, d3d11OctreeNode->posZ);
+		this->cbVSData->World = XMMatrixTranspose(worldMatrix);
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
 		HRESULT hr = context->Map(this->constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 		if (SUCCEEDED(hr))
@@ -164,61 +184,20 @@ bool D3D11VolumeRenderer::LoadFileIntoBuffer(const std::string& fileName, std::v
 		int size = ftell(fp);
 		fseek(fp, 0, SEEK_SET);
 		buffer.resize(size);
-		fread(&buffer[0], size, 1, fp);
+		fread(buffer.data(), size, 1, fp);
 		fclose(fp);
 
 		return true;
 	}
 	else
 	{
+		LogMessage("Failed to find: %s\n", fileName.c_str());
 		return false;
 	}
 }
 
-void D3D11VolumeRenderer::CompileShaderFromString(std::vector<char> &buffer, const D3D11_INPUT_ELEMENT_DESC* desc,
-	ID3D11VertexShader** outVS, ID3D11PixelShader** outPS, ID3D11InputLayout** outIL)
+D3D11VolumeRenderer* D3D11VolumeRenderer::Instance()
 {
-	HMODULE compiler = LoadLibraryA("D3DCompiler_43.dll");
-	if (compiler == NULL)
-	{
-		// Try compiler from Windows 8 SDK
-		compiler = LoadLibraryA("D3DCompiler_46.dll");
-	}
-	if (compiler)
-	{
-		ID3D10Blob* vsBlob = NULL;
-		ID3D10Blob* psBlob = NULL;
-
-		D3DCompileFunc compileFunc = (D3DCompileFunc)GetProcAddress(compiler, "D3DCompile");
-		if (compileFunc)
-		{
-			HRESULT hr;
-			hr = compileFunc(buffer.data(), buffer.size(), NULL, NULL, NULL, "VS", "vs_4_0", 0, 0, &vsBlob, NULL);
-			if (SUCCEEDED(hr))
-			{
-				g_D3D11Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), NULL, outVS);
-			}
-
-			hr = compileFunc(buffer.data(), buffer.size(), NULL, NULL, NULL, "PS", "ps_4_0", 0, 0, &psBlob, NULL);
-			if (SUCCEEDED(hr))
-			{
-				g_D3D11Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), NULL, outPS);
-			}
-		}
-
-		// input layout
-		if (*outVS && vsBlob)
-		{
-			g_D3D11Device->CreateInputLayout(desc, 2, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), outIL);
-		}
-
-		SAFE_RELEASE(vsBlob);
-		SAFE_RELEASE(psBlob);
-
-		FreeLibrary(compiler);
-	}
-	else
-	{
-		DebugLog("D3D11: HLSL shader compiler not found, will not render anything\n");
-	}
+	static D3D11VolumeRenderer s_instance;
+	return &s_instance;
 }
