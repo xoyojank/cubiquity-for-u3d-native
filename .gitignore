@@ -12,3 +12,6 @@ cubiquity/Tools/ProcessVDB/CMakeFiles
 cubiquity-native-plugin/VisualStudio2013/x64
 *.log
 /cubiquity-for-unity3d/obj/Debug
+/cubiquity-for-unity3d/Assets/Plugins/x86_64
+/cubiquity-for-unity3d/Assets/StreamingAssets/Cubiquity/Shaders
+/cubiquity-for-unity3d/Assets/StreamingAssets/Cubiquity/VoxelDatabases

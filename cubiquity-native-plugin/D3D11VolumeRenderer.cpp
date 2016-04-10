@@ -18,13 +18,13 @@ typedef HRESULT(WINAPI *D3DCompileFunc)(
 
 const char* VertexShaderFilePath[] = 
 {
-	"Cubiquity/Shaders/ColoredCubesVertexShader.cso",
-	"Cubiquity/Shaders/TerrainVertexShader.cso"
+	"/Cubiquity/Shaders/ColoredCubesVertexShader.cso",
+	"/Cubiquity/Shaders/TerrainVertexShader.cso"
 };
 const char* PixelShaderFilePath[] =
 {
-	"Cubiquity/Shaders/ColoredCubesPixelShader.cso",
-	"Cubiquity/Shaders/TerrainPixelShader.cso"
+	"/Cubiquity/Shaders/ColoredCubesPixelShader.cso",
+	"/Cubiquity/Shaders/TerrainPixelShader.cso"
 };
 
 
@@ -75,8 +75,10 @@ bool D3D11VolumeRenderer::Setup(const std::string& assetPath)
 	std::vector<char> vsBuffer, psBuffer;
 	for (int i = 0; i < 2; ++i)
 	{
-		LoadFileIntoBuffer(assetPath + VertexShaderFilePath[i], vsBuffer);
-		LoadFileIntoBuffer(assetPath + PixelShaderFilePath[i], psBuffer);
+		if (!LoadFileIntoBuffer(assetPath + VertexShaderFilePath[i], vsBuffer))
+			return false;
+		if (!LoadFileIntoBuffer(assetPath + PixelShaderFilePath[i], psBuffer))
+			return false;
 		hr = g_D3D11Device->CreateVertexShader(vsBuffer.data(), vsBuffer.size(), nullptr, &this->vertexShader[i]);
 		V_RETURN(hr);
 		hr = g_D3D11Device->CreatePixelShader(psBuffer.data(), psBuffer.size(), nullptr, &this->pixelShader[i]);
