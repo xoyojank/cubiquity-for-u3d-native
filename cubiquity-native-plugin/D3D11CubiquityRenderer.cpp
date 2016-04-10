@@ -1,4 +1,4 @@
-#include "D3D11VolumeRenderer.h"
+#include "D3D11CubiquityRenderer.h"
 #include "Utils.h"
 
 extern ID3D11Device* g_D3D11Device;
@@ -40,8 +40,9 @@ D3D11_INPUT_ELEMENT_DESC TerrainInputElementDesc[] = {
 const D3D11_INPUT_ELEMENT_DESC* InputElementDesc[] = { ColorCubesInputElementDesc, TerrainInputElementDesc };
 const UINT NumOfInputElement[] = { 2, 3 };
 
+
 //--------------------------------------------------------------------------------------
-D3D11VolumeRenderer::D3D11VolumeRenderer()
+D3D11CubiquityRenderer::D3D11CubiquityRenderer()
 : constantBuffer(nullptr)
 , cbVSData(nullptr)
 , currentVertexStride(0)
@@ -54,13 +55,14 @@ D3D11VolumeRenderer::D3D11VolumeRenderer()
 	}
 }
 
-bool D3D11VolumeRenderer::Setup(const std::string& assetPath)
+bool D3D11CubiquityRenderer::Setup(const std::string& path)
 {
 	if (this->cbVSData != nullptr)
 	{
 		// has loaded
 		return true;
 	}
+	this->assetPath = path;
 	this->cbVSData = (ConstantBufferVS*)_aligned_malloc(sizeof(ConstantBufferVS), 16);
 	HRESULT hr;
 	// constant buffer
@@ -75,9 +77,9 @@ bool D3D11VolumeRenderer::Setup(const std::string& assetPath)
 	std::vector<char> vsBuffer, psBuffer;
 	for (int i = 0; i < 2; ++i)
 	{
-		if (!LoadFileIntoBuffer(assetPath + VertexShaderFilePath[i], vsBuffer))
+		if (!LoadFileIntoBuffer(path + VertexShaderFilePath[i], vsBuffer))
 			return false;
-		if (!LoadFileIntoBuffer(assetPath + PixelShaderFilePath[i], psBuffer))
+		if (!LoadFileIntoBuffer(path + PixelShaderFilePath[i], psBuffer))
 			return false;
 		hr = g_D3D11Device->CreateVertexShader(vsBuffer.data(), vsBuffer.size(), nullptr, &this->vertexShader[i]);
 		V_RETURN(hr);
@@ -90,7 +92,7 @@ bool D3D11VolumeRenderer::Setup(const std::string& assetPath)
 	return true;
 }
 
-void D3D11VolumeRenderer::Destroy()
+void D3D11CubiquityRenderer::Destroy()
 {
 	SAFE_RELEASE(this->constantBuffer);
 	for (int i = 0; i < 2; ++i)
@@ -102,16 +104,21 @@ void D3D11VolumeRenderer::Destroy()
 	_aligned_free(this->cbVSData);
 }
 
-void D3D11VolumeRenderer::UpdateMatrix(const XMFLOAT4X4& viewMatrix, const XMFLOAT4X4& projectionMatrix)
+void D3D11CubiquityRenderer::UpdateVolume(uint32_t volumeHandle, const XMFLOAT4X4& viewMatrix, const XMFLOAT4X4& projectionMatrix)
 {
 	if (this->cbVSData)
 	{
-		this->cbVSData->View = XMMatrixTranspose(XMLoadFloat4x4(&viewMatrix));
-		this->cbVSData->Projection = XMMatrixTranspose(XMLoadFloat4x4(&projectionMatrix));
+		this->cbVSData->View = XMLoadFloat4x4(&viewMatrix);
+		this->cbVSData->Projection = XMLoadFloat4x4(&projectionMatrix);
+
+		uint32_t isUpToDate;
+		XMMATRIX inverseViewMatrix = XMMatrixInverse(nullptr, this->cbVSData->View);
+		XMVECTOR eyePos = XMMatrixTranspose(inverseViewMatrix).r[3];
+		validate(cuUpdateVolume(volumeHandle, XMVectorGetX(eyePos), XMVectorGetY(eyePos), XMVectorGetZ(eyePos), 1.0f, &isUpToDate));
 	}
 }
 
-void D3D11VolumeRenderer::RenderVolume(ID3D11DeviceContext* context, uint32_t volumeType, D3D11OctreeNode* rootNode)
+void D3D11CubiquityRenderer::RenderVolume(ID3D11DeviceContext* context, uint32_t volumeType, D3D11OctreeNode* rootNode)
 {
 	assert(volumeType == CU_COLORED_CUBES || volumeType == CU_TERRAIN);
 
@@ -137,7 +144,7 @@ void D3D11VolumeRenderer::RenderVolume(ID3D11DeviceContext* context, uint32_t vo
 }
 
 
-void D3D11VolumeRenderer::RenderOctreeNode(ID3D11DeviceContext* context, D3D11OctreeNode* d3d11OctreeNode)
+void D3D11CubiquityRenderer::RenderOctreeNode(ID3D11DeviceContext* context, D3D11OctreeNode* d3d11OctreeNode)
 {
 	if (d3d11OctreeNode->noOfIndices > 0 && d3d11OctreeNode->renderThisNode)
 	{
@@ -176,7 +183,7 @@ void D3D11VolumeRenderer::RenderOctreeNode(ID3D11DeviceContext* context, D3D11Oc
 	}
 }
 
-bool D3D11VolumeRenderer::LoadFileIntoBuffer(const std::string& fileName, std::vector<char>& buffer)
+bool D3D11CubiquityRenderer::LoadFileIntoBuffer(const std::string& fileName, std::vector<char>& buffer)
 {
 	FILE* fp;
 	fopen_s(&fp, fileName.c_str(), "rb");
@@ -198,8 +205,63 @@ bool D3D11VolumeRenderer::LoadFileIntoBuffer(const std::string& fileName, std::v
 	}
 }
 
-D3D11VolumeRenderer* D3D11VolumeRenderer::Instance()
+D3D11CubiquityRenderer* D3D11CubiquityRenderer::Instance()
 {
-	static D3D11VolumeRenderer s_instance;
+	static D3D11CubiquityRenderer s_instance;
 	return &s_instance;
+}
+
+static uint32_t s_testVolumeHandle = 0;
+void D3D11CubiquityRenderer::RenderTestVolume(ID3D11DeviceContext* context, uint32_t volumeType)
+{
+	if (s_testVolumeHandle == 0)
+	{
+		if (volumeType == CU_COLORED_CUBES)
+		{
+			std::string path = this->assetPath + "/Cubiquity/VoxelDatabases/Examples/VoxeliensColoredCubes.vdb";
+			validate(cuNewColoredCubesVolumeFromVDB(path.c_str(), CU_READONLY, 32, &s_testVolumeHandle));
+		}
+		else
+		{
+			std::string path = this->assetPath + "/Cubiquity/VoxelDatabases/Examples/VoxeliensTerrain.vdb";
+			validate(cuNewTerrainVolumeFromVDB(path.c_str(), CU_READONLY, 32, &s_testVolumeHandle));
+		}
+		validate(cuSetLodRange(s_testVolumeHandle, 0, 0));
+		//validate(cuDeleteVolume(volumeHandle));
+	}
+	D3D11OctreeNode* rootOctreeNode = 0;
+
+	uint32_t hasRootNode;
+	validate(cuHasRootOctreeNode(s_testVolumeHandle, &hasRootNode));
+	if (hasRootNode == 1) // FIXME - Maybe it's easier if there is always a root node?
+	{
+		if (!rootOctreeNode)
+		{
+			rootOctreeNode = new D3D11OctreeNode(0);
+		}
+
+		uint32_t octreeNodeHandle;
+		cuGetRootOctreeNode(s_testVolumeHandle, &octreeNodeHandle);
+		D3D11OctreeNode::ProcessOctreeNode(octreeNodeHandle, rootOctreeNode);
+		//processOctreeNodeMeshes(octreeNodeHandle, rootOpenGLOctreeNode);
+		//processOctreeNodeFlags(octreeNodeHandle, rootOpenGLOctreeNode);
+	}
+	else
+	{
+		SAFE_DELETE(rootOctreeNode);
+	}
+
+	if (rootOctreeNode)
+	{
+		RenderVolume(context, volumeType, rootOctreeNode);
+	}
+
+}
+
+
+extern "C" void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API UpdateVolume(uint32_t volumeHandle, float vm[], float pm[])
+{
+	if (s_testVolumeHandle)
+		volumeHandle = s_testVolumeHandle;
+	D3D11CubiquityRenderer::Instance()->UpdateVolume(volumeHandle, XMFLOAT4X4(vm), XMFLOAT4X4(pm));
 }

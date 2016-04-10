@@ -1,7 +1,7 @@
 // Example low level rendering Unity plugin
 #include "CubiquityPlugin.h"
 #include "Unity/IUnityGraphics.h"
-#include "D3D11VolumeRenderer.h"
+#include "D3D11CubiquityRenderer.h"
 #include "Utils.h"
 #include <cassert>
 #include <cmath>
@@ -42,8 +42,6 @@
 static float g_Time;
 
 extern "C" void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API SetTimeFromUnity (float t) { g_Time = t; }
-
-
 
 // --------------------------------------------------------------------------
 // SetTextureFromUnity, an example function we export which is called by one of the scripts.
@@ -216,8 +214,8 @@ static void UNITY_INTERFACE_API OnRenderEvent(int eventID)
 	// in different ordering.
 	MyVertex verts[3] = {
 		{ -0.5f, -0.25f,  0, 0xFFff0000 },
+		{ 0, 0.5f, 0, 0xFF0000ff },
 		{  0.5f, -0.25f,  0, 0xFF00ff00 },
-		{  0,     0.5f ,  0, 0xFF0000ff },
 	};
 
 
@@ -327,7 +325,7 @@ static bool EnsureD3D11ResourcesAreCreated()
 	if (s_UnityStreamingAssetsPath.empty())
 		return false;
 
-	bool success = D3D11VolumeRenderer::Instance()->Setup(s_UnityStreamingAssetsPath);
+	bool success = D3D11CubiquityRenderer::Instance()->Setup(s_UnityStreamingAssetsPath);
 	if (!success)
 		return false;
 
@@ -355,8 +353,8 @@ static bool EnsureD3D11ResourcesAreCreated()
 	vertexShaderPath += "/Shaders/DX11_9_1/SimpleVertexShader.cso";
 	std::string fragmentShaderPath(s_UnityStreamingAssetsPath);
 	fragmentShaderPath += "/Shaders/DX11_9_1/SimplePixelShader.cso";
-	D3D11VolumeRenderer::LoadFileIntoBuffer(vertexShaderPath, vertexShader);
-	D3D11VolumeRenderer::LoadFileIntoBuffer(fragmentShaderPath, pixelShader);
+	D3D11CubiquityRenderer::LoadFileIntoBuffer(vertexShaderPath, vertexShader);
+	D3D11CubiquityRenderer::LoadFileIntoBuffer(fragmentShaderPath, pixelShader);
 
 	if (vertexShader.size() > 0 && pixelShader.size() > 0)
 	{
@@ -410,7 +408,7 @@ static void ReleaseD3D11Resources()
 	SAFE_RELEASE(g_D3D11BlendState);
 	SAFE_RELEASE(g_D3D11DepthState);
 
-	D3D11VolumeRenderer::Instance()->Destroy();
+	D3D11CubiquityRenderer::Instance()->Destroy();
 }
 
 static void DoEventGraphicsDeviceD3D11(UnityGfxDeviceEventType eventType)
@@ -842,6 +840,8 @@ static void DoRendering (const float* worldMatrix, const float* identityMatrix, 
 		UINT offset = 0;
 		ctx->IASetVertexBuffers (0, 1, &g_D3D11VB, &stride, &offset);
 		ctx->Draw (3, 0);
+
+		D3D11CubiquityRenderer::Instance()->RenderTestVolume(ctx, CU_COLORED_CUBES);
 
 		ctx->Release();
 	}

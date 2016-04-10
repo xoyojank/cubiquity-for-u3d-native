@@ -3,26 +3,29 @@
 #include <string>
 #include <vector>
 #include <DirectXMath.h>
+#include "Unity/IUnityInterface.h"
 
 using namespace DirectX;
 
-class D3D11VolumeRenderer
+class D3D11CubiquityRenderer
 {
 public:
-	static D3D11VolumeRenderer* Instance();
+	static D3D11CubiquityRenderer* Instance();
 
 	bool Setup(const std::string& assetPath);
 
 	void Destroy();
 
-	void UpdateMatrix(const XMFLOAT4X4& viewMatrix, const XMFLOAT4X4& projectionMatrix);
+	void UpdateVolume(uint32_t volumeHandle, const XMFLOAT4X4& viewMatrix, const XMFLOAT4X4& projectionMatrix);
 	void RenderVolume(ID3D11DeviceContext* context, uint32_t volumeType, D3D11OctreeNode* rootNode);
+
+	void RenderTestVolume(ID3D11DeviceContext* context, uint32_t volumeType);
 
 public:
 	static bool LoadFileIntoBuffer(const std::string& fileName, std::vector<char>& buffer);
 
 private:
-	D3D11VolumeRenderer();
+	D3D11CubiquityRenderer();
 	void RenderOctreeNode(ID3D11DeviceContext* context, D3D11OctreeNode* d3d11OctreeNode);
 
 private:
@@ -40,4 +43,8 @@ private:
 
 private:
 	UINT currentVertexStride;
+	std::string assetPath;
 };
+
+
+extern "C" void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API UpdateVolume(uint32_t volumeHandle, float viewMatrix[], float projectionMatrix[]);

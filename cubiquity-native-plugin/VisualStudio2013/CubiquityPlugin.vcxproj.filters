@@ -54,7 +54,7 @@
     </ClCompile>
     <ClCompile Include="..\CubiquityPlugin.cpp" />
     <ClCompile Include="..\D3D11OctreeNode.cpp" />
-    <ClCompile Include="..\D3D11VolumeRenderer.cpp" />
+    <ClCompile Include="..\D3D11CubiquityRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\UnityPluginInterface.h" />
@@ -270,7 +270,6 @@
     </ClInclude>
     <ClInclude Include="..\Utils.h" />
     <ClInclude Include="..\D3D11OctreeNode.h" />
-    <ClInclude Include="..\D3D11VolumeRenderer.h" />
     <ClInclude Include="..\CubiquityPlugin.h" />
     <ClInclude Include="..\Unity\IUnityGraphics.h">
       <Filter>Unity</Filter>
@@ -287,6 +286,7 @@
     <ClInclude Include="..\Unity\IUnityInterface.h">
       <Filter>Unity</Filter>
     </ClInclude>
+    <ClInclude Include="..\D3D11CubiquityRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Cubiquity">

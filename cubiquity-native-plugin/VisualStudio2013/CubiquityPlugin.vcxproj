@@ -183,7 +183,7 @@
     <ClCompile Include="..\..\cubiquity\Core\VoxelDatabase.cpp" />
     <ClCompile Include="..\CubiquityPlugin.cpp" />
     <ClCompile Include="..\D3D11OctreeNode.cpp" />
-    <ClCompile Include="..\D3D11VolumeRenderer.cpp" />
+    <ClCompile Include="..\D3D11CubiquityRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\cubiquity\Core\BackgroundTaskProcessor.h" />
@@ -258,7 +258,7 @@
     <ClInclude Include="..\..\cubiquity\Core\WritePermissions.h" />
     <ClInclude Include="..\CubiquityPlugin.h" />
     <ClInclude Include="..\D3D11OctreeNode.h" />
-    <ClInclude Include="..\D3D11VolumeRenderer.h" />
+    <ClInclude Include="..\D3D11CubiquityRenderer.h" />
     <ClInclude Include="..\UnityPluginInterface.h" />
     <ClInclude Include="..\Unity\IUnityGraphics.h" />
     <ClInclude Include="..\Unity\IUnityGraphicsD3D11.h" />

@@ -48,7 +48,7 @@ void D3D11OctreeNode::ProcessOctreeNode(uint32_t octreeNodeHandle, D3D11OctreeNo
 	{
 		if (octreeNode.propertiesLastChanged > d3d11OctreeNode->propertiesLastSynced)
 		{
-			LogMessage("Resynced properties at %s\n", d3d11OctreeNode->propertiesLastSynced);
+			//LogMessage("Resynced properties at %d\n", d3d11OctreeNode->propertiesLastSynced);
 			d3d11OctreeNode->height = octreeNode.height;
 			d3d11OctreeNode->renderThisNode = octreeNode.renderThisNode;
 			cuGetCurrentTime(&(d3d11OctreeNode->propertiesLastSynced));
@@ -111,7 +111,7 @@ void D3D11OctreeNode::ProcessOctreeNode(uint32_t octreeNodeHandle, D3D11OctreeNo
 			}
 
 			cuGetCurrentTime(&(d3d11OctreeNode->meshLastSynced));
-			LogMessage("Resynced mesh at %s\n", d3d11OctreeNode->meshLastSynced);
+			//LogMessage("Resynced mesh at %d\n", d3d11OctreeNode->meshLastSynced);
 		}
 
 		if (octreeNode.structureLastChanged > d3d11OctreeNode->structureLastSynced)
@@ -142,7 +142,7 @@ void D3D11OctreeNode::ProcessOctreeNode(uint32_t octreeNodeHandle, D3D11OctreeNo
 			}
 
 			cuGetCurrentTime(&(d3d11OctreeNode->structureLastSynced));
-			LogMessage("Resynced structure at %s\n", d3d11OctreeNode->structureLastSynced);
+			//LogMessage("Resynced structure at %d\n", d3d11OctreeNode->structureLastSynced);
 		}
 
 		for (uint32_t z = 0; z < 2; z++)
