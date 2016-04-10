@@ -104,7 +104,7 @@ void D3D11CubiquityRenderer::Destroy()
 	_aligned_free(this->cbVSData);
 }
 
-void D3D11CubiquityRenderer::UpdateVolume(uint32_t volumeHandle, const XMFLOAT4X4& viewMatrix, const XMFLOAT4X4& projectionMatrix)
+bool D3D11CubiquityRenderer::UpdateVolume(uint32_t volumeHandle, const XMFLOAT4X4& viewMatrix, const XMFLOAT4X4& projectionMatrix)
 {
 	if (this->cbVSData)
 	{
@@ -115,7 +115,14 @@ void D3D11CubiquityRenderer::UpdateVolume(uint32_t volumeHandle, const XMFLOAT4X
 		XMMATRIX inverseViewMatrix = XMMatrixInverse(nullptr, this->cbVSData->View);
 		XMVECTOR eyePos = XMMatrixTranspose(inverseViewMatrix).r[3];
 		validate(cuUpdateVolume(volumeHandle, XMVectorGetX(eyePos), XMVectorGetY(eyePos), XMVectorGetZ(eyePos), 1.0f, &isUpToDate));
+
+		uint32_t octreeNodeHandle;
+		cuGetRootOctreeNode(volumeHandle, &octreeNodeHandle);
+		D3D11OctreeNode::ProcessOctreeNode(octreeNodeHandle, s_rootOctreeNode);
+
+		return isUpToDate != 0;
 	}
+	return false;
 }
 
 void D3D11CubiquityRenderer::RenderVolume(ID3D11DeviceContext* context, uint32_t volumeType, D3D11OctreeNode* rootNode)
@@ -239,10 +246,6 @@ void D3D11CubiquityRenderer::RenderTestVolume(ID3D11DeviceContext* context, uint
 		{
 			s_rootOctreeNode = new D3D11OctreeNode(0);
 		}
-
-		uint32_t octreeNodeHandle;
-		cuGetRootOctreeNode(s_testVolumeHandle, &octreeNodeHandle);
-		D3D11OctreeNode::ProcessOctreeNode(octreeNodeHandle, s_rootOctreeNode);
 		//processOctreeNodeMeshes(octreeNodeHandle, rootOpenGLOctreeNode);
 		//processOctreeNodeFlags(octreeNodeHandle, rootOpenGLOctreeNode);
 	}
@@ -259,9 +262,10 @@ void D3D11CubiquityRenderer::RenderTestVolume(ID3D11DeviceContext* context, uint
 }
 
 
-extern "C" void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API UpdateVolume(uint32_t volumeHandle, float vm[], float pm[])
+extern "C" bool UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API UpdateVolume(uint32_t volumeHandle, float vm[], float pm[])
 {
 	if (s_testVolumeHandle)
 		volumeHandle = s_testVolumeHandle;
-	D3D11CubiquityRenderer::Instance()->UpdateVolume(volumeHandle, XMFLOAT4X4(vm), XMFLOAT4X4(pm));
+
+	return D3D11CubiquityRenderer::Instance()->UpdateVolume(volumeHandle, XMFLOAT4X4(vm), XMFLOAT4X4(pm));
 }

@@ -131,11 +131,7 @@ void D3D11OctreeNode::ProcessOctreeNode(uint32_t octreeNodeHandle, D3D11OctreeNo
 						}
 						else
 						{
-							if (d3d11OctreeNode->children[x][y][z])
-							{
-								delete d3d11OctreeNode->children[x][y][z];
-								d3d11OctreeNode->children[x][y][z] = nullptr;
-							}
+							SAFE_DELETE(d3d11OctreeNode->children[x][y][z]);
 						}
 					}
 				}

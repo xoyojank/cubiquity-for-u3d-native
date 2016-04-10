@@ -8,6 +8,7 @@ using System;
 using System.Collections;
 using System.Text;
 
+#if !CUBIQUITY_NATIVE_RENDERER
 namespace Cubiquity
 {
 	namespace Impl
@@ -368,3 +369,4 @@ namespace Cubiquity
 		}
 	}
 }
+#endif

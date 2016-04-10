@@ -86,6 +86,7 @@ namespace Cubiquity
 			}
 	    }
 		
+#if !CUBIQUITY_NATIVE_RENDERER
 		/// \cond
         protected override bool SynchronizeOctree(uint availableSyncOperations)
 		{
@@ -151,5 +152,6 @@ namespace Cubiquity
             return cubiquityUpToDate && availableSyncOperations > 0;
 		}
 		/// \endcond
+#endif
 	}
 }

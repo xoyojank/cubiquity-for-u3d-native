@@ -16,7 +16,7 @@ public:
 
 	void Destroy();
 
-	void UpdateVolume(uint32_t volumeHandle, const XMFLOAT4X4& viewMatrix, const XMFLOAT4X4& projectionMatrix);
+	bool UpdateVolume(uint32_t volumeHandle, const XMFLOAT4X4& viewMatrix, const XMFLOAT4X4& projectionMatrix);
 	void RenderVolume(ID3D11DeviceContext* context, uint32_t volumeType, D3D11OctreeNode* rootNode);
 
 	void RenderTestVolume(ID3D11DeviceContext* context, uint32_t volumeType);
@@ -47,4 +47,4 @@ private:
 };
 
 
-extern "C" void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API UpdateVolume(uint32_t volumeHandle, float viewMatrix[], float projectionMatrix[]);
+extern "C" bool UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API UpdateVolume(uint32_t volumeHandle, float viewMatrix[], float projectionMatrix[]);

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 using Cubiquity.Impl;
 
@@ -260,9 +261,39 @@ namespace Cubiquity
             rootOctreeNodeGameObject = null;
         }
 
+#if CUBIQUITY_NATIVE_RENDERER
+        [DllImport("CubiquityPlugin")]
+        private static extern bool UpdateVolume(uint volumeHandle, float[] viewMatrix, float[] projectionMatrix);
+        private static float[] MatrixToArray(Matrix4x4 _matrix)
+        {
+            float[] result = new float[16];
+
+            for (int _row = 0; _row < 4; _row++)
+            {
+                for (int _col = 0; _col < 4; _col++)
+                {
+                    result[_col + _row * 4] = _matrix[_row, _col];
+                }
+            }
+
+            return result;
+        }
+        protected bool SynchronizeOctree(uint maxSyncOperations)
+        {
+            if (Camera.current != null)
+            {
+                var viewMatrix = Camera.current.worldToCameraMatrix;
+                var projectionMatrix = GL.GetGPUProjectionMatrix(Camera.current.projectionMatrix, false);
+
+                return UpdateVolume(data.volumeHandle.Value, MatrixToArray(viewMatrix), MatrixToArray(projectionMatrix));
+            }
+            return false;
+        }
+#else
         protected abstract bool SynchronizeOctree(uint maxSyncOperations);
-		
-		private void Update()
+#endif
+
+        private void Update()
 		{
             if (flushRequested)
             {
