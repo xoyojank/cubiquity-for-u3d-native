@@ -63,14 +63,12 @@ float3 DecodeNormal(uint encodedNormal)
 //--------------------------------------------------------------------------------------
 VS_OUTPUT VS(VS_INPUT input)
 {
-	float3 pos = DecodePosition(input.EncodedPosAndNormal.xyz);
-	float3 normal = DecodeNormal(input.EncodedPosAndNormal.w);
-
 	VS_OUTPUT output = (VS_OUTPUT)0;
-	output.Pos = mul(pos, World);
+	output.Pos = float4(DecodePosition(input.EncodedPosAndNormal.xyz), 1.0);
+	output.Pos = mul(output.Pos, World);
 	output.Pos = mul(output.Pos, View);
 	output.Pos = mul(output.Pos, Projection);
-	output.Normal = normal;// Valid if we don't scale or rotate our volume.
+	output.Normal = DecodeNormal(input.EncodedPosAndNormal.w);;// Valid if we don't scale or rotate our volume.
 	output.Color = input.Color;
 	output.Weights = input.Weights;
 

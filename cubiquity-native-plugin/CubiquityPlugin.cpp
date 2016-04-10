@@ -384,7 +384,7 @@ static bool EnsureD3D11ResourcesAreCreated()
 	D3D11_DEPTH_STENCIL_DESC dsdesc;
 	memset (&dsdesc, 0, sizeof(dsdesc));
 	dsdesc.DepthEnable = TRUE;
-	dsdesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+	dsdesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 	dsdesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
 	g_D3D11Device->CreateDepthStencilState (&dsdesc, &g_D3D11DepthState);
 
@@ -841,7 +841,8 @@ static void DoRendering (const float* worldMatrix, const float* identityMatrix, 
 		ctx->IASetVertexBuffers (0, 1, &g_D3D11VB, &stride, &offset);
 		ctx->Draw (3, 0);
 
-		D3D11CubiquityRenderer::Instance()->RenderTestVolume(ctx, CU_COLORED_CUBES);
+		//D3D11CubiquityRenderer::Instance()->RenderTestVolume(ctx, CU_COLORED_CUBES);
+		D3D11CubiquityRenderer::Instance()->RenderTestVolume(ctx, CU_TERRAIN);
 
 		ctx->Release();
 	}

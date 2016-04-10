@@ -212,6 +212,7 @@ D3D11CubiquityRenderer* D3D11CubiquityRenderer::Instance()
 }
 
 static uint32_t s_testVolumeHandle = 0;
+static D3D11OctreeNode* s_rootOctreeNode = nullptr;
 void D3D11CubiquityRenderer::RenderTestVolume(ID3D11DeviceContext* context, uint32_t volumeType)
 {
 	if (s_testVolumeHandle == 0)
@@ -229,31 +230,30 @@ void D3D11CubiquityRenderer::RenderTestVolume(ID3D11DeviceContext* context, uint
 		validate(cuSetLodRange(s_testVolumeHandle, 0, 0));
 		//validate(cuDeleteVolume(volumeHandle));
 	}
-	D3D11OctreeNode* rootOctreeNode = 0;
 
 	uint32_t hasRootNode;
 	validate(cuHasRootOctreeNode(s_testVolumeHandle, &hasRootNode));
 	if (hasRootNode == 1) // FIXME - Maybe it's easier if there is always a root node?
 	{
-		if (!rootOctreeNode)
+		if (!s_rootOctreeNode)
 		{
-			rootOctreeNode = new D3D11OctreeNode(0);
+			s_rootOctreeNode = new D3D11OctreeNode(0);
 		}
 
 		uint32_t octreeNodeHandle;
 		cuGetRootOctreeNode(s_testVolumeHandle, &octreeNodeHandle);
-		D3D11OctreeNode::ProcessOctreeNode(octreeNodeHandle, rootOctreeNode);
+		D3D11OctreeNode::ProcessOctreeNode(octreeNodeHandle, s_rootOctreeNode);
 		//processOctreeNodeMeshes(octreeNodeHandle, rootOpenGLOctreeNode);
 		//processOctreeNodeFlags(octreeNodeHandle, rootOpenGLOctreeNode);
 	}
 	else
 	{
-		SAFE_DELETE(rootOctreeNode);
+		SAFE_DELETE(s_rootOctreeNode);
 	}
 
-	if (rootOctreeNode)
+	if (s_rootOctreeNode)
 	{
-		RenderVolume(context, volumeType, rootOctreeNode);
+		RenderVolume(context, volumeType, s_rootOctreeNode);
 	}
 
 }
