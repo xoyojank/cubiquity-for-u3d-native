@@ -3,6 +3,10 @@ using System;
 using System.Collections;
 using System.Runtime.InteropServices;
 
+#if CUBIQUITY_NATIVE_RENDERER
+
+namespace Cubiquity
+{
 
 public class CubiquityRenderer : MonoBehaviour
 {
@@ -14,16 +18,28 @@ public class CubiquityRenderer : MonoBehaviour
 
 	[DllImport("CubiquityPlugin")]
 	private static extern void SetTimeFromUnity(float t);
+    [DllImport("CubiquityPlugin")]
+    private static extern void UpdateCamera(float[] viewMatrix, float[] projectionMatrix);
 
 	[DllImport("CubiquityPlugin")]
 	private static extern void SetUnityStreamingAssetsPath([MarshalAs(UnmanagedType.LPStr)] string path);
 	[DllImport("CubiquityPlugin")]
 	private static extern IntPtr GetRenderEventFunc();
 
+    private static CubiquityRenderer s_instance = null;
 
-	IEnumerator Start ()
+    void Awake()
+    {
+        if (s_instance == null)
+            s_instance = this;
+        else
+            Debug.LogError("We only support one volume to render now.");
+    }
+
+	IEnumerator Start()
     {
 		SetUnityStreamingAssetsPath(Application.streamingAssetsPath);
+
 		yield return StartCoroutine("CallPluginAtEndOfFrames");
 	}
 
@@ -36,6 +52,13 @@ public class CubiquityRenderer : MonoBehaviour
 
 			// Set time for the plugin
 			SetTimeFromUnity(Time.timeSinceLevelLoad);
+            if (Camera.current != null)
+            {
+                var viewMatrix = Camera.current.worldToCameraMatrix;
+                var projectionMatrix = GL.GetGPUProjectionMatrix(Camera.current.projectionMatrix, false);
+
+                UpdateCamera(MatrixToArray(viewMatrix), MatrixToArray(projectionMatrix));
+            }
 
 			// Issue a plugin event with arbitrary integer identifier.
 			// The plugin can distinguish between different
@@ -44,4 +67,24 @@ public class CubiquityRenderer : MonoBehaviour
 			GL.IssuePluginEvent(GetRenderEventFunc(), 1);
 		}
 	}
+
+    private static float[] MatrixToArray(Matrix4x4 _matrix)
+    {
+        float[] result = new float[16];
+
+        for (int _row = 0; _row < 4; _row++)
+        {
+            for (int _col = 0; _col < 4; _col++)
+            {
+                result[_col + _row * 4] = _matrix[_row, _col];
+            }
+        }
+
+        return result;
+    }
+
 }
+
+}
+
+#endif

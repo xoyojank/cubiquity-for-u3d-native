@@ -46,6 +46,8 @@ D3D11CubiquityRenderer::D3D11CubiquityRenderer()
 : constantBuffer(nullptr)
 , cbVSData(nullptr)
 , currentVertexStride(0)
+, defaultVolumeHandle(0)
+, defaultRootOctreeNode(nullptr)
 {
 	for (int i = 0; i < 2; ++i)
 	{
@@ -62,7 +64,6 @@ bool D3D11CubiquityRenderer::Setup(const std::string& path)
 		// has loaded
 		return true;
 	}
-	this->assetPath = path;
 	this->cbVSData = (ConstantBufferVS*)_aligned_malloc(sizeof(ConstantBufferVS), 16);
 	HRESULT hr;
 	// constant buffer
@@ -104,12 +105,24 @@ void D3D11CubiquityRenderer::Destroy()
 	_aligned_free(this->cbVSData);
 }
 
-bool D3D11CubiquityRenderer::UpdateVolume(uint32_t volumeHandle, const XMFLOAT4X4& viewMatrix, const XMFLOAT4X4& projectionMatrix)
+void D3D11CubiquityRenderer::UpdateCamera(const XMFLOAT4X4& viewMatrix, const XMFLOAT4X4& projectionMatrix)
 {
 	if (this->cbVSData)
 	{
 		this->cbVSData->View = XMLoadFloat4x4(&viewMatrix);
 		this->cbVSData->Projection = XMLoadFloat4x4(&projectionMatrix);
+	}
+}
+
+bool D3D11CubiquityRenderer::UpdateVolume(uint32_t volumeHandle, D3D11OctreeNode* rootOctreeNode)
+{
+	this->defaultVolumeHandle = volumeHandle;
+	this->defaultRootOctreeNode = rootOctreeNode;
+	if (this->cbVSData)
+	{
+		// Although the LOD system is partially functional I don't feel it's ready for release yet.
+		// The following line disables it by forcing the highest level of detail to always be used.
+		validate(cuSetLodRange(volumeHandle, 0, 0));
 
 		uint32_t isUpToDate;
 		XMMATRIX inverseViewMatrix = XMMatrixInverse(nullptr, this->cbVSData->View);
@@ -118,7 +131,7 @@ bool D3D11CubiquityRenderer::UpdateVolume(uint32_t volumeHandle, const XMFLOAT4X
 
 		uint32_t octreeNodeHandle;
 		cuGetRootOctreeNode(volumeHandle, &octreeNodeHandle);
-		D3D11OctreeNode::ProcessOctreeNode(octreeNodeHandle, s_rootOctreeNode);
+		D3D11OctreeNode::ProcessOctreeNode(octreeNodeHandle, rootOctreeNode);
 
 		return isUpToDate != 0;
 	}
@@ -156,7 +169,7 @@ void D3D11CubiquityRenderer::RenderOctreeNode(ID3D11DeviceContext* context, D3D1
 	if (d3d11OctreeNode->noOfIndices > 0 && d3d11OctreeNode->renderThisNode)
 	{
 		// update constant buffer
-		XMMATRIX worldMatrix = XMMatrixTranslation(d3d11OctreeNode->posX, d3d11OctreeNode->posY, d3d11OctreeNode->posZ);
+		XMMATRIX worldMatrix = XMMatrixTranslation((float)d3d11OctreeNode->posX, (float)d3d11OctreeNode->posY, (float)d3d11OctreeNode->posZ);
 		this->cbVSData->World = XMMatrixTranspose(worldMatrix);
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
 		HRESULT hr = context->Map(this->constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -218,54 +231,44 @@ D3D11CubiquityRenderer* D3D11CubiquityRenderer::Instance()
 	return &s_instance;
 }
 
-static uint32_t s_testVolumeHandle = 0;
-static D3D11OctreeNode* s_rootOctreeNode = nullptr;
-void D3D11CubiquityRenderer::RenderTestVolume(ID3D11DeviceContext* context, uint32_t volumeType)
+void D3D11CubiquityRenderer::RenderDefaultVolume(ID3D11DeviceContext* context)
 {
-	if (s_testVolumeHandle == 0)
-	{
-		if (volumeType == CU_COLORED_CUBES)
-		{
-			std::string path = this->assetPath + "/Cubiquity/VoxelDatabases/Examples/VoxeliensColoredCubes.vdb";
-			validate(cuNewColoredCubesVolumeFromVDB(path.c_str(), CU_READONLY, 32, &s_testVolumeHandle));
-		}
-		else
-		{
-			std::string path = this->assetPath + "/Cubiquity/VoxelDatabases/Examples/VoxeliensTerrain.vdb";
-			validate(cuNewTerrainVolumeFromVDB(path.c_str(), CU_READONLY, 32, &s_testVolumeHandle));
-		}
-		validate(cuSetLodRange(s_testVolumeHandle, 0, 0));
-		//validate(cuDeleteVolume(volumeHandle));
-	}
+	if (this->defaultVolumeHandle == 0)
+		return;
+	uint32_t volumeType;
+	validate(cuGetVolumeType(this->defaultVolumeHandle, &volumeType));
 
 	uint32_t hasRootNode;
-	validate(cuHasRootOctreeNode(s_testVolumeHandle, &hasRootNode));
-	if (hasRootNode == 1) // FIXME - Maybe it's easier if there is always a root node?
+	validate(cuHasRootOctreeNode(this->defaultVolumeHandle, &hasRootNode));
+	if (hasRootNode == 1)
 	{
-		if (!s_rootOctreeNode)
-		{
-			s_rootOctreeNode = new D3D11OctreeNode(0);
-		}
-		//processOctreeNodeMeshes(octreeNodeHandle, rootOpenGLOctreeNode);
-		//processOctreeNodeFlags(octreeNodeHandle, rootOpenGLOctreeNode);
+		RenderVolume(context, volumeType, this->defaultRootOctreeNode);
 	}
-	else
-	{
-		SAFE_DELETE(s_rootOctreeNode);
-	}
-
-	if (s_rootOctreeNode)
-	{
-		RenderVolume(context, volumeType, s_rootOctreeNode);
-	}
-
 }
 
 
-extern "C" bool UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API UpdateVolume(uint32_t volumeHandle, float vm[], float pm[])
+extern "C" void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API UpdateCamera(float vm[], float pm[])
 {
-	if (s_testVolumeHandle)
-		volumeHandle = s_testVolumeHandle;
-
-	return D3D11CubiquityRenderer::Instance()->UpdateVolume(volumeHandle, XMFLOAT4X4(vm), XMFLOAT4X4(pm));
+	D3D11CubiquityRenderer::Instance()->UpdateCamera(XMFLOAT4X4(vm), XMFLOAT4X4(pm));
+}
+extern "C" bool UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API UpdateVolume(uint32_t volumeHandle, PVOID rootOctreeNode)
+{
+	return D3D11CubiquityRenderer::Instance()->UpdateVolume(volumeHandle, (D3D11OctreeNode*)rootOctreeNode);
+}
+extern "C" PVOID UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API CreateOctreeNode()
+{
+	return new D3D11OctreeNode(nullptr);
+}
+extern "C" void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API DestroyOctreeNode(PVOID octreeNode)
+{
+	if (octreeNode)
+	{
+		delete reinterpret_cast<D3D11OctreeNode*>(octreeNode);
+		D3D11CubiquityRenderer* renderer = D3D11CubiquityRenderer::Instance();
+		if (renderer->defaultRootOctreeNode == octreeNode)
+		{
+			renderer->defaultVolumeHandle = 0;
+			renderer->defaultRootOctreeNode = nullptr;
+		}
+	}
 }

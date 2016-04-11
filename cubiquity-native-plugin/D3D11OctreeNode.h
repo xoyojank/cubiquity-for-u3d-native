@@ -1,6 +1,7 @@
 #pragma once
 #include "CubiquityC.h"
 #include <d3d11.h>
+#include "Unity/IUnityInterface.h"
 
 class D3D11OctreeNode
 {
@@ -29,5 +30,5 @@ public:
 	D3D11OctreeNode(D3D11OctreeNode* _parent);
 	~D3D11OctreeNode();
 
-	static void ProcessOctreeNode(uint32_t octreeNodeHandle, D3D11OctreeNode* openGLOctreeNode);
+	static void ProcessOctreeNode(uint32_t octreeNodeHandle, D3D11OctreeNode* d3d11OctreeNode);
 };

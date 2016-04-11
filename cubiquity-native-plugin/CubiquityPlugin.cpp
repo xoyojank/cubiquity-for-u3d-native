@@ -43,31 +43,6 @@ static float g_Time;
 
 extern "C" void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API SetTimeFromUnity (float t) { g_Time = t; }
 
-// --------------------------------------------------------------------------
-// SetTextureFromUnity, an example function we export which is called by one of the scripts.
-
-static void* g_TexturePointer = NULL;
-#ifdef SUPPORT_OPENGL_UNIFIED
-static int   g_TexWidth  = 0;
-static int   g_TexHeight = 0;
-#endif
-
-#if SUPPORT_OPENGL_UNIFIED
-extern "C" void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API SetTextureFromUnity(void* texturePtr, int w, int h)
-#else
-extern "C" void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API SetTextureFromUnity(void* texturePtr)
-#endif
-{
-	// A script calls this at initialization time; just remember the texture pointer here.
-	// Will update texture pixels each frame from the plugin rendering event (texture update
-	// needs to happen on the rendering thread).
-	g_TexturePointer = texturePtr;
-#if SUPPORT_OPENGL_UNIFIED
-	g_TexWidth = w;
-	g_TexHeight = h;
-#endif
-}
-
 enum
 {
 	ATTRIB_POSITION = 0,
@@ -146,7 +121,6 @@ static void UNITY_INTERFACE_API OnGraphicsDeviceEvent(UnityGfxDeviceEventType ev
 		{
 			DebugLog("OnGraphicsDeviceEvent(Shutdown).\n");
 			s_DeviceType = kUnityGfxRendererNull;
-			g_TexturePointer = NULL;
 			break;
 		}
 
@@ -799,18 +773,6 @@ static void DoRendering (const float* worldMatrix, const float* identityMatrix, 
 
 		// Draw!
 		g_D3D9Device->DrawPrimitive (D3DPT_TRIANGLELIST, 0, 1);
-
-		// Update native texture from code
-		if (g_TexturePointer)
-		{
-			IDirect3DTexture9* d3dtex = (IDirect3DTexture9*)g_TexturePointer;
-			D3DSURFACE_DESC desc;
-			d3dtex->GetLevelDesc (0, &desc);
-			D3DLOCKED_RECT lr;
-			d3dtex->LockRect (0, &lr, NULL, 0);
-			FillTextureFromCode (desc.Width, desc.Height, lr.Pitch, (unsigned char*)lr.pBits);
-			d3dtex->UnlockRect (0);
-		}
 	}
 	#endif
 
@@ -822,6 +784,7 @@ static void DoRendering (const float* worldMatrix, const float* identityMatrix, 
 		ID3D11DeviceContext* ctx = NULL;
 		g_D3D11Device->GetImmediateContext (&ctx);
 
+#ifdef DRAW_DEBUG_TRIANGLE
 		// update constant buffer - just the world matrix in our case
 		ctx->UpdateSubresource (g_D3D11CB, 0, NULL, worldMatrix, 64, 0);
 
@@ -840,9 +803,10 @@ static void DoRendering (const float* worldMatrix, const float* identityMatrix, 
 		UINT offset = 0;
 		ctx->IASetVertexBuffers (0, 1, &g_D3D11VB, &stride, &offset);
 		ctx->Draw (3, 0);
+#endif
 
 		//D3D11CubiquityRenderer::Instance()->RenderTestVolume(ctx, CU_COLORED_CUBES);
-		D3D11CubiquityRenderer::Instance()->RenderTestVolume(ctx, CU_TERRAIN);
+		D3D11CubiquityRenderer::Instance()->RenderDefaultVolume(ctx);
 
 		ctx->Release();
 	}

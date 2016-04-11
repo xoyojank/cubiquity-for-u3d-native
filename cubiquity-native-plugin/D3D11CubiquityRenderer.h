@@ -16,10 +16,11 @@ public:
 
 	void Destroy();
 
-	bool UpdateVolume(uint32_t volumeHandle, const XMFLOAT4X4& viewMatrix, const XMFLOAT4X4& projectionMatrix);
+	void UpdateCamera(const XMFLOAT4X4& viewMatrix, const XMFLOAT4X4& projectionMatrix);
+	bool UpdateVolume(uint32_t volumeHandle, D3D11OctreeNode* rootOctreeNode);
 	void RenderVolume(ID3D11DeviceContext* context, uint32_t volumeType, D3D11OctreeNode* rootNode);
 
-	void RenderTestVolume(ID3D11DeviceContext* context, uint32_t volumeType);
+	void RenderDefaultVolume(ID3D11DeviceContext* context);
 
 public:
 	static bool LoadFileIntoBuffer(const std::string& fileName, std::vector<char>& buffer);
@@ -43,8 +44,15 @@ private:
 
 private:
 	UINT currentVertexStride;
-	std::string assetPath;
+
+public:
+	uint32_t defaultVolumeHandle;
+	D3D11OctreeNode* defaultRootOctreeNode;
 };
 
 
-extern "C" bool UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API UpdateVolume(uint32_t volumeHandle, float viewMatrix[], float projectionMatrix[]);
+extern "C" void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API UpdateCamera(float viewMatrix[], float projectionMatrix[]);
+extern "C" bool UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API UpdateVolume(uint32_t volumeHandle, PVOID rootOctreeNode);
+
+extern "C" PVOID UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API CreateOctreeNode();
+extern "C" void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API DestroyOctreeNode(PVOID octreeNode);
