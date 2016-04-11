@@ -26,47 +26,29 @@ public class CubiquityRenderer : MonoBehaviour
 	[DllImport("CubiquityPlugin")]
 	private static extern IntPtr GetRenderEventFunc();
 
-    private static CubiquityRenderer s_instance = null;
-
-    void Awake()
-    {
-        if (s_instance == null)
-            s_instance = this;
-        else
-            Debug.LogError("We only support one volume to render now.");
-    }
-
-	IEnumerator Start()
+	void Start()
     {
 		SetUnityStreamingAssetsPath(Application.streamingAssetsPath);
-
-		yield return StartCoroutine("CallPluginAtEndOfFrames");
 	}
 
-	private IEnumerator CallPluginAtEndOfFrames()
-	{
-		while (true)
+    void OnPostRender()
+    {
+        // Set time for the plugin
+        SetTimeFromUnity(Time.timeSinceLevelLoad);
+        if (Camera.current != null)
         {
-			// Wait until all frame rendering is done
-			yield return new WaitForEndOfFrame();
+            var viewMatrix = Camera.current.worldToCameraMatrix;
+            var projectionMatrix = GL.GetGPUProjectionMatrix(Camera.current.projectionMatrix, false);
 
-			// Set time for the plugin
-			SetTimeFromUnity(Time.timeSinceLevelLoad);
-            if (Camera.current != null)
-            {
-                var viewMatrix = Camera.current.worldToCameraMatrix;
-                var projectionMatrix = GL.GetGPUProjectionMatrix(Camera.current.projectionMatrix, false);
+            UpdateCamera(MatrixToArray(viewMatrix), MatrixToArray(projectionMatrix));
+        }
 
-                UpdateCamera(MatrixToArray(viewMatrix), MatrixToArray(projectionMatrix));
-            }
-
-			// Issue a plugin event with arbitrary integer identifier.
-			// The plugin can distinguish between different
-			// things it needs to do based on this ID.
-			// For our simple plugin, it does not matter which ID we pass here.
-			GL.IssuePluginEvent(GetRenderEventFunc(), 1);
-		}
-	}
+        // Issue a plugin event with arbitrary integer identifier.
+        // The plugin can distinguish between different
+        // things it needs to do based on this ID.
+        // For our simple plugin, it does not matter which ID we pass here.
+        GL.IssuePluginEvent(GetRenderEventFunc(), 1);
+    }
 
     private static float[] MatrixToArray(Matrix4x4 _matrix)
     {
