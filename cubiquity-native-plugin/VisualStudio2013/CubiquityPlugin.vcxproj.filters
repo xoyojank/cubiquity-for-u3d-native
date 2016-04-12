@@ -375,6 +375,7 @@
     <None Include="..\..\cubiquity\Core\Dependancies\PolyVox\Impl\IteratorController.inl">
       <Filter>PolyVox\Impl</Filter>
     </None>
+    <None Include="..\CubiquityPlugin.def" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\cubiquity\Core\Dependancies\PolyVox\LICENSE.txt">

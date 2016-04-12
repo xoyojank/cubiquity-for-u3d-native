@@ -10,49 +10,49 @@ using namespace DirectX;
 class D3D11CubiquityRenderer
 {
 public:
-	static D3D11CubiquityRenderer* Instance();
+    static D3D11CubiquityRenderer* Instance();
 
-	bool Setup(const std::string& assetPath);
+    bool Setup(const std::string& assetPath);
 
-	void Destroy();
+    void Destroy();
 
-	void UpdateCamera(const XMFLOAT4X4& viewMatrix, const XMFLOAT4X4& projectionMatrix);
-	bool UpdateVolume(uint32_t volumeHandle, D3D11OctreeNode* rootOctreeNode);
-	void RenderVolume(ID3D11DeviceContext* context, uint32_t volumeType, D3D11OctreeNode* rootNode);
+    void UpdateCamera(const XMFLOAT4X4& viewMatrix, const XMFLOAT4X4& projectionMatrix);
+    bool UpdateVolume(uint32_t volumeHandle, D3D11OctreeNode* rootOctreeNode);
+    void RenderVolume(ID3D11DeviceContext* context, uint32_t volumeType, D3D11OctreeNode* rootNode);
 
-	void RenderDefaultVolume(ID3D11DeviceContext* context);
-
-public:
-	static bool LoadFileIntoBuffer(const std::string& fileName, std::vector<char>& buffer);
-
-private:
-	D3D11CubiquityRenderer();
-	void RenderOctreeNode(ID3D11DeviceContext* context, D3D11OctreeNode* d3d11OctreeNode);
-
-private:
-	struct ConstantBufferVS
-	{
-		DirectX::XMMATRIX World;
-		DirectX::XMMATRIX View;
-		DirectX::XMMATRIX Projection;
-	};
-	ConstantBufferVS* cbVSData;
-	ID3D11Buffer* constantBuffer;
-	ID3D11VertexShader* vertexShader[2];
-	ID3D11PixelShader* pixelShader[2];
-	ID3D11InputLayout* inputLayout[2];
-
-private:
-	UINT currentVertexStride;
+    void RenderDefaultVolume(ID3D11DeviceContext* context);
 
 public:
-	uint32_t defaultVolumeHandle;
-	D3D11OctreeNode* defaultRootOctreeNode;
+    static bool LoadFileIntoBuffer(const std::string& fileName, std::vector<char>& buffer);
+
+private:
+    D3D11CubiquityRenderer();
+    void RenderOctreeNode(ID3D11DeviceContext* context, D3D11OctreeNode* d3d11OctreeNode);
+
+private:
+    struct ConstantBufferVS
+    {
+        DirectX::XMMATRIX World;
+        DirectX::XMMATRIX View;
+        DirectX::XMMATRIX Projection;
+    };
+    ConstantBufferVS* cbVSData;
+    ID3D11Buffer* constantBuffer;
+    ID3D11VertexShader* vertexShader[2];
+    ID3D11PixelShader* pixelShader[2];
+    ID3D11InputLayout* inputLayout[2];
+
+private:
+    UINT currentVertexStride;
+
+public:
+    uint32_t defaultVolumeHandle;
+    D3D11OctreeNode* defaultRootOctreeNode;
 };
 
 
-extern "C" void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API UpdateCamera(float viewMatrix[], float projectionMatrix[]);
-extern "C" bool UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API UpdateVolume(uint32_t volumeHandle, PVOID rootOctreeNode);
+extern "C" void CUBIQUITYC_API UpdateCamera(float viewMatrix[], float projectionMatrix[]);
+extern "C" bool CUBIQUITYC_API UpdateVolume(uint32_t volumeHandle, PVOID rootOctreeNode);
 
-extern "C" PVOID UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API CreateOctreeNode();
-extern "C" void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API DestroyOctreeNode(PVOID octreeNode);
+extern "C" PVOID CUBIQUITYC_API CreateOctreeNode();
+extern "C" void CUBIQUITYC_API DestroyOctreeNode(PVOID octreeNode);
