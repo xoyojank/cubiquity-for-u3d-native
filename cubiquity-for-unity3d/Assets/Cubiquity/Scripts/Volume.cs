@@ -286,7 +286,7 @@ namespace Cubiquity
                 rootOctreeNode = CreateOctreeNode();
             }
 
-            return UpdateVolume(data.volumeHandle.Value, rootOctreeNode, transform.worldToLocalMatrix.toFloatArray());
+            return UpdateVolume(data.volumeHandle.Value, rootOctreeNode, transform.localToWorldMatrix.toFloatArray());
         }
 #else
         protected abstract bool SynchronizeOctree(uint maxSyncOperations);
