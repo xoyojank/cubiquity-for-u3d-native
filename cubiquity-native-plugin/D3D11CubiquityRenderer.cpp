@@ -116,12 +116,13 @@ void D3D11CubiquityRenderer::UpdateCamera(const XMFLOAT4X4& viewMatrix, const XM
     }
 }
 
-bool D3D11CubiquityRenderer::UpdateVolume(uint32_t volumeHandle, D3D11OctreeNode* rootOctreeNode)
+bool D3D11CubiquityRenderer::UpdateVolume(uint32_t volumeHandle, D3D11OctreeNode* rootOctreeNode, const XMFLOAT4X4& worldMatrix)
 {
     this->defaultVolumeHandle = volumeHandle;
     this->defaultRootOctreeNode = rootOctreeNode;
     if (this->cbVSData)
     {
+		this->defaultVolumeWorldMatrix = worldMatrix;
         // Although the LOD system is partially functional I don't feel it's ready for release yet.
         // The following line disables it by forcing the highest level of detail to always be used.
         validate(cuSetLodRange(volumeHandle, 0, 0));
@@ -172,6 +173,7 @@ void D3D11CubiquityRenderer::RenderOctreeNode(ID3D11DeviceContext* context, D3D1
     {
         // update constant buffer
         XMMATRIX worldMatrix = XMMatrixTranslation((float)d3d11OctreeNode->posX, (float)d3d11OctreeNode->posY, (float)d3d11OctreeNode->posZ);
+		worldMatrix = XMMatrixMultiply(worldMatrix, XMLoadFloat4x4(&this->defaultVolumeWorldMatrix));
         this->cbVSData->World = XMMatrixTranspose(worldMatrix);
         D3D11_MAPPED_SUBRESOURCE mappedResource;
         HRESULT hr = context->Map(this->constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -253,9 +255,9 @@ extern "C" void CUBIQUITYC_API UpdateCamera(float vm[], float pm[])
 {
     D3D11CubiquityRenderer::Instance()->UpdateCamera(XMFLOAT4X4(vm), XMFLOAT4X4(pm));
 }
-extern "C" bool CUBIQUITYC_API UpdateVolume(uint32_t volumeHandle, PVOID rootOctreeNode)
+extern "C" bool CUBIQUITYC_API UpdateVolume(uint32_t volumeHandle, PVOID rootOctreeNode, float wm[])
 {
-    return D3D11CubiquityRenderer::Instance()->UpdateVolume(volumeHandle, (D3D11OctreeNode*)rootOctreeNode);
+    return D3D11CubiquityRenderer::Instance()->UpdateVolume(volumeHandle, (D3D11OctreeNode*)rootOctreeNode, XMFLOAT4X4(wm));
 }
 extern "C" PVOID CUBIQUITYC_API CreateOctreeNode()
 {

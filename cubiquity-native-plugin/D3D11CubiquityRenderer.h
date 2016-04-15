@@ -17,7 +17,7 @@ public:
     void Destroy();
 
     void UpdateCamera(const XMFLOAT4X4& viewMatrix, const XMFLOAT4X4& projectionMatrix);
-    bool UpdateVolume(uint32_t volumeHandle, D3D11OctreeNode* rootOctreeNode);
+    bool UpdateVolume(uint32_t volumeHandle, D3D11OctreeNode* rootOctreeNode, const XMFLOAT4X4& worldMatrix);
     void RenderVolume(ID3D11DeviceContext* context, uint32_t volumeType, D3D11OctreeNode* rootNode);
 
     void RenderDefaultVolume(ID3D11DeviceContext* context);
@@ -48,11 +48,12 @@ private:
 public:
     uint32_t defaultVolumeHandle;
     D3D11OctreeNode* defaultRootOctreeNode;
+	XMFLOAT4X4 defaultVolumeWorldMatrix;
 };
 
 
 extern "C" void CUBIQUITYC_API UpdateCamera(float viewMatrix[], float projectionMatrix[]);
-extern "C" bool CUBIQUITYC_API UpdateVolume(uint32_t volumeHandle, PVOID rootOctreeNode);
+extern "C" bool CUBIQUITYC_API UpdateVolume(uint32_t volumeHandle, PVOID rootOctreeNode, float worldMatrix[]);
 
 extern "C" PVOID CUBIQUITYC_API CreateOctreeNode();
 extern "C" void CUBIQUITYC_API DestroyOctreeNode(PVOID octreeNode);

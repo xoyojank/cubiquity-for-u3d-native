@@ -273,7 +273,7 @@ namespace Cubiquity
 
 #if CUBIQUITY_NATIVE_RENDERER
         [DllImport("CubiquityPlugin")]
-        private static extern bool UpdateVolume(uint volumeHandle, System.IntPtr rootNode);
+        private static extern bool UpdateVolume(uint volumeHandle, System.IntPtr rootNode, float[] worldMatrix);
         [DllImport("CubiquityPlugin")]
         private static extern System.IntPtr CreateOctreeNode();
         [DllImport("CubiquityPlugin")]
@@ -286,7 +286,7 @@ namespace Cubiquity
                 rootOctreeNode = CreateOctreeNode();
             }
 
-            return UpdateVolume(data.volumeHandle.Value, rootOctreeNode);
+            return UpdateVolume(data.volumeHandle.Value, rootOctreeNode, transform.worldToLocalMatrix.toFloatArray());
         }
 #else
         protected abstract bool SynchronizeOctree(uint maxSyncOperations);
