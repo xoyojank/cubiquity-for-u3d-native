@@ -2,12 +2,14 @@ using UnityEngine;
 using System;
 using System.Collections;
 using System.Runtime.InteropServices;
+using UnityEngine.VR;
 
 #if CUBIQUITY_NATIVE_RENDERER
 
 namespace Cubiquity
 {
 
+[RequireComponent(typeof(Camera))]
 public class CubiquityRenderer : MonoBehaviour
 {
 	// Native plugin rendering events are only called if a plugin is used
@@ -16,14 +18,14 @@ public class CubiquityRenderer : MonoBehaviour
 	// For this example, we'll call into plugin's SetTimeFromUnity
 	// function and pass the current time so the plugin can animate.
 
-	[DllImport("CubiquityPlugin")]
+    [DllImport("CubiquityPlugin")]
 	private static extern void SetTimeFromUnity(float t);
     [DllImport("CubiquityPlugin")]
     private static extern void UpdateCamera(float[] viewMatrix, float[] projectionMatrix);
 
-	[DllImport("CubiquityPlugin")]
+    [DllImport("CubiquityPlugin")]
 	private static extern void SetUnityStreamingAssetsPath([MarshalAs(UnmanagedType.LPStr)] string path);
-	[DllImport("CubiquityPlugin")]
+    [DllImport("CubiquityPlugin")]
 	private static extern IntPtr GetRenderEventFunc();
 
 	void Start()
@@ -38,7 +40,7 @@ public class CubiquityRenderer : MonoBehaviour
         if (Camera.current != null)
         {
             var viewMatrix = Camera.current.worldToCameraMatrix;
-            var projectionMatrix = GL.GetGPUProjectionMatrix(Camera.current.projectionMatrix, false);
+            var projectionMatrix = GL.GetGPUProjectionMatrix(Camera.current.projectionMatrix, VRSettings.enabled);
 
             UpdateCamera(MatrixToArray(viewMatrix), MatrixToArray(projectionMatrix));
         }
