@@ -17,7 +17,7 @@ public:
     void Destroy();
 
     void UpdateCamera(const XMFLOAT4X4& viewMatrix, const XMFLOAT4X4& projectionMatrix);
-    bool UpdateVolume(uint32_t volumeHandle, D3D11OctreeNode* rootOctreeNode, const XMFLOAT4X4& worldMatrix);
+    bool UpdateDefaultVolume(uint32_t volumeHandle, D3D11OctreeNode* rootOctreeNode, const XMFLOAT4X4& worldMatrix);
     void RenderVolume(ID3D11DeviceContext* context, uint32_t volumeType, D3D11OctreeNode* rootNode);
 
     void RenderDefaultVolume(ID3D11DeviceContext* context);
@@ -46,9 +46,11 @@ private:
     UINT currentVertexStride;
 
 public:
+    //TODO: move to a manager to support more volumes
     uint32_t defaultVolumeHandle;
     D3D11OctreeNode* defaultRootOctreeNode;
-	XMFLOAT4X4 defaultVolumeWorldMatrix;
+    XMFLOAT4X4 defaultVolumeWorldMatrix;
+    CRITICAL_SECTION defaultVolumeLock;
 };
 
 

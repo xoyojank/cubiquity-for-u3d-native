@@ -57,6 +57,8 @@ D3D11CubiquityRenderer::D3D11CubiquityRenderer()
         this->pixelShader[i] = nullptr;
         this->inputLayout[i] = nullptr;
     }
+
+    InitializeCriticalSection(&this->defaultVolumeLock);
 }
 
 bool D3D11CubiquityRenderer::Setup(const std::string& path)
@@ -116,18 +118,19 @@ void D3D11CubiquityRenderer::UpdateCamera(const XMFLOAT4X4& viewMatrix, const XM
     }
 }
 
-bool D3D11CubiquityRenderer::UpdateVolume(uint32_t volumeHandle, D3D11OctreeNode* rootOctreeNode, const XMFLOAT4X4& worldMatrix)
+bool D3D11CubiquityRenderer::UpdateDefaultVolume(uint32_t volumeHandle, D3D11OctreeNode* rootOctreeNode, const XMFLOAT4X4& worldMatrix)
 {
+    EnterCriticalSection(&this->defaultVolumeLock);
+    uint32_t isUpToDate = 0;
     this->defaultVolumeHandle = volumeHandle;
     this->defaultRootOctreeNode = rootOctreeNode;
     if (this->cbVSData)
     {
-		this->defaultVolumeWorldMatrix = worldMatrix;
+        this->defaultVolumeWorldMatrix = worldMatrix;
         // Although the LOD system is partially functional I don't feel it's ready for release yet.
         // The following line disables it by forcing the highest level of detail to always be used.
         validate(cuSetLodRange(volumeHandle, 0, 0));
 
-        uint32_t isUpToDate;
         XMMATRIX inverseViewMatrix = XMMatrixInverse(nullptr, this->cbVSData->View);
         XMVECTOR eyePos = XMMatrixTranspose(inverseViewMatrix).r[3];
         validate(cuUpdateVolume(volumeHandle, XMVectorGetX(eyePos), XMVectorGetY(eyePos), XMVectorGetZ(eyePos), 1.0f, &isUpToDate));
@@ -136,9 +139,9 @@ bool D3D11CubiquityRenderer::UpdateVolume(uint32_t volumeHandle, D3D11OctreeNode
         cuGetRootOctreeNode(volumeHandle, &octreeNodeHandle);
         D3D11OctreeNode::ProcessOctreeNode(octreeNodeHandle, rootOctreeNode);
 
-        return isUpToDate != 0;
     }
-    return false;
+    LeaveCriticalSection(&this->defaultVolumeLock);
+    return isUpToDate != 0;
 }
 
 void D3D11CubiquityRenderer::RenderVolume(ID3D11DeviceContext* context, uint32_t volumeType, D3D11OctreeNode* rootNode)
@@ -173,7 +176,7 @@ void D3D11CubiquityRenderer::RenderOctreeNode(ID3D11DeviceContext* context, D3D1
     {
         // update constant buffer
         XMMATRIX worldMatrix = XMMatrixTranslation((float)d3d11OctreeNode->posX, (float)d3d11OctreeNode->posY, (float)d3d11OctreeNode->posZ);
-		worldMatrix = XMMatrixMultiply(worldMatrix, XMLoadFloat4x4(&this->defaultVolumeWorldMatrix));
+        worldMatrix = XMMatrixMultiply(worldMatrix, XMLoadFloat4x4(&this->defaultVolumeWorldMatrix));
         this->cbVSData->World = XMMatrixTranspose(worldMatrix);
         D3D11_MAPPED_SUBRESOURCE mappedResource;
         HRESULT hr = context->Map(this->constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -239,14 +242,19 @@ void D3D11CubiquityRenderer::RenderDefaultVolume(ID3D11DeviceContext* context)
 {
     if (this->defaultVolumeHandle == 0)
         return;
-    uint32_t volumeType;
-    validate(cuGetVolumeType(this->defaultVolumeHandle, &volumeType));
-
-    uint32_t hasRootNode;
-    validate(cuHasRootOctreeNode(this->defaultVolumeHandle, &hasRootNode));
-    if (hasRootNode == 1)
+    if (TryEnterCriticalSection(&this->defaultVolumeLock))
     {
-        RenderVolume(context, volumeType, this->defaultRootOctreeNode);
+        uint32_t volumeType;
+        validate(cuGetVolumeType(this->defaultVolumeHandle, &volumeType));
+
+        uint32_t hasRootNode;
+        validate(cuHasRootOctreeNode(this->defaultVolumeHandle, &hasRootNode));
+        if (hasRootNode == 1)
+        {
+            RenderVolume(context, volumeType, this->defaultRootOctreeNode);
+        }
+
+        LeaveCriticalSection(&this->defaultVolumeLock);
     }
 }
 
@@ -257,7 +265,7 @@ extern "C" void CUBIQUITYC_API UpdateCamera(float vm[], float pm[])
 }
 extern "C" bool CUBIQUITYC_API UpdateVolume(uint32_t volumeHandle, PVOID rootOctreeNode, float wm[])
 {
-    return D3D11CubiquityRenderer::Instance()->UpdateVolume(volumeHandle, (D3D11OctreeNode*)rootOctreeNode, XMFLOAT4X4(wm));
+    return D3D11CubiquityRenderer::Instance()->UpdateDefaultVolume(volumeHandle, (D3D11OctreeNode*)rootOctreeNode, XMFLOAT4X4(wm));
 }
 extern "C" PVOID CUBIQUITYC_API CreateOctreeNode()
 {
