@@ -57,8 +57,6 @@ D3D11CubiquityRenderer::D3D11CubiquityRenderer()
         this->pixelShader[i] = nullptr;
         this->inputLayout[i] = nullptr;
     }
-
-    InitializeCriticalSection(&this->defaultVolumeLock);
 }
 
 bool D3D11CubiquityRenderer::Setup(const std::string& path)
@@ -120,7 +118,6 @@ void D3D11CubiquityRenderer::UpdateCamera(const XMFLOAT4X4& viewMatrix, const XM
 
 bool D3D11CubiquityRenderer::UpdateDefaultVolume(uint32_t volumeHandle, D3D11OctreeNode* rootOctreeNode, const XMFLOAT4X4& worldMatrix)
 {
-    EnterCriticalSection(&this->defaultVolumeLock);
     uint32_t isUpToDate = 0;
     this->defaultVolumeHandle = volumeHandle;
     this->defaultRootOctreeNode = rootOctreeNode;
@@ -140,7 +137,6 @@ bool D3D11CubiquityRenderer::UpdateDefaultVolume(uint32_t volumeHandle, D3D11Oct
         D3D11OctreeNode::ProcessOctreeNode(octreeNodeHandle, rootOctreeNode);
 
     }
-    LeaveCriticalSection(&this->defaultVolumeLock);
     return isUpToDate != 0;
 }
 
@@ -172,27 +168,33 @@ void D3D11CubiquityRenderer::RenderVolume(ID3D11DeviceContext* context, uint32_t
 
 void D3D11CubiquityRenderer::RenderOctreeNode(ID3D11DeviceContext* context, D3D11OctreeNode* d3d11OctreeNode)
 {
+    d3d11OctreeNode->AddRef();
     if (d3d11OctreeNode->noOfIndices > 0 && d3d11OctreeNode->renderThisNode)
     {
-        // update constant buffer
-        XMMATRIX worldMatrix = XMMatrixTranslation((float)d3d11OctreeNode->posX, (float)d3d11OctreeNode->posY, (float)d3d11OctreeNode->posZ);
-        worldMatrix = XMMatrixMultiply(worldMatrix, XMLoadFloat4x4(&this->defaultVolumeWorldMatrix));
-        this->cbVSData->World = XMMatrixTranspose(worldMatrix);
-        D3D11_MAPPED_SUBRESOURCE mappedResource;
-        HRESULT hr = context->Map(this->constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-        if (SUCCEEDED(hr))
+        if (TryEnterCriticalSection(&d3d11OctreeNode->bufferLock))
         {
-            memcpy(mappedResource.pData, this->cbVSData, sizeof(ConstantBufferVS));
-            context->Unmap(this->constantBuffer, 0);
+            // update constant buffer
+            XMMATRIX worldMatrix = XMMatrixTranslation((float)d3d11OctreeNode->posX, (float)d3d11OctreeNode->posY, (float)d3d11OctreeNode->posZ);
+            worldMatrix = XMMatrixMultiply(worldMatrix, XMLoadFloat4x4(&this->defaultVolumeWorldMatrix));
+            this->cbVSData->World = XMMatrixTranspose(worldMatrix);
+            D3D11_MAPPED_SUBRESOURCE mappedResource;
+            HRESULT hr = context->Map(this->constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+            if (SUCCEEDED(hr))
+            {
+                memcpy(mappedResource.pData, this->cbVSData, sizeof(ConstantBufferVS));
+                context->Unmap(this->constantBuffer, 0);
+            }
+            context->VSSetConstantBuffers(0, 1, &this->constantBuffer);
+
+            // set vertex & index buffer
+            UINT offset = 0;
+            context->IASetVertexBuffers(0, 1, &d3d11OctreeNode->vertexBuffer, &this->currentVertexStride, &offset);
+            context->IASetIndexBuffer(d3d11OctreeNode->indexBuffer, DXGI_FORMAT_R16_UINT, 0);
+
+            context->DrawIndexed(d3d11OctreeNode->noOfIndices, 0, 0);
+
+            LeaveCriticalSection(&d3d11OctreeNode->bufferLock);
         }
-        context->VSSetConstantBuffers(0, 1, &this->constantBuffer);
-
-        // set vertex & index buffer
-        UINT offset = 0;
-        context->IASetVertexBuffers(0, 1, &d3d11OctreeNode->vertexBuffer, &this->currentVertexStride, &offset);
-        context->IASetIndexBuffer(d3d11OctreeNode->indexBuffer, DXGI_FORMAT_R16_UINT, 0);
-
-        context->DrawIndexed(d3d11OctreeNode->noOfIndices, 0, 0);
     }
 
     for (uint32_t z = 0; z < 2; z++)
@@ -208,6 +210,7 @@ void D3D11CubiquityRenderer::RenderOctreeNode(ID3D11DeviceContext* context, D3D1
             }
         }
     }
+    d3d11OctreeNode->Release();
 }
 
 bool D3D11CubiquityRenderer::LoadFileIntoBuffer(const std::string& fileName, std::vector<char>& buffer)
@@ -242,19 +245,15 @@ void D3D11CubiquityRenderer::RenderDefaultVolume(ID3D11DeviceContext* context)
 {
     if (this->defaultVolumeHandle == 0)
         return;
-    if (TryEnterCriticalSection(&this->defaultVolumeLock))
+
+    uint32_t volumeType;
+    validate(cuGetVolumeType(this->defaultVolumeHandle, &volumeType));
+
+    uint32_t hasRootNode;
+    validate(cuHasRootOctreeNode(this->defaultVolumeHandle, &hasRootNode));
+    if (hasRootNode == 1)
     {
-        uint32_t volumeType;
-        validate(cuGetVolumeType(this->defaultVolumeHandle, &volumeType));
-
-        uint32_t hasRootNode;
-        validate(cuHasRootOctreeNode(this->defaultVolumeHandle, &hasRootNode));
-        if (hasRootNode == 1)
-        {
-            RenderVolume(context, volumeType, this->defaultRootOctreeNode);
-        }
-
-        LeaveCriticalSection(&this->defaultVolumeLock);
+        RenderVolume(context, volumeType, this->defaultRootOctreeNode);
     }
 }
 
@@ -275,7 +274,7 @@ extern "C" void CUBIQUITYC_API DestroyOctreeNode(PVOID octreeNode)
 {
     if (octreeNode)
     {
-        delete reinterpret_cast<D3D11OctreeNode*>(octreeNode);
+        reinterpret_cast<D3D11OctreeNode*>(octreeNode)->Release();
         D3D11CubiquityRenderer* renderer = D3D11CubiquityRenderer::Instance();
         if (renderer->defaultRootOctreeNode == octreeNode)
         {
