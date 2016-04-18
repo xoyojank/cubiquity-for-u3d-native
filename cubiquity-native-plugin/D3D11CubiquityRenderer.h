@@ -50,6 +50,7 @@ public:
     uint32_t defaultVolumeHandle;
     D3D11OctreeNode* defaultRootOctreeNode;
     XMFLOAT4X4 defaultVolumeWorldMatrix;
+    CRITICAL_SECTION defaultVolumeLock;
 };
 
 
