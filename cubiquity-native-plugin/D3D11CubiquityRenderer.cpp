@@ -176,7 +176,8 @@ void D3D11CubiquityRenderer::RenderOctreeNode(ID3D11DeviceContext* context, D3D1
     {
         // update constant buffer
         XMMATRIX worldMatrix = XMMatrixTranslation((float)d3d11OctreeNode->posX, (float)d3d11OctreeNode->posY, (float)d3d11OctreeNode->posZ);
-        worldMatrix = XMMatrixMultiply(worldMatrix, XMLoadFloat4x4(&this->defaultVolumeWorldMatrix));
+		XMMATRIX objectTransform = XMMatrixTranspose(XMLoadFloat4x4(&this->defaultVolumeWorldMatrix));
+		worldMatrix = XMMatrixMultiply(worldMatrix, objectTransform);
         this->cbVSData->World = XMMatrixTranspose(worldMatrix);
         D3D11_MAPPED_SUBRESOURCE mappedResource;
         HRESULT hr = context->Map(this->constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
