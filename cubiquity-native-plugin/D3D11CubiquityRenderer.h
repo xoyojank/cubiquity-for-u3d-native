@@ -45,11 +45,14 @@ private:
 private:
     UINT currentVertexStride;
 
+	uint32_t frameCounter;
+
 public:
     //TODO: move to a manager to support more volumes
     uint32_t defaultVolumeHandle;
     D3D11OctreeNode* defaultRootOctreeNode;
     XMFLOAT4X4 defaultVolumeWorldMatrix;
+	uint32_t defaultVolumeUpToDate;
     CRITICAL_SECTION defaultVolumeLock;
 };
 

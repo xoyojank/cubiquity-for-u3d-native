@@ -49,7 +49,9 @@ D3D11CubiquityRenderer::D3D11CubiquityRenderer()
     , cbVSData(nullptr)
     , currentVertexStride(0)
     , defaultVolumeHandle(0)
+	, defaultVolumeUpToDate(0)
     , defaultRootOctreeNode(nullptr)
+	, frameCounter(0)
 {
     for (int i = 0; i < 2; ++i)
     {
@@ -116,32 +118,6 @@ void D3D11CubiquityRenderer::UpdateCamera(const XMFLOAT4X4& viewMatrix, const XM
         this->cbVSData->View = XMLoadFloat4x4(&viewMatrix);
         this->cbVSData->Projection = XMLoadFloat4x4(&projectionMatrix);
     }
-}
-
-bool D3D11CubiquityRenderer::UpdateDefaultVolume(uint32_t volumeHandle, D3D11OctreeNode* rootOctreeNode, const XMFLOAT4X4& worldMatrix)
-{
-    EnterCriticalSection(&this->defaultVolumeLock);
-    uint32_t isUpToDate = 0;
-    this->defaultVolumeHandle = volumeHandle;
-    this->defaultRootOctreeNode = rootOctreeNode;
-    if (this->cbVSData)
-    {
-        this->defaultVolumeWorldMatrix = worldMatrix;
-        // Although the LOD system is partially functional I don't feel it's ready for release yet.
-        // The following line disables it by forcing the highest level of detail to always be used.
-        validate(cuSetLodRange(volumeHandle, 0, 0));
-
-        XMMATRIX inverseViewMatrix = XMMatrixInverse(nullptr, this->cbVSData->View);
-        XMVECTOR eyePos = XMMatrixTranspose(inverseViewMatrix).r[3];
-        validate(cuUpdateVolume(volumeHandle, XMVectorGetX(eyePos), XMVectorGetY(eyePos), XMVectorGetZ(eyePos), 1.0f, &isUpToDate));
-
-        uint32_t octreeNodeHandle;
-        cuGetRootOctreeNode(volumeHandle, &octreeNodeHandle);
-        D3D11OctreeNode::ProcessOctreeNode(octreeNodeHandle, rootOctreeNode);
-
-    }
-    LeaveCriticalSection(&this->defaultVolumeLock);
-    return isUpToDate != 0;
 }
 
 void D3D11CubiquityRenderer::RenderVolume(ID3D11DeviceContext* context, uint32_t volumeType, D3D11OctreeNode* rootNode)
@@ -239,11 +215,37 @@ D3D11CubiquityRenderer* D3D11CubiquityRenderer::Instance()
     return &s_instance;
 }
 
+bool D3D11CubiquityRenderer::UpdateDefaultVolume(uint32_t volumeHandle, D3D11OctreeNode* rootOctreeNode, const XMFLOAT4X4& worldMatrix)
+{
+	EnterCriticalSection(&this->defaultVolumeLock);
+	this->defaultVolumeHandle = volumeHandle;
+	this->defaultRootOctreeNode = rootOctreeNode;
+	this->defaultVolumeWorldMatrix = worldMatrix;
+	LeaveCriticalSection(&this->defaultVolumeLock);
+	return this->defaultVolumeUpToDate != 0;
+}
+
 void D3D11CubiquityRenderer::RenderDefaultVolume(ID3D11DeviceContext* context)
 {
     if (this->defaultVolumeHandle == 0)
         return;
-    if (TryEnterCriticalSection(&this->defaultVolumeLock))
+	EnterCriticalSection(&this->defaultVolumeLock);
+	// update
+	if ((this->frameCounter++ % 2 == 0) && this->cbVSData)
+	{
+		// Although the LOD system is partially functional I don't feel it's ready for release yet.
+		// The following line disables it by forcing the highest level of detail to always be used.
+		validate(cuSetLodRange(this->defaultVolumeHandle, 0, 0));
+
+		XMMATRIX inverseViewMatrix = XMMatrixInverse(nullptr, this->cbVSData->View);
+		XMVECTOR eyePos = XMMatrixTranspose(inverseViewMatrix).r[3];
+		validate(cuUpdateVolume(this->defaultVolumeHandle, XMVectorGetX(eyePos), XMVectorGetY(eyePos), XMVectorGetZ(eyePos), 1.0f, &this->defaultVolumeUpToDate));
+
+		uint32_t octreeNodeHandle;
+		cuGetRootOctreeNode(this->defaultVolumeHandle, &octreeNodeHandle);
+		D3D11OctreeNode::ProcessOctreeNode(octreeNodeHandle, this->defaultRootOctreeNode);
+	}
+	// render
     {
         uint32_t volumeType;
         validate(cuGetVolumeType(this->defaultVolumeHandle, &volumeType));
@@ -254,9 +256,8 @@ void D3D11CubiquityRenderer::RenderDefaultVolume(ID3D11DeviceContext* context)
         {
             RenderVolume(context, volumeType, this->defaultRootOctreeNode);
         }
-
-        LeaveCriticalSection(&this->defaultVolumeLock);
     }
+	LeaveCriticalSection(&this->defaultVolumeLock);
 }
 
 
