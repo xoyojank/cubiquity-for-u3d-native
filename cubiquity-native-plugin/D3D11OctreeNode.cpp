@@ -1,5 +1,6 @@
 #include "D3D11OctreeNode.h"
 #include "Utils.h"
+#include "RenderThreadCommand.h"
 
 extern ID3D11Device* g_D3D11Device;
 
@@ -30,7 +31,7 @@ D3D11OctreeNode::~D3D11OctreeNode()
         {
             for (uint32_t x = 0; x < 2; x++)
             {
-                SAFE_DELETE(this->children[x][y][z]);
+                SAFE_RELEASE(this->children[x][y][z]);
             }
         }
     }
@@ -77,36 +78,60 @@ void D3D11OctreeNode::ProcessOctreeNode(uint32_t octreeNodeHandle, D3D11OctreeNo
                 d3d11OctreeNode->posZ = octreeNode.posZ;
                 d3d11OctreeNode->noOfIndices = noOfIndices;
 
-                SAFE_RELEASE(d3d11OctreeNode->indexBuffer);
-                SAFE_RELEASE(d3d11OctreeNode->vertexBuffer);
+                class CreateVBIBRenderCommand : public RenderCommand
+                {
+                public:
+                    D3D11OctreeNode* d3d11OctreeNode;
+                    uint32_t volumeType;
+                    uint32_t noOfIndices;
+                    std::vector<uint16_t> indices;
+                    std::vector<uint8_t> vertexData;
 
-                HRESULT hr;
-                // create index buffer
-                D3D11_BUFFER_DESC bufferDesc = { 0 };
-                bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-                bufferDesc.ByteWidth = sizeof(uint16_t) * noOfIndices;
-                bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-                D3D11_SUBRESOURCE_DATA subResData = { 0 };
-                subResData.pSysMem = indices;
-                hr = g_D3D11Device->CreateBuffer(&bufferDesc, &subResData, &d3d11OctreeNode->indexBuffer);
-                assert(SUCCEEDED(hr));
+                    virtual ~CreateVBIBRenderCommand()
+                    {
+                        d3d11OctreeNode->Release();
+                    }
 
-                // create vertex buffer
-                bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+                    virtual void DoCommand() override
+                    {
+                        SAFE_RELEASE(d3d11OctreeNode->indexBuffer);
+                        SAFE_RELEASE(d3d11OctreeNode->vertexBuffer);
+                        HRESULT hr;
+                        // create index buffer
+                        D3D11_BUFFER_DESC bufferDesc = { 0 };
+                        D3D11_SUBRESOURCE_DATA subResData = { 0 };
+                        bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+                        bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+                        bufferDesc.ByteWidth = sizeof(uint16_t)* noOfIndices;
+                        subResData.pSysMem = indices.data();
+                        hr = g_D3D11Device->CreateBuffer(&bufferDesc, &subResData, &d3d11OctreeNode->indexBuffer);
+                        assert(SUCCEEDED(hr));
+                        // create vertex buffer
+                        bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+                        bufferDesc.ByteWidth = vertexData.size();
+                        subResData.pSysMem = vertexData.data();
+                        hr = g_D3D11Device->CreateBuffer(&bufferDesc, &subResData, &d3d11OctreeNode->vertexBuffer);
+                        assert(SUCCEEDED(hr));
+                    }
+                };
+                d3d11OctreeNode->AddRef(); // release in command's destructor
+                CreateVBIBRenderCommand* command = new CreateVBIBRenderCommand();
+                command->d3d11OctreeNode = d3d11OctreeNode;
+                command->volumeType = volumeType;
+                command->noOfIndices = noOfIndices;
+                command->indices.resize(noOfIndices);
+                memcpy(command->indices.data(), indices, sizeof(uint16_t) * noOfIndices);
+                size_t vertexDataSize = 0;
                 if (volumeType == CU_COLORED_CUBES)
-                {
-                    bufferDesc.ByteWidth = sizeof(CuColoredCubesVertex)* noOfVertices;
-                    subResData.pSysMem = vertices;
-                    hr = g_D3D11Device->CreateBuffer(&bufferDesc, &subResData, &d3d11OctreeNode->vertexBuffer);
-                    assert(SUCCEEDED(hr));
-                }
+                    vertexDataSize = sizeof(CuColoredCubesVertex)* noOfVertices;
                 else if (volumeType == CU_TERRAIN)
-                {
-                    bufferDesc.ByteWidth = sizeof(CuTerrainVertex)* noOfVertices;
-                    subResData.pSysMem = vertices;
-                    hr = g_D3D11Device->CreateBuffer(&bufferDesc, &subResData, &d3d11OctreeNode->vertexBuffer);
-                    assert(SUCCEEDED(hr));
-                }
+                    vertexDataSize = sizeof(CuTerrainVertex)* noOfVertices;
+                else
+                    __debugbreak();
+                command->vertexData.resize(vertexDataSize);
+                memcpy(command->vertexData.data(), vertices, vertexDataSize);
+
+                RenderCommandProcessor::Instance()->SendCommand(command);
             }
             else
             {
@@ -134,7 +159,7 @@ void D3D11OctreeNode::ProcessOctreeNode(uint32_t octreeNodeHandle, D3D11OctreeNo
                         }
                         else
                         {
-                            SAFE_DELETE(d3d11OctreeNode->children[x][y][z]);
+                            SAFE_RELEASE(d3d11OctreeNode->children[x][y][z]);
                         }
                     }
                 }

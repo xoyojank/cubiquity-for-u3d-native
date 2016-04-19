@@ -16,7 +16,7 @@ public:
 
     void Destroy();
 
-    void UpdateCamera(const XMFLOAT4X4& viewMatrix, const XMFLOAT4X4& projectionMatrix);
+    void UpdateCamera(const XMFLOAT4X4& viewMatrix, const XMFLOAT4X4& projectionMatrix, bool isVR);
     bool UpdateDefaultVolume(uint32_t volumeHandle, D3D11OctreeNode* rootOctreeNode, const XMFLOAT4X4& worldMatrix);
     void RenderVolume(ID3D11DeviceContext* context, uint32_t volumeType, D3D11OctreeNode* rootNode);
 
@@ -45,19 +45,18 @@ private:
 private:
     UINT currentVertexStride;
 
-	uint32_t frameCounter;
+    bool isVREnabled;
 
 public:
     //TODO: move to a manager to support more volumes
     uint32_t defaultVolumeHandle;
     D3D11OctreeNode* defaultRootOctreeNode;
     XMFLOAT4X4 defaultVolumeWorldMatrix;
-	uint32_t defaultVolumeUpToDate;
     CRITICAL_SECTION defaultVolumeLock;
 };
 
 
-extern "C" void CUBIQUITYC_API UpdateCamera(float viewMatrix[], float projectionMatrix[]);
+extern "C" void CUBIQUITYC_API UpdateCamera(float viewMatrix[], float projectionMatrix[], bool isVR);
 extern "C" bool CUBIQUITYC_API UpdateVolume(uint32_t volumeHandle, PVOID rootOctreeNode, float worldMatrix[]);
 
 extern "C" PVOID CUBIQUITYC_API CreateOctreeNode();

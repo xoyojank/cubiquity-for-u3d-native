@@ -39,7 +39,7 @@ public class CubiquityRenderer : MonoBehaviour
     [DllImport("CubiquityPlugin")]
     private static extern void SetTimeFromUnity(float t);
     [DllImport("CubiquityPlugin")]
-    private static extern void UpdateCamera(float[] viewMatrix, float[] projectionMatrix);
+    private static extern void UpdateCamera(float[] viewMatrix, float[] projectionMatrix, bool isVR);
 
     [DllImport("CubiquityPlugin")]
     private static extern void SetUnityStreamingAssetsPath([MarshalAs(UnmanagedType.LPStr)] string path);
@@ -60,7 +60,7 @@ public class CubiquityRenderer : MonoBehaviour
             var viewMatrix = Camera.current.worldToCameraMatrix;
             var projectionMatrix = GL.GetGPUProjectionMatrix(Camera.current.projectionMatrix, VRSettings.enabled);
 
-            UpdateCamera(viewMatrix.toFloatArray(), projectionMatrix.toFloatArray());
+            UpdateCamera(viewMatrix.toFloatArray(), projectionMatrix.toFloatArray(), VRSettings.enabled);
         }
 
         // Issue a plugin event with arbitrary integer identifier.

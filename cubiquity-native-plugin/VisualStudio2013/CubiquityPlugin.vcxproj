@@ -188,6 +188,7 @@
     <ClCompile Include="..\CubiquityPlugin.cpp" />
     <ClCompile Include="..\D3D11OctreeNode.cpp" />
     <ClCompile Include="..\D3D11CubiquityRenderer.cpp" />
+    <ClCompile Include="..\RenderThreadCommand.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\cubiquity\Core\BackgroundTaskProcessor.h" />
@@ -263,6 +264,8 @@
     <ClInclude Include="..\CubiquityPlugin.h" />
     <ClInclude Include="..\D3D11OctreeNode.h" />
     <ClInclude Include="..\D3D11CubiquityRenderer.h" />
+    <ClInclude Include="..\RefCounted.h" />
+    <ClInclude Include="..\RenderThreadCommand.h" />
     <ClInclude Include="..\UnityPluginInterface.h" />
     <ClInclude Include="..\Unity\IUnityGraphics.h" />
     <ClInclude Include="..\Unity\IUnityGraphicsD3D11.h" />
