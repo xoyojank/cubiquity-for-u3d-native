@@ -150,7 +150,7 @@ void D3D11CubiquityRenderer::RenderVolume(ID3D11DeviceContext* context, uint32_t
 void D3D11CubiquityRenderer::RenderOctreeNode(ID3D11DeviceContext* context, D3D11OctreeNode* d3d11OctreeNode)
 {
     if (d3d11OctreeNode->noOfIndices > 0 && d3d11OctreeNode->renderThisNode &&
-            nullptr != d3d11OctreeNode->vertexBuffer && nullptr != d3d11OctreeNode->indexBuffer)
+        nullptr != d3d11OctreeNode->vertexBuffer && nullptr != d3d11OctreeNode->indexBuffer)
     {
         // update constant buffer
         XMMATRIX worldMatrix = XMMatrixTranslation((float)d3d11OctreeNode->posX, (float)d3d11OctreeNode->posY, (float)d3d11OctreeNode->posZ);
@@ -220,19 +220,16 @@ D3D11CubiquityRenderer* D3D11CubiquityRenderer::Instance()
 bool D3D11CubiquityRenderer::UpdateDefaultVolume(uint32_t volumeHandle, D3D11OctreeNode* rootOctreeNode, const XMFLOAT4X4& worldMatrix)
 {
     //EnterCriticalSection(&this->defaultVolumeLock);
-    if (this->defaultVolumeHandle != volumeHandle)
-    {
-        this->defaultVolumeHandle = volumeHandle;
-        this->defaultRootOctreeNode = rootOctreeNode;
-        // Although the LOD system is partially functional I don't feel it's ready for release yet.
-        // The following line disables it by forcing the highest level of detail to always be used.
-        validate(cuSetLodRange(this->defaultVolumeHandle, 0, 0));
-    }
+    this->defaultVolumeHandle = volumeHandle;
+    this->defaultRootOctreeNode = rootOctreeNode;
+    // Although the LOD system is partially functional I don't feel it's ready for release yet.
+    // The following line disables it by forcing the highest level of detail to always be used.
+    validate(cuSetLodRange(this->defaultVolumeHandle, 0, 0));
 
     uint32_t isUpToDate = 0;
     if (this->cbVSData)
     {
-	    this->defaultVolumeWorldMatrix = worldMatrix;
+        this->defaultVolumeWorldMatrix = worldMatrix;
         XMMATRIX inverseViewMatrix = XMMatrixInverse(nullptr, this->cbVSData->View);
         XMVECTOR eyePos = XMMatrixTranspose(inverseViewMatrix).r[3];
         validate(cuUpdateVolume(this->defaultVolumeHandle, XMVectorGetX(eyePos), XMVectorGetY(eyePos), XMVectorGetZ(eyePos), 1.0f, &isUpToDate));
