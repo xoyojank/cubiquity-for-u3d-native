@@ -224,7 +224,6 @@ bool D3D11CubiquityRenderer::UpdateDefaultVolume(uint32_t volumeHandle, D3D11Oct
     {
         this->defaultVolumeHandle = volumeHandle;
         this->defaultRootOctreeNode = rootOctreeNode;
-        this->defaultVolumeWorldMatrix = worldMatrix;
         // Although the LOD system is partially functional I don't feel it's ready for release yet.
         // The following line disables it by forcing the highest level of detail to always be used.
         validate(cuSetLodRange(this->defaultVolumeHandle, 0, 0));
@@ -233,6 +232,7 @@ bool D3D11CubiquityRenderer::UpdateDefaultVolume(uint32_t volumeHandle, D3D11Oct
     uint32_t isUpToDate = 0;
     if (this->cbVSData)
     {
+	    this->defaultVolumeWorldMatrix = worldMatrix;
         XMMATRIX inverseViewMatrix = XMMatrixInverse(nullptr, this->cbVSData->View);
         XMVECTOR eyePos = XMMatrixTranspose(inverseViewMatrix).r[3];
         validate(cuUpdateVolume(this->defaultVolumeHandle, XMVectorGetX(eyePos), XMVectorGetY(eyePos), XMVectorGetZ(eyePos), 1.0f, &isUpToDate));
