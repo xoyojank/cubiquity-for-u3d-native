@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Runtime.InteropServices;
 using UnityEngine.VR;
+using UnityEngine.Rendering;
 
 #if CUBIQUITY_NATIVE_RENDERER
 
@@ -27,7 +28,6 @@ static class MatrixExtension
     }
 }
 
-[RequireComponent(typeof(Camera))]
 public class CubiquityRenderer : MonoBehaviour
 {
     // Native plugin rendering events are only called if a plugin is used
@@ -46,12 +46,20 @@ public class CubiquityRenderer : MonoBehaviour
     [DllImport("CubiquityPlugin")]
     private static extern IntPtr GetRenderEventFunc();
 
+    private CommandBuffer commandBuffer;
+    public Camera camera;
+
     void Start()
     {
         SetUnityStreamingAssetsPath(Application.streamingAssetsPath);
+
+        commandBuffer = new CommandBuffer();
+        commandBuffer.IssuePluginEvent(GetRenderEventFunc(), 1);
+        camera.AddCommandBuffer(CameraEvent.AfterEverything, commandBuffer);
+        GetComponent<MeshFilter>().mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 1000);
     }
 
-    void OnPostRender()
+    void OnWillRenderObject()
     {
         // Set time for the plugin
         SetTimeFromUnity(Time.timeSinceLevelLoad);
@@ -62,14 +70,7 @@ public class CubiquityRenderer : MonoBehaviour
 
             UpdateCamera(viewMatrix.toFloatArray(), projectionMatrix.toFloatArray(), VRSettings.enabled);
         }
-
-        // Issue a plugin event with arbitrary integer identifier.
-        // The plugin can distinguish between different
-        // things it needs to do based on this ID.
-        // For our simple plugin, it does not matter which ID we pass here.
-        GL.IssuePluginEvent(GetRenderEventFunc(), 1);
     }
-
 }
 
 }
